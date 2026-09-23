@@ -132,13 +132,55 @@
         <!-- Grid 6 Kartu Lampu -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="lampuGrid"></div>
 
+        <!-- Panel Monitoring Log Aktivitas Real-Time -->
+        <div class="glass-panel p-4 sm:p-6 rounded-3xl space-y-3 shadow-lg border border-slate-200/80 dark:border-white/10">
+            <div class="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-2.5">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-rectangle-list text-indigo-500 text-sm"></i>
+                    <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-white">Monitoring Log Aktivitas</h3>
+                </div>
+                <button onclick="clearLog()" class="text-[10px] text-slate-400 hover:text-rose-500 font-bold transition-colors">
+                    <i class="fa-solid fa-trash-can mr-1"></i> Bersihkan Log
+                </button>
+            </div>
+            <div id="logContainer" class="bg-slate-200/50 dark:bg-slate-950/60 p-3 rounded-2xl h-36 overflow-y-auto space-y-1.5 font-mono text-[11px] border border-slate-300/40 dark:border-white/5">
+                <div class="text-slate-400 italic">Menunggu aktivitas sistem...</div>
+            </div>
+        </div>
+
         <!-- Footer Info Broker -->
         <p id="brokerStatus" class="text-[11px] text-slate-500 dark:text-slate-400 text-center font-mono py-1">Menghubungkan ke broker...</p>
     </div>
 
-    <!-- Skrip Audio, Partikel, & MQTT -->
+    <!-- Skrip Monitoring, Audio, & MQTT -->
     <script>
-        // Efek Suara Audio Saja (Haptic/Getar Dihapus)
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            if (logContainer.children.length === 1 && logContainer.children[0].classList.contains('italic')) {
+                logContainer.innerHTML = '';
+            }
+            const timeStr = new Date().toLocaleTimeString('id-ID');
+            let colorClass = 'text-slate-600 dark:text-slate-300';
+            let icon = 'fa-circle-info text-indigo-400';
+
+            if (type === 'success') { colorClass = 'text-emerald-600 dark:text-emerald-400 font-bold'; icon = 'fa-circle-check text-emerald-500'; }
+            if (type === 'danger') { colorClass = 'text-rose-600 dark:text-rose-400 font-bold'; icon = 'fa-triangle-exclamation text-rose-500'; }
+            if (type === 'warning') { colorClass = 'text-amber-600 dark:text-amber-400'; icon = 'fa-circle-exclamation text-amber-500'; }
+
+            const logItem = document.createElement('div');
+            logItem.className = `flex items-center gap-2 ${colorClass} border-b border-slate-300/20 dark:border-white/5 pb-1 animate-fadeIn`;
+            logItem.innerHTML = `<span class="text-slate-400 text-[10px] shrink-0">[${timeStr}]</span> <i class="fa-solid ${icon} text-[10px] shrink-0"></i> <span class="truncate">${message}</span>`;
+            
+            logContainer.prepend(logItem);
+            while (logContainer.children.length > 50) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+        }
+
+        function clearLog() {
+            document.getElementById('logContainer').innerHTML = '<div class="text-slate-400 italic">Log dibersihkan...</div>';
+        }
+
         function playClickSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -153,7 +195,6 @@
             } catch (e) {}
         }
 
-        // Deteksi Perangkat HP untuk Partikel
         const isMobile = window.innerWidth < 768;
         const canvas = document.getElementById('particleCanvas');
         let particlesArray = [];
@@ -201,9 +242,11 @@
             if (html.classList.contains('dark')) {
                 html.classList.remove('dark'); localStorage.setItem('theme', 'light');
                 themeIcon.className = "fa-solid fa-sun text-sm text-amber-500";
+                addLog("Tema diubah ke Light Mode", "info");
             } else {
                 html.classList.add('dark'); localStorage.setItem('theme', 'dark');
                 themeIcon.className = "fa-solid fa-moon text-sm text-yellow-400";
+                addLog("Tema diubah ke Dark Mode", "info");
             }
         }
 
@@ -307,13 +350,21 @@
         }
 
         function kirimGlobal(nilai) {
+            let actionName = nilai === '1' ? 'Menyalakan SEMUA lampu' : 'Mematikan SEMUA lampu';
+            addLog(actionName, 'warning');
             lampuList.forEach(l => { if (!jadwalStates[l.topik]) client.publish(l.topik, nilai); });
         }
 
         client.on("connect", () => {
             document.getElementById("brokerStatus").innerText = "Status: Terhubung ke MQTT Cloud (WSS)";
+            addLog("Berhasil terhubung ke MQTT Broker Cloud", "success");
             client.subscribe(mqttStatusTopic); client.subscribe(mqttRssiTopic);
             lampuList.forEach(l => client.subscribe(l.topik));
+        });
+
+        client.on("error", (err) => {
+            document.getElementById("brokerStatus").innerText = "Status: Gagal Terhubung ke Broker";
+            addLog("Koneksi MQTT Broker Gagal!", "danger");
         });
 
         client.on("message", (topic, payload) => {
@@ -328,6 +379,7 @@
                     document.getElementById('espDot').className = "w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0";
                     document.getElementById('espStatus').innerText = "Offline";
                     document.getElementById('espStatus').className = "font-bold text-[11px] text-rose-500 uppercase";
+                    addLog("ESP32 S3 terdeteksi OFFLINE", "danger");
                 }, 15000);
             }
 
@@ -346,11 +398,13 @@
                         dotDiv.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-breathing';
                         iconBox.className = "w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-md shadow-emerald-500/40 shrink-0 animate-breathing";
                         card.classList.add('card-active');
+                        addLog(`${l.nama} menyala`, "success");
                     } else {
                         textSpan.innerText = 'MATI'; textSpan.className = 'font-extrabold text-[10px] text-slate-400 uppercase';
                         dotDiv.className = 'w-2 h-2 rounded-full bg-slate-400';
                         iconBox.className = "w-10 h-10 rounded-xl bg-slate-200/80 dark:bg-slate-800/80 flex items-center justify-center text-slate-600 dark:text-slate-400 shadow-inner shrink-0";
                         card.classList.remove('card-active');
+                        addLog(`${l.nama} mati`, "info");
                     }
                 }
             });
@@ -366,10 +420,12 @@
         setInterval(updateClock, 1000);
 
         function mulaiTimer(id, topik) {
+            let lampuObj = lampuList.find(l => l.id === id);
             if (jadwalStates[topik]) return alert("Jadwal aktif!");
             if (timerIntervals[id]) clearInterval(timerIntervals[id]);
             let detik = parseInt(document.getElementById(`timerSec_${id}`).value) || 10;
             client.publish(topik, '1');
+            addLog(`Timer ${lampuObj.nama} dimulai selama ${detik} detik`, "warning");
 
             timerIntervals[id] = setInterval(() => {
                 if (detik > 0) {
@@ -377,20 +433,25 @@
                 } else {
                     clearInterval(timerIntervals[id]); client.publish(topik, '0');
                     document.getElementById(`timerInfo_${id}`).innerText = "Selesai";
+                    addLog(`Timer ${lampuObj.nama} selesai (otomatis mati)`, "info");
                 }
             }, 1000);
         }
 
         function aktifkanJadwal(id, topik) {
+            let lampuObj = lampuList.find(l => l.id === id);
             const mulai = document.getElementById(`mulai_${id}`).value, selesai = document.getElementById(`selesai_${id}`).value;
             if (!mulai || !selesai) return alert("Atur jam mulai & selesai!");
             jadwalStates[topik] = true;
             document.getElementById(`jadwalInfo_${id}`).innerText = `Aktif (${mulai}-${selesai})`;
+            addLog(`Jadwal otomatis ${lampuObj.nama} diaktifkan (${mulai} - ${selesai})`, "success");
         }
 
         function matikanJadwal(id) {
-            jadwalStates[lampuList.find(l => l.id === id).topik] = false;
+            let lampuObj = lampuList.find(l => l.id === id);
+            jadwalStates[lampuObj.topik] = false;
             document.getElementById(`jadwalInfo_${id}`).innerText = "Nonaktif";
+            addLog(`Jadwal otomatis ${lampuObj.nama} dimatikan`, "warning");
         }
 
         function cekRentangJadwal(id, topik, jam, menit) {
