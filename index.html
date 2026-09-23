@@ -96,7 +96,7 @@
                     </div>
 
                     <!-- Tombol Voice Control (Mikrofon) -->
-                    <button id="btnVoice" onclick="playClickSound(); toggleVoiceRecognition()" class="w-10 h-10 rounded-xl bg-slate-200/80 dark:bg-white/10 border border-slate-300/50 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-indigo-400 active:scale-95 transition-all shrink-0" title="Kontrol Suara (Voice Command)">
+                    <button id="btnVoice" onclick="playClickSound(); toggleVoiceRecognition()" class="w-10 h-10 rounded-xl bg-slate-200/80 dark:bg-white/10 border border-slate-300/50 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-indigo-400 active:scale-95 transition-all shrink-0 relative" title="Kontrol Suara (Voice Command)">
                         <i id="micIcon" class="fa-solid fa-microphone text-sm"></i>
                     </button>
 
@@ -110,6 +110,12 @@
                         <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
                     </button>
                 </div>
+            </div>
+
+            <!-- Panel Feedback Teks Suara Live -->
+            <div id="voiceFeedbackBox" class="hidden bg-indigo-500/10 border border-indigo-500/30 px-3 py-2 rounded-2xl flex items-center gap-3 transition-all">
+                <i class="fa-solid fa-waveform text-indigo-500 animate-pulse text-sm"></i>
+                <div class="text-xs font-mono text-indigo-600 dark:text-indigo-300 truncate" id="voiceTranscriptText">Mendengarkan suara Anda... (Ucapkan: "Nyalakan lampu 1")</div>
             </div>
 
             <!-- Tombol Master Tunggal & Bar Status -->
@@ -332,49 +338,74 @@
             deviceHours[l.id] = savedSec;
         });
 
-        // --- FITUR KONTROL SUARA (WEB SPEECH API) ---
+        // --- PERBAIKAN FITUR KONTROL SUARA (WEB SPEECH API) ---
         let recognition = null;
         let isListening = false;
 
         function toggleVoiceRecognition() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                alert(currentLang === 'id' ? "Browser Anda tidak mendukung kontrol suara." : "Your browser does not support voice commands.");
+                alert(currentLang === 'id' ? "Browser Anda tidak mendukung Web Speech API." : "Your browser does not support Web Speech API.");
                 return;
             }
 
             const btnVoice = document.getElementById('btnVoice');
             const micIcon = document.getElementById('micIcon');
+            const feedbackBox = document.getElementById('voiceFeedbackBox');
+            const transcriptText = document.getElementById('voiceTranscriptText');
 
             if (!isListening) {
-                recognition = new SpeechRecognition();
-                recognition.lang = 'id-ID';
-                recognition.interimResults = false;
-                recognition.maxAlternatives = 1;
+                try {
+                    recognition = new SpeechRecognition();
+                    recognition.lang = 'id-ID';
+                    recognition.interimResults = true;
+                    recognition.maxAlternatives = 1;
 
-                recognition.onstart = () => {
-                    isListening = true;
-                    btnVoice.classList.add('listening-mic');
-                    micIcon.className = "fa-solid fa-microphone-lines text-sm fa-bounce";
-                    addLog("Voice Assistant: Mendengarkan perintah...", "user");
-                };
+                    recognition.onstart = () => {
+                        isListening = true;
+                        btnVoice.classList.add('listening-mic');
+                        micIcon.className = "fa-solid fa-microphone-lines text-sm fa-bounce";
+                        feedbackBox.classList.remove('hidden');
+                        transcriptText.innerText = currentLang === 'id' ? "Silakan bicara (Contoh: Nyalakan lampu 1)..." : "Listening (Example: Turn on light 1)...";
+                        addLog("Voice Assistant: Aktif mendengarkan...", "user");
+                    };
 
-                recognition.onresult = (event) => {
-                    let speechText = event.results[0][0].transcript.toLowerCase();
-                    addLog(`Suara terdeteksi: "${speechText}"`, "user");
-                    prosesPerintahSuara(speechText);
-                };
+                    recognition.onresult = (event) => {
+                        let interimTranscript = '';
+                        let finalTranscript = '';
+                        for (let i = event.resultIndex; i < event.results.length; ++i) {
+                            if (event.results[i].isFinal) {
+                                finalTranscript += event.results[i][0].transcript;
+                            } else {
+                                interimTranscript += event.results[i][0].transcript;
+                            }
+                        }
 
-                recognition.onerror = (event) => {
-                    addLog(`Voice Error: ${event.error}`, "warning");
+                        let currentSpeech = finalTranscript || interimTranscript;
+                        if (currentSpeech) {
+                            transcriptText.innerText = `"${currentSpeech}"`;
+                        }
+
+                        if (finalTranscript) {
+                            prosesPerintahSuara(finalTranscript.toLowerCase().trim());
+                        }
+                    };
+
+                    recognition.onerror = (event) => {
+                        addLog(`Voice Error: ${event.error}`, "warning");
+                        transcriptText.innerText = `Error: ${event.error}`;
+                        setTimeout(stopVoiceUI, 3000);
+                    };
+
+                    recognition.onend = () => {
+                        stopVoiceUI();
+                    };
+
+                    recognition.start();
+                } catch (e) {
+                    alert("Gagal memulai mikrofon: " + e.message);
                     stopVoiceUI();
-                };
-
-                recognition.onend = () => {
-                    stopVoiceUI();
-                };
-
-                recognition.start();
+                }
             } else {
                 if (recognition) recognition.stop();
                 stopVoiceUI();
@@ -385,22 +416,25 @@
             isListening = false;
             const btnVoice = document.getElementById('btnVoice');
             const micIcon = document.getElementById('micIcon');
-            if (btnVoice && micIcon) {
+            const feedbackBox = document.getElementById('voiceFeedbackBox');
+            if (btnVoice && micIcon && feedbackBox) {
                 btnVoice.classList.remove('listening-mic');
                 micIcon.className = "fa-solid fa-microphone text-sm";
+                feedbackBox.classList.add('hidden');
             }
         }
 
         function prosesPerintahSuara(text) {
+            addLog(`Suara final: "${text}"`, "user");
             let matched = false;
 
             // Perintah Master Global
-            if (text.includes("nyalakan semua") || text.includes("hidupkan semua")) {
+            if (text.includes("nyalakan semua") || text.includes("hidupkan semua") || text.includes("all on")) {
                 lampuList.forEach(l => { if (!jadwalStates[l.topik]) publishWithQueue(l.topik, '1'); });
                 addLog("Voice: Menyalakan semua lampu", "success");
                 return;
             }
-            if (text.includes("matikan semua")) {
+            if (text.includes("matikan semua") || text.includes("all off")) {
                 lampuList.forEach(l => { if (!jadwalStates[l.topik]) publishWithQueue(l.topik, '0'); });
                 addLog("Voice: Mematikan semua lampu", "success");
                 return;
@@ -408,20 +442,19 @@
 
             // Perintah Per Lampu
             lampuList.forEach(l => {
+                let nomorLampuStr = `lampu ${l.id}`;
                 let namaClean = l.nama.toLowerCase();
-                // Ekstraksi angka atau nama ruangan (misal: "lampu 1", "utama", "kamar")
-                let keywordMatch = text.includes(`lampu ${l.id}`) || text.includes(namaClean.split(' ')[0]);
                 
-                if (keywordMatch) {
+                if (text.includes(nomorLampuStr) || text.includes(`lampu ${l.id}`) || text.includes(namaClean.split(' ')[0])) {
                     if (jadwalStates[l.topik]) {
                         alert(translations[currentLang].alertManualLock);
                         return;
                     }
-                    if (text.includes("nyala") || text.includes("hidup")) {
+                    if (text.includes("nyala") || text.includes("hidup") || text.includes("on")) {
                         publishWithQueue(l.topik, '1');
                         addLog(`Voice: Menyalakan ${l.nama}`, "success");
                         matched = true;
-                    } else if (text.includes("mati")) {
+                    } else if (text.includes("mati") || text.includes("off")) {
                         publishWithQueue(l.topik, '0');
                         addLog(`Voice: Mematikan ${l.nama}`, "success");
                         matched = true;
@@ -433,7 +466,7 @@
                 addLog(`Voice: Perintah "${text}" tidak dikenali.`, "warning");
             }
         }
-        // --------------------------------------------
+        // --------------------------------------------------
 
         setInterval(() => {
             lampuList.forEach(l => {
