@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Home IoT - Multi-User Live Pro</title>
+    <title>Smart Home IoT - Energy Analytics Pro</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -11,6 +11,8 @@
     </script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js untuk Grafik Statistik Daya -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- HiveMQ MQTT Client Library -->
     <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
     <style>
@@ -141,21 +143,19 @@
         <!-- Grid 6 Kartu Lampu -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="lampuGrid"></div>
 
-        <!-- Panel Monitoring Log Aktivitas Real-Time & Live Users -->
+        <!-- Panel Grafik Statistik Konsumsi Daya & Live Users -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <!-- Log Aktivitas -->
+            <!-- Grafik Analitik Daya (Chart.js) -->
             <div class="glass-panel p-4 sm:p-6 rounded-3xl space-y-3 shadow-lg border border-slate-200/80 dark:border-white/10 lg:col-span-2">
                 <div class="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-2.5">
                     <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-rectangle-list text-indigo-500 text-sm"></i>
-                        <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-white">Monitoring Log Aktivitas</h3>
+                        <i class="fa-solid fa-chart-line text-amber-500 text-sm"></i>
+                        <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-white">Statistik Konsumsi Daya Real-Time (Watt)</h3>
                     </div>
-                    <button onclick="clearLog()" class="text-[10px] text-slate-400 hover:text-rose-500 font-bold transition-colors">
-                        <i class="fa-solid fa-trash-can mr-1"></i> Bersihkan Log
-                    </button>
+                    <span class="text-[10px] text-slate-400 font-mono">Live Update</span>
                 </div>
-                <div id="logContainer" class="bg-slate-200/50 dark:bg-slate-950/60 p-3 rounded-2xl h-36 overflow-y-auto space-y-1.5 font-mono text-[11px] border border-slate-300/40 dark:border-white/5">
-                    <div class="text-slate-400 italic">Menunggu aktivitas sistem...</div>
+                <div class="h-48 relative">
+                    <canvas id="energyChart"></canvas>
                 </div>
             </div>
 
@@ -165,9 +165,25 @@
                     <i class="fa-solid fa-users text-indigo-500 text-sm"></i>
                     <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-white">Pengguna Terhubung</h3>
                 </div>
-                <div id="usersListContainer" class="bg-slate-200/50 dark:bg-slate-950/60 p-3 rounded-2xl h-36 overflow-y-auto space-y-2 font-mono text-[11px] border border-slate-300/40 dark:border-white/5">
+                <div id="usersListContainer" class="bg-slate-200/50 dark:bg-slate-950/60 p-3 rounded-2xl h-48 overflow-y-auto space-y-2 font-mono text-[11px] border border-slate-300/40 dark:border-white/5">
                     <div class="text-slate-400 italic">Memuat sesi pengguna...</div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Panel Monitoring Log Aktivitas Real-Time -->
+        <div class="glass-panel p-4 sm:p-6 rounded-3xl space-y-3 shadow-lg border border-slate-200/80 dark:border-white/10">
+            <div class="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-2.5">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-rectangle-list text-indigo-500 text-sm"></i>
+                    <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-white">Monitoring Log Aktivitas</h3>
+                </div>
+                <button onclick="clearLog()" class="text-[10px] text-slate-400 hover:text-rose-500 font-bold transition-colors">
+                    <i class="fa-solid fa-trash-can mr-1"></i> Bersihkan Log
+                </button>
+            </div>
+            <div id="logContainer" class="bg-slate-200/50 dark:bg-slate-950/60 p-3 rounded-2xl h-32 overflow-y-auto space-y-1.5 font-mono text-[11px] border border-slate-300/40 dark:border-white/5">
+                <div class="text-slate-400 italic">Menunggu aktivitas sistem...</div>
             </div>
         </div>
 
@@ -175,9 +191,46 @@
         <p id="brokerStatus" class="text-[11px] text-slate-500 dark:text-slate-400 text-center font-mono py-1">Menghubungkan ke broker...</p>
     </div>
 
-    <!-- Skrip Multi-User, Monitoring, Audio, & MQTT -->
+    <!-- Skrip Grafik, Multi-User, Monitoring, & MQTT -->
     <script>
-        // Unique ID untuk sesi browser saat ini
+        // Inisialisasi Grafik Chart.js
+        const ctxChart = document.getElementById('energyChart').getContext('2d');
+        const energyChart = new Chart(ctxChart, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Total Daya (Watt)',
+                    data: [],
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#94a3b8' } },
+                    y: { beginAtZero: true, grid: { color: 'rgba(148, 163, 184, 0.1)' }, ticks: { font: { size: 10 }, color: '#94a3b8' } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        function updateEnergyChart(totalWatt) {
+            const nowStr = new Date().toLocaleTimeString('id-ID');
+            if (energyChart.data.labels.length > 10) {
+                energyChart.data.labels.shift();
+                energyChart.data.datasets[0].data.shift();
+            }
+            energyChart.data.labels.push(nowStr);
+            energyChart.data.datasets[0].data.push(totalWatt);
+            energyChart.update();
+        }
+
         const mySessionId = "User_" + Math.random().toString(36).substr(2, 5).toUpperCase();
         let activeUsersMap = {};
 
@@ -196,7 +249,7 @@
             if (type === 'user') { colorClass = 'text-indigo-600 dark:text-indigo-400 font-semibold'; icon = 'fa-user text-indigo-500'; }
 
             const logItem = document.createElement('div');
-            logItem.className = `flex items-center gap-2 ${colorClass} border-b border-slate-300/20 dark:border-white/5 pb-1 animate-fadeIn`;
+            logItem.className = `flex items-center gap-2 ${colorClass} border-b border-slate-300/20 dark:border-white/5 pb-1`;
             logItem.innerHTML = `<span class="text-slate-400 text-[10px] shrink-0">[${timeStr}]</span> <i class="fa-solid ${icon} text-[10px] shrink-0"></i> <span class="truncate">${message}</span>`;
             
             logContainer.prepend(logItem);
@@ -213,8 +266,6 @@
             const container = document.getElementById('usersListContainer');
             container.innerHTML = '';
             let keys = Object.keys(activeUsersMap);
-            
-            document.getElementById('activeCountUsers')?.innerText; // placeholder
             document.getElementById('activeUsersCount').innerText = `${keys.length} Orang Online`;
 
             if (keys.length === 0) {
@@ -315,7 +366,7 @@
         const mqttPort = 8884; 
         const mqttStatusTopic = "esp32s3/status/galang";
         const mqttRssiTopic = "esp32s3/rssi/galang";
-        const mqttPresenceTopic = "smart_home/presence/galang"; // Topik khusus deteksi user online
+        const mqttPresenceTopic = "smart_home/presence/galang";
         
         const lampuList = [
             { id: 1, nama: "Lampu 1 (Utama)", topik: "esp32s3/lampu1/galang", icon: "fa-lightbulb", watt: 10 },
@@ -395,24 +446,16 @@
         const client = mqtt.connect(`wss://${mqttHost}:${mqttPort}/mqtt`, mqttOptions);
         let espTimeout = null;
 
-        // Kirim sinyal presence berkala agar pengguna lain tahu kita online
         function sendPresenceHeartbeat() {
-            if (client.connected) {
-                client.publish(mqttPresenceTopic, mySessionId, { qos: 0 });
-            }
+            if (client.connected) client.publish(mqttPresenceTopic, mySessionId, { qos: 0 });
         }
         setInterval(sendPresenceHeartbeat, 3000);
 
-        // Cek berkala pengguna yang tidak aktif (timeout 10 detik)
         setInterval(() => {
             let now = Date.now();
             let changed = false;
             for (let uid in activeUsersMap) {
-                if (now - activeUsersMap[uid] > 10000) {
-                    delete activeUsersMap[uid];
-                    changed = true;
-                    addLog(`Pengguna ${uid} meninggalkan sesi`, "warning");
-                }
+                if (now - activeUsersMap[uid] > 10000) { delete activeUsersMap[uid]; changed = true; }
             }
             if (changed) updateActiveUsersUI();
         }, 3000);
@@ -424,6 +467,7 @@
             });
             document.getElementById('activeCount').innerText = `${activeCount} / 6`;
             document.getElementById('powerUsage').innerText = `${totalWatt} W`;
+            updateEnergyChart(totalWatt);
         }
 
         function kirimGlobal(nilai) {
@@ -434,40 +478,32 @@
 
         function kirimMQTT(topik, nilai) {
             let lampuObj = lampuList.find(l => l.topik === topik);
-            if (jadwalStates[topik]) {
-                alert(`Kontrol manual ${lampuObj.nama} dikunci karena Jadwal Otomatis aktif!`);
-                return;
-            }
+            if (jadwalStates[topik]) return alert(`Kontrol manual ${lampuObj.nama} dikunci karena Jadwal Aktif!`);
             client.publish(topik, nilai);
         }
 
         client.on("connect", () => {
             document.getElementById("brokerStatus").innerText = "Status: Terhubung ke MQTT Cloud (WSS)";
-            addLog(`Sesi Anda dimulai sebagai [${mySessionId}]`, "success");
-            client.subscribe(mqttStatusTopic); 
-            client.subscribe(mqttRssiTopic);
-            client.subscribe(mqttPresenceTopic);
+            addLog(`Sesi Anda: [${mySessionId}]`, "success");
+            client.subscribe(mqttStatusTopic); client.subscribe(mqttRssiTopic); client.subscribe(mqttPresenceTopic);
             lampuList.forEach(l => client.subscribe(l.topik));
             sendPresenceHeartbeat();
         });
 
-        client.on("error", (err) => {
+        client.on("error", () => {
             document.getElementById("brokerStatus").innerText = "Status: Gagal Terhubung ke Broker";
-            addLog("Koneksi MQTT Broker Gagal!", "danger");
+            addLog("Koneksi MQTT Gagal!", "danger");
         });
 
         client.on("message", (topic, payload) => {
             let message = payload.toString();
 
-            // Deteksi Kehadiran Pengguna Lain
             if (topic === mqttPresenceTopic) {
                 let uid = message;
                 let isNew = !activeUsersMap[uid];
                 activeUsersMap[uid] = Date.now();
                 updateActiveUsersUI();
-                if (isNew && uid !== mySessionId) {
-                    addLog(`Pengguna baru terdeteksi online: ${uid}`, "user");
-                }
+                if (isNew && uid !== mySessionId) addLog(`Pengguna online: ${uid}`, "user");
                 return;
             }
 
@@ -481,7 +517,7 @@
                     document.getElementById('espDot').className = "w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0";
                     document.getElementById('espStatus').innerText = "Offline";
                     document.getElementById('espStatus').className = "font-bold text-[11px] text-rose-500 uppercase";
-                    addLog("ESP32 S3 terdeteksi OFFLINE", "danger");
+                    addLog("ESP32 S3 OFFLINE", "danger");
                 }, 15000);
             }
 
@@ -500,13 +536,13 @@
                         dotDiv.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-breathing';
                         iconBox.className = "w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-md shadow-emerald-500/40 shrink-0 animate-breathing";
                         card.classList.add('card-active');
-                        addLog(`${l.nama} dinyalakan`, "success");
+                        addLog(`${l.nama} menyala`, "success");
                     } else {
                         textSpan.innerText = 'MATI'; textSpan.className = 'font-extrabold text-[10px] text-slate-400 uppercase';
                         dotDiv.className = 'w-2 h-2 rounded-full bg-slate-400';
                         iconBox.className = "w-10 h-10 rounded-xl bg-slate-200/80 dark:bg-slate-800/80 flex items-center justify-center text-slate-600 dark:text-slate-400 shadow-inner shrink-0";
                         card.classList.remove('card-active');
-                        addLog(`${l.nama} dimatikan`, "info");
+                        addLog(`${l.nama} mati`, "info");
                     }
                 }
             });
@@ -542,7 +578,7 @@
         function aktifkanJadwal(id, topik) {
             let lampuObj = lampuList.find(l => l.id === id);
             const mulai = document.getElementById(`mulai_${id}`).value, selesai = document.getElementById(`selesai_${id}`).value;
-            if (!mulai || !selesai) return alert("Atur jam mulai & selesai!");
+            if (!mulai || !selesai) return alert("Atur jam!");
             jadwalStates[topik] = true;
             document.getElementById(`jadwalInfo_${id}`).innerText = `Aktif (${mulai}-${selesai})`;
             addLog(`Jadwal ${lampuObj.nama} aktif (${mulai}-${selesai})`, "success");
