@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Home IoT - Ultimate Multi-Language Pro</title>
+    <title>Smart Home IoT - Ultimate Enterprise Pro</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -37,6 +37,13 @@
             50% { background-color: rgba(239, 68, 68, 0.3); border-color: rgba(239, 68, 68, 0.9); }
         }
         .animate-overload { animation: alertPulse 1s infinite ease-in-out; }
+
+        @keyframes micPulse {
+            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+            70% { box-shadow: 0 0 0 12px rgba(99, 102, 241, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+        .listening-mic { animation: micPulse 1.5s infinite; background-color: #4f46e5 !important; color: white !important; }
 
         .glass-panel {
             background: rgba(255, 255, 255, 0.9);
@@ -81,12 +88,17 @@
                     </div>
                 </div>
 
-                <!-- Jam, Tombol Bahasa, & Toggle Tema -->
+                <!-- Jam, Tombol Mikrofon, Tombol Bahasa, & Toggle Tema -->
                 <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-3 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200 dark:border-white/10">
                     <div class="text-left sm:text-right">
                         <div id="liveClock" class="text-base sm:text-lg font-extrabold font-mono text-indigo-600 dark:text-indigo-400">00:00:00</div>
                         <div id="liveDate" class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">Memuat...</div>
                     </div>
+
+                    <!-- Tombol Voice Control (Mikrofon) -->
+                    <button id="btnVoice" onclick="playClickSound(); toggleVoiceRecognition()" class="w-10 h-10 rounded-xl bg-slate-200/80 dark:bg-white/10 border border-slate-300/50 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-indigo-400 active:scale-95 transition-all shrink-0" title="Kontrol Suara (Voice Command)">
+                        <i id="micIcon" class="fa-solid fa-microphone text-sm"></i>
+                    </button>
 
                     <!-- Tombol Pengalih Bahasa (ID/EN) -->
                     <button onclick="playClickSound(); toggleLanguage()" class="px-3 h-10 rounded-xl bg-slate-200/80 dark:bg-white/10 border border-slate-300/50 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-bold text-xs active:scale-95 transition-all shrink-0">
@@ -133,6 +145,15 @@
                     <div>
                         <div id="lblOnlineTitle" class="text-[8px] text-indigo-500 dark:text-indigo-400 font-bold uppercase">Online</div>
                         <span id="activeUsersCount" class="font-bold text-[11px] text-indigo-700 dark:text-indigo-300 font-mono">1 Orang</span>
+                    </div>
+                </div>
+
+                <!-- Indikator Ping / Latency Real-Time -->
+                <div class="bg-slate-200/60 dark:bg-slate-900/80 px-3 py-1.5 rounded-xl flex items-center space-x-2 border border-slate-300/40 dark:border-white/5 flex-1 min-w-[110px]">
+                    <div id="pingDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></div>
+                    <div>
+                        <div id="lblPingTitle" class="text-[8px] text-slate-400 font-bold uppercase">Latensi Cloud</div>
+                        <span id="pingValue" class="font-bold text-[11px] text-emerald-500 font-mono">-- ms</span>
                     </div>
                 </div>
 
@@ -218,6 +239,7 @@
     <!-- Skrip Utama -->
     <script>
         const MAX_SAFE_POWER = 60;
+        const MAX_LIFESPAN_HOURS = 10000;
         let isOverloadAlertTriggered = false;
         let currentLang = localStorage.getItem('app_lang') || 'id';
 
@@ -229,6 +251,7 @@
                 costTitle: "Estimasi Biaya / Hari",
                 weatherTitle: "Cuaca Luar",
                 onlineTitle: "Online",
+                pingTitle: "Latensi Cloud",
                 powerTitle: "Daya (Max 60W)",
                 activeTitle: "Aktif",
                 chartTitle: "Statistik Konsumsi Daya Real-Time (Watt)",
@@ -247,6 +270,7 @@
                 btnScheduleOn: "AKTIFKAN JADWAL",
                 btnScheduleOff: "MATIKAN JADWAL",
                 scheduleOff: "Nonaktif",
+                lifespanTitle: "Masa Pakai LED",
                 modalPromptName: "Ubah nama untuk",
                 alertSchedule: "Atur jam mulai dan selesai terlebih dahulu!",
                 alertManualLock: "Kontrol manual dikunci karena Jadwal Aktif!"
@@ -258,6 +282,7 @@
                 costTitle: "Est. Daily Cost",
                 weatherTitle: "Outdoor Weather",
                 onlineTitle: "Online",
+                pingTitle: "Cloud Latency",
                 powerTitle: "Power (Max 60W)",
                 activeTitle: "Active",
                 chartTitle: "Real-Time Power Consumption Stats (Watts)",
@@ -276,6 +301,7 @@
                 btnScheduleOn: "ENABLE SCHEDULE",
                 btnScheduleOff: "DISABLE SCHEDULE",
                 scheduleOff: "Disabled",
+                lifespanTitle: "LED Lifespan",
                 modalPromptName: "Change name for",
                 alertSchedule: "Please set start and end times first!",
                 alertManualLock: "Manual control locked because Schedule is Active!"
@@ -294,13 +320,138 @@
         let stateLampu = {};
         let timerIntervals = {};
         let jadwalStates = {};
+        let deviceHours = {};
 
         lampuList.forEach(l => {
             let savedName = localStorage.getItem(`lampu_nama_${l.id}`);
             if (savedName) l.nama = savedName;
             stateLampu[l.topik] = '0';
             jadwalStates[l.topik] = false;
+            
+            let savedSec = parseInt(localStorage.getItem(`lampu_seconds_${l.id}`)) || 0;
+            deviceHours[l.id] = savedSec;
         });
+
+        // --- FITUR KONTROL SUARA (WEB SPEECH API) ---
+        let recognition = null;
+        let isListening = false;
+
+        function toggleVoiceRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert(currentLang === 'id' ? "Browser Anda tidak mendukung kontrol suara." : "Your browser does not support voice commands.");
+                return;
+            }
+
+            const btnVoice = document.getElementById('btnVoice');
+            const micIcon = document.getElementById('micIcon');
+
+            if (!isListening) {
+                recognition = new SpeechRecognition();
+                recognition.lang = 'id-ID';
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+
+                recognition.onstart = () => {
+                    isListening = true;
+                    btnVoice.classList.add('listening-mic');
+                    micIcon.className = "fa-solid fa-microphone-lines text-sm fa-bounce";
+                    addLog("Voice Assistant: Mendengarkan perintah...", "user");
+                };
+
+                recognition.onresult = (event) => {
+                    let speechText = event.results[0][0].transcript.toLowerCase();
+                    addLog(`Suara terdeteksi: "${speechText}"`, "user");
+                    prosesPerintahSuara(speechText);
+                };
+
+                recognition.onerror = (event) => {
+                    addLog(`Voice Error: ${event.error}`, "warning");
+                    stopVoiceUI();
+                };
+
+                recognition.onend = () => {
+                    stopVoiceUI();
+                };
+
+                recognition.start();
+            } else {
+                if (recognition) recognition.stop();
+                stopVoiceUI();
+            }
+        }
+
+        function stopVoiceUI() {
+            isListening = false;
+            const btnVoice = document.getElementById('btnVoice');
+            const micIcon = document.getElementById('micIcon');
+            if (btnVoice && micIcon) {
+                btnVoice.classList.remove('listening-mic');
+                micIcon.className = "fa-solid fa-microphone text-sm";
+            }
+        }
+
+        function prosesPerintahSuara(text) {
+            let matched = false;
+
+            // Perintah Master Global
+            if (text.includes("nyalakan semua") || text.includes("hidupkan semua")) {
+                lampuList.forEach(l => { if (!jadwalStates[l.topik]) publishWithQueue(l.topik, '1'); });
+                addLog("Voice: Menyalakan semua lampu", "success");
+                return;
+            }
+            if (text.includes("matikan semua")) {
+                lampuList.forEach(l => { if (!jadwalStates[l.topik]) publishWithQueue(l.topik, '0'); });
+                addLog("Voice: Mematikan semua lampu", "success");
+                return;
+            }
+
+            // Perintah Per Lampu
+            lampuList.forEach(l => {
+                let namaClean = l.nama.toLowerCase();
+                // Ekstraksi angka atau nama ruangan (misal: "lampu 1", "utama", "kamar")
+                let keywordMatch = text.includes(`lampu ${l.id}`) || text.includes(namaClean.split(' ')[0]);
+                
+                if (keywordMatch) {
+                    if (jadwalStates[l.topik]) {
+                        alert(translations[currentLang].alertManualLock);
+                        return;
+                    }
+                    if (text.includes("nyala") || text.includes("hidup")) {
+                        publishWithQueue(l.topik, '1');
+                        addLog(`Voice: Menyalakan ${l.nama}`, "success");
+                        matched = true;
+                    } else if (text.includes("mati")) {
+                        publishWithQueue(l.topik, '0');
+                        addLog(`Voice: Mematikan ${l.nama}`, "success");
+                        matched = true;
+                    }
+                }
+            });
+
+            if (!matched) {
+                addLog(`Voice: Perintah "${text}" tidak dikenali.`, "warning");
+            }
+        }
+        // --------------------------------------------
+
+        setInterval(() => {
+            lampuList.forEach(l => {
+                if (stateLampu[l.topik] === '1') {
+                    deviceHours[l.id]++;
+                    localStorage.setItem(`lampu_seconds_${l.id}`, deviceHours[l.id]);
+                    
+                    let hoursEl = document.getElementById(`lifespanHours_${l.id}`);
+                    let barEl = document.getElementById(`lifespanBar_${l.id}`);
+                    if (hoursEl && barEl) {
+                        let totalHours = (deviceHours[l.id] / 3600).toFixed(1);
+                        let remainingPercent = Math.max(0, 100 - ((totalHours / MAX_LIFESPAN_HOURS) * 100)).toFixed(1);
+                        hoursEl.innerText = `${totalHours}h (${remainingPercent}%)`;
+                        barEl.style.width = `${remainingPercent}%`;
+                    }
+                }
+            });
+        }, 1000);
 
         function renderCards() {
             const container = document.getElementById('lampuGrid');
@@ -312,6 +463,9 @@
                 let savedSelesai = localStorage.getItem(`jadwal_selesai_${lampu.id}`) || "";
                 let isSchedActive = jadwalStates[lampu.topik] || false;
                 let currentSt = stateLampu[lampu.topik] || '0';
+
+                let totalHours = (deviceHours[lampu.id] / 3600).toFixed(1);
+                let remainingPercent = Math.max(0, 100 - ((totalHours / MAX_LIFESPAN_HOURS) * 100)).toFixed(1);
 
                 container.innerHTML += `
                     <div id="card_${lampu.id}" class="glass-panel p-4 rounded-3xl space-y-3 shadow-lg border border-slate-200/80 dark:border-white/10 relative overflow-hidden ${currentSt === '1' ? 'card-active' : ''}">
@@ -339,6 +493,17 @@
                             </button>
                         </div>
 
+                        <!-- Widget Masa Pakai Perangkat -->
+                        <div class="bg-slate-200/40 dark:bg-slate-900/40 p-2.5 rounded-xl space-y-1">
+                            <div class="flex justify-between items-center text-[9px] font-extrabold text-indigo-500 uppercase">
+                                <span>${t.lifespanTitle}</span>
+                                <span id="lifespanHours_${lampu.id}" class="font-mono text-slate-700 dark:text-slate-300">${totalHours}h (${remainingPercent}%)</span>
+                            </div>
+                            <div class="w-full bg-slate-300 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                <div id="lifespanBar_${lampu.id}" class="bg-indigo-500 h-full rounded-full transition-all duration-500" style="width: ${remainingPercent}%"></div>
+                            </div>
+                        </div>
+
                         <div class="bg-slate-200/40 dark:bg-slate-900/40 p-3 rounded-xl space-y-1.5">
                             <span class="text-[9px] font-extrabold text-indigo-500 uppercase">${t.timerTitle}</span>
                             <div class="flex gap-2">
@@ -348,7 +513,6 @@
                             <div id="timerInfo_${lampu.id}" class="text-[10px] text-center text-slate-400 font-mono">${t.timerOff}</div>
                         </div>
 
-                        <!-- Satu Tombol Toggle Jadwal -->
                         <div class="bg-slate-200/40 dark:bg-slate-900/40 p-3 rounded-xl space-y-1.5">
                             <span class="text-[9px] font-extrabold text-indigo-500 uppercase">${t.scheduleTitle}</span>
                             <div class="grid grid-cols-2 gap-1.5">
@@ -374,6 +538,7 @@
             document.getElementById('lblCostTitle').innerText = t.costTitle;
             document.getElementById('lblWeatherTitle').innerText = t.weatherTitle;
             document.getElementById('lblOnlineTitle').innerText = t.onlineTitle;
+            document.getElementById('lblPingTitle').innerText = t.pingTitle;
             document.getElementById('powerLabel').innerText = t.powerTitle;
             document.getElementById('lblActiveTitle').innerText = t.activeTitle;
             document.getElementById('txtChartTitle').innerText = t.chartTitle;
@@ -582,6 +747,16 @@
         const mqttStatusTopic = "esp32s3/status/galang";
         const mqttRssiTopic = "esp32s3/rssi/galang";
         const mqttPresenceTopic = "smart_home/presence/galang";
+        let pingStartTime = 0;
+        const mqttPingTopic = "smart_home/ping/galang";
+
+        function measurePing() {
+            if (client && client.connected) {
+                pingStartTime = performance.now();
+                client.publish(mqttPingTopic, "PING_" + pingStartTime, { qos: 0 });
+            }
+        }
+        setInterval(measurePing, 5000);
 
         function ubahNamaLampu(id) {
             let lampuObj = lampuList.find(l => l.id === id);
@@ -602,6 +777,30 @@
 
         const client = mqtt.connect(`wss://${mqttHost}:${mqttPort}/mqtt`, mqttOptions);
         let espTimeout = null;
+
+        let offlineQueue = JSON.parse(localStorage.getItem('mqtt_offline_queue') || '[]');
+
+        function publishWithQueue(topic, message) {
+            if (client && client.connected) {
+                client.publish(topic, message);
+                addLog(`MQTT Publish -> [${topic}]: ${message}`, "info");
+            } else {
+                offlineQueue.push({ topic, message, time: new Date().toLocaleTimeString() });
+                localStorage.setItem('mqtt_offline_queue', JSON.stringify(offlineQueue));
+                addLog(`Offline: Perintah disimpan ke antrean (${offlineQueue.length})`, "warning");
+            }
+        }
+
+        function flushOfflineQueue() {
+            if (offlineQueue.length > 0 && client && client.connected) {
+                addLog(`Koneksi pulih: Mengirim ${offlineQueue.length} pesan tertunda...`, "success");
+                offlineQueue.forEach(item => {
+                    client.publish(item.topic, item.message);
+                });
+                offlineQueue = [];
+                localStorage.removeItem('mqtt_offline_queue');
+            }
+        }
 
         function sendPresenceHeartbeat() {
             if (client.connected) client.publish(mqttPresenceTopic, mySessionId, { qos: 0 });
@@ -677,7 +876,7 @@
             
             let currentState = stateLampu[topik] || '0';
             let targetState = (currentState === '1') ? '0' : '1';
-            client.publish(topik, targetState);
+            publishWithQueue(topik, targetState);
         }
 
         function toggleGlobalMaster() {
@@ -688,7 +887,7 @@
             let actionName = targetState === '1' ? 'Turning ON ALL lights' : 'Turning OFF ALL lights';
             
             addLog(`${mySessionId}: ${actionName}`, 'user');
-            lampuList.forEach(l => { if (!jadwalStates[l.topik]) client.publish(l.topik, targetState); });
+            lampuList.forEach(l => { if (!jadwalStates[l.topik]) publishWithQueue(l.topik, targetState); });
         }
 
         function toggleJadwal(id, topik) {
@@ -722,9 +921,11 @@
         client.on("connect", () => {
             document.getElementById("brokerStatus").innerText = "Status: Connected to MQTT Cloud (WSS)";
             addLog(`Session ID: [${mySessionId}]`, "success");
-            client.subscribe(mqttStatusTopic); client.subscribe(mqttRssiTopic); client.subscribe(mqttPresenceTopic);
+            client.subscribe(mqttStatusTopic); client.subscribe(mqttRssiTopic); client.subscribe(mqttPresenceTopic); client.subscribe(mqttPingTopic);
             lampuList.forEach(l => client.subscribe(l.topik));
             sendPresenceHeartbeat();
+            measurePing();
+            flushOfflineQueue();
         });
 
         client.on("error", () => {
@@ -734,6 +935,25 @@
 
         client.on("message", (topic, payload) => {
             let message = payload.toString();
+
+            if (topic === mqttPingTopic && message.startsWith("PING_")) {
+                let pingDuration = Math.round(performance.now() - pingStartTime);
+                let pingEl = document.getElementById('pingValue');
+                let pingDot = document.getElementById('pingDot');
+                pingEl.innerText = `${pingDuration} ms`;
+                
+                if (pingDuration < 150) {
+                    pingEl.className = "font-bold text-[11px] text-emerald-500 font-mono";
+                    pingDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0";
+                } else if (pingDuration < 400) {
+                    pingEl.className = "font-bold text-[11px] text-amber-500 font-mono";
+                    pingDot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0";
+                } else {
+                    pingEl.className = "font-bold text-[11px] text-rose-500 font-mono";
+                    pingDot.className = "w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0";
+                }
+                return;
+            }
 
             if (topic === mqttPresenceTopic) {
                 let uid = message;
@@ -756,11 +976,6 @@
                     document.getElementById('espStatus').className = "font-bold text-[11px] text-rose-500 uppercase";
                     addLog("ESP32 S3 OFFLINE", "danger");
                 }, 15000);
-            }
-
-            if (topic === mqttRssiTopic) {
-                let rssiVal = parseInt(message);
-                document.getElementById('wifiRssi').innerText = `${rssiVal} dBm`;
             }
 
             lampuList.forEach(l => {
@@ -786,14 +1001,14 @@
             if (jadwalStates[topik]) return alert(currentLang === 'id' ? "Jadwal aktif!" : "Schedule is active!");
             if (timerIntervals[id]) clearInterval(timerIntervals[id]);
             let detik = parseInt(document.getElementById(`timerSec_${id}`).value) || 10;
-            client.publish(topik, '1');
+            publishWithQueue(topik, '1');
             addLog(`Timer ${lampuObj.nama} (${detik}s)`, "warning");
 
             timerIntervals[id] = setInterval(() => {
                 if (detik > 0) {
                     detik--; document.getElementById(`timerInfo_${id}`).innerText = `${currentLang === 'id' ? 'Sisa' : 'Remaining'}: ${detik}s`;
                 } else {
-                    clearInterval(timerIntervals[id]); client.publish(topik, '0');
+                    clearInterval(timerIntervals[id]); publishWithQueue(topik, '0');
                     document.getElementById(`timerInfo_${id}`).innerText = t.timerDone;
                 }
             }, 1000);
@@ -804,10 +1019,9 @@
             const s = document.getElementById(`selesai_${id}`).value.split(':').map(Number);
             if (!m.length || !s.length) return;
             const nowMin = (jam * 60) + menit;
-            client.publish(topik, (nowMin >= (m[0]*60+m[1]) && nowMin < (s[0]*60+s[1])) ? '1' : '0');
+            publishWithQueue(topik, (nowMin >= (m[0]*60+m[1]) && nowMin < (s[0]*60+s[1])) ? '1' : '0');
         }
 
-        // Inisialisasi Bahasa & Render Kartu Awal
         updateLanguageUI();
     </script>
 </body>
