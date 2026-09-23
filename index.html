@@ -338,14 +338,14 @@
             deviceHours[l.id] = savedSec;
         });
 
-        // --- PERBAIKAN FITUR KONTROL SUARA (WEB SPEECH API) ---
+        // --- KONTROL SUARA PRESISI (DIPERBAIKI) ---
         let recognition = null;
         let isListening = false;
 
         function toggleVoiceRecognition() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                alert(currentLang === 'id' ? "Browser Anda tidak mendukung Web Speech API." : "Your browser does not support Web Speech API.");
+                alert("Browser Anda tidak mendukung Web Speech API.");
                 return;
             }
 
@@ -366,8 +366,8 @@
                         btnVoice.classList.add('listening-mic');
                         micIcon.className = "fa-solid fa-microphone-lines text-sm fa-bounce";
                         feedbackBox.classList.remove('hidden');
-                        transcriptText.innerText = currentLang === 'id' ? "Silakan bicara (Contoh: Nyalakan lampu 1)..." : "Listening (Example: Turn on light 1)...";
-                        addLog("Voice Assistant: Aktif mendengarkan...", "user");
+                        transcriptText.innerText = "Mendengarkan... (Contoh: 'Matikan lampu utama' atau 'Nyalakan lampu 2')";
+                        addLog("Voice: Mendengarkan...", "user");
                     };
 
                     recognition.onresult = (event) => {
@@ -382,9 +382,7 @@
                         }
 
                         let currentSpeech = finalTranscript || interimTranscript;
-                        if (currentSpeech) {
-                            transcriptText.innerText = `"${currentSpeech}"`;
-                        }
+                        if (currentSpeech) transcriptText.innerText = `"${currentSpeech}"`;
 
                         if (finalTranscript) {
                             prosesPerintahSuara(finalTranscript.toLowerCase().trim());
@@ -393,8 +391,7 @@
 
                     recognition.onerror = (event) => {
                         addLog(`Voice Error: ${event.error}`, "warning");
-                        transcriptText.innerText = `Error: ${event.error}`;
-                        setTimeout(stopVoiceUI, 3000);
+                        stopVoiceUI();
                     };
 
                     recognition.onend = () => {
@@ -403,7 +400,6 @@
 
                     recognition.start();
                 } catch (e) {
-                    alert("Gagal memulai mikrofon: " + e.message);
                     stopVoiceUI();
                 }
             } else {
@@ -425,45 +421,52 @@
         }
 
         function prosesPerintahSuara(text) {
-            addLog(`Suara final: "${text}"`, "user");
-            let matched = false;
+            addLog(`Suara diterima: "${text}"`, "user");
 
-            // Perintah Master Global
-            if (text.includes("nyalakan semua") || text.includes("hidupkan semua") || text.includes("all on")) {
-                lampuList.forEach(l => { if (!jadwalStates[l.topik]) publishWithQueue(l.topik, '1'); });
-                addLog("Voice: Menyalakan semua lampu", "success");
-                return;
-            }
-            if (text.includes("matikan semua") || text.includes("all off")) {
-                lampuList.forEach(l => { if (!jadwalStates[l.topik]) publishWithQueue(l.topik, '0'); });
-                addLog("Voice: Mematikan semua lampu", "success");
-                return;
-            }
-
-            // Perintah Per Lampu
-            lampuList.forEach(l => {
-                let nomorLampuStr = `lampu ${l.id}`;
-                let namaClean = l.nama.toLowerCase();
-                
-                if (text.includes(nomorLampuStr) || text.includes(`lampu ${l.id}`) || text.includes(namaClean.split(' ')[0])) {
-                    if (jadwalStates[l.topik]) {
-                        alert(translations[currentLang].alertManualLock);
-                        return;
-                    }
-                    if (text.includes("nyala") || text.includes("hidup") || text.includes("on")) {
-                        publishWithQueue(l.topik, '1');
-                        addLog(`Voice: Menyalakan ${l.nama}`, "success");
-                        matched = true;
-                    } else if (text.includes("mati") || text.includes("off")) {
-                        publishWithQueue(l.topik, '0');
-                        addLog(`Voice: Mematikan ${l.nama}`, "success");
-                        matched = true;
-                    }
+            // 1. Cek Perintah Global (Harus mengandung kata "semua")
+            if (text.includes("semua") || text.includes("all")) {
+                if (text.includes("nyala") || text.includes("hidup") || text.includes("on")) {
+                    lampuList.forEach(l => { if (!jadwalStates[l.topik]) publishWithQueue(l.topik, '1'); });
+                    addLog("Voice: Menyalakan semua lampu", "success");
+                    return;
                 }
-            });
+                if (text.includes("mati") || text.includes("off")) {
+                    lampuList.forEach(l => { if (!jadwalStates[l.topik]) publishWithQueue(l.topik, '0'); });
+                    addLog("Voice: Mematikan semua lampu", "success");
+                    return;
+                }
+            }
+
+            // 2. Cek Perintah Spesifik Per Lampu
+            let matched = false;
+            let targetState = null;
+
+            if (text.includes("nyala") || text.includes("hidup") || text.includes("on")) {
+                targetState = '1';
+            } else if (text.includes("mati") || text.includes("off")) {
+                targetState = '0';
+            }
+
+            if (targetState !== null) {
+                lampuList.forEach(l => {
+                    let namaLampuLower = l.nama.toLowerCase();
+                    // Cocokkan berdasarkan nomor ID (misal: "1", "satu") atau kata spesifik di nama lampu (misal: "utama", "kamar", "dapur")
+                    let keywordMatch = text.includes(`lampu ${l.id}`) || text.includes(`${l.id}`) || namaLampuLower.split(' ').some(word => word.length > 2 && text.includes(word));
+
+                    if (keywordMatch) {
+                        if (jadwalStates[l.topik]) {
+                            alert(translations[currentLang].alertManualLock);
+                            return;
+                        }
+                        publishWithQueue(l.topik, targetState);
+                        addLog(`Voice: ${targetState === '1' ? 'Menyalakan' : 'Mematikan'} ${l.nama}`, "success");
+                        matched = true;
+                    }
+                });
+            }
 
             if (!matched) {
-                addLog(`Voice: Perintah "${text}" tidak dikenali.`, "warning");
+                addLog(`Voice: Perintah "${text}" tidak cocok dengan perangkat manapun.`, "warning");
             }
         }
         // --------------------------------------------------
