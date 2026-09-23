@@ -298,6 +298,8 @@
         lampuList.forEach(l => {
             let savedName = localStorage.getItem(`lampu_nama_${l.id}`);
             if (savedName) l.nama = savedName;
+            stateLampu[l.topik] = '0';
+            jadwalStates[l.topik] = false;
         });
 
         function renderCards() {
@@ -581,11 +583,6 @@
         const mqttRssiTopic = "esp32s3/rssi/galang";
         const mqttPresenceTopic = "smart_home/presence/galang";
 
-        let stateLampu = {};
-        let timerIntervals = {};
-
-        lampuList.forEach(l => { stateLampu[l.topik] = '0'; jadwalStates[l.topik] = false; });
-
         function ubahNamaLampu(id) {
             let lampuObj = lampuList.find(l => l.id === id);
             let t = translations[currentLang];
@@ -769,7 +766,7 @@
             lampuList.forEach(l => {
                 if (topic === l.topik) {
                     stateLampu[l.topik] = message;
-                    renderCards(); // Render ulang kartu agar status tombol sinkron sempurna
+                    renderCards();
                 }
             });
             updateStatsAndPower();
@@ -810,7 +807,7 @@
             client.publish(topik, (nowMin >= (m[0]*60+m[1]) && nowMin < (s[0]*60+s[1])) ? '1' : '0');
         }
 
-        // Inisialisasi Bahasa Awal
+        // Inisialisasi Bahasa & Render Kartu Awal
         updateLanguageUI();
     </script>
 </body>
