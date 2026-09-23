@@ -40,12 +40,12 @@
 
         <!-- Tombol Kontrol Manual -->
         <div class="grid grid-cols-2 gap-4">
-            <button onclick="kirimMQTT('1')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg shadow-emerald-900/30 active:scale-95 flex items-center justify-center space-x-2">
+            <button id="btnNyala" onclick="kirimMQTT('1')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg shadow-emerald-900/30 active:scale-95 flex items-center justify-center space-x-2">
                 <svg class="w-5 h-5 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 <span>NYALAKAN</span>
             </button>
 
-            <button onclick="kirimMQTT('0')" class="bg-rose-600 hover:bg-rose-500 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg shadow-rose-900/30 active:scale-95 flex items-center justify-center space-x-2">
+            <button id="btnMati" onclick="kirimMQTT('0')" class="bg-rose-600 hover:bg-rose-500 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg shadow-rose-900/30 active:scale-95 flex items-center justify-center space-x-2">
                 <svg class="w-5 h-5 text-rose-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728"/></svg>
                 <span>MATIKAN</span>
             </button>
@@ -110,8 +110,8 @@
         
         const mqttOptions = {
             clientId: "WebClient_" + Math.random().toString(16).substr(2, 8),
-            username: "galanglinduaji", // Sesuaikan dengan username HiveMQ Cloud Anda
-            password: "galangganteng", // Sesuaikan dengan password HiveMQ Cloud Anda
+            username: "galanglinduaji", 
+            password: "galangganteng", 
             protocol: "wss"
         };
 
@@ -147,6 +147,10 @@
         });
 
         function kirimMQTT(nilai) {
+            if (isJadwalActive) {
+                alert("Kontrol manual dikunci karena Jadwal Otomatis sedang aktif! Matikan jadwal terlebih dahulu jika ingin mengontrol secara manual.");
+                return;
+            }
             client.publish(mqttTopic, nilai);
         }
 
@@ -162,15 +166,19 @@
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             document.getElementById('liveDate').innerText = now.toLocaleDateString('id-ID', options);
 
-            // Cek pengecekan jadwal otomatis setiap detik jika diaktifkan
+            // Cek pengecekan rentang jadwal setiap detik jika diaktifkan
             if (isJadwalActive) {
-                cekLogikaJadwal(jam, menit);
+                cekRentangJadwal(now.getHours(), now.getMinutes());
             }
         }
         setInterval(updateClock, 1000);
 
         // Fitur Timer Durasi (Jam, Menit, Detik)
         function mulaiTimer() {
+            if (isJadwalActive) {
+                alert("Tidak dapat memulai timer saat jadwal otomatis aktif.");
+                return;
+            }
             if (countdownInterval) clearInterval(countdownInterval);
 
             let j = parseInt(document.getElementById('timerJam').value) || 0;
@@ -184,8 +192,7 @@
                 return;
             }
 
-            // Nyalakan lampu terlebih dahulu
-            kirimMQTT('1');
+            client.publish(mqttTopic, '1');
 
             countdownInterval = setInterval(() => {
                 if (totalDetik > 0) {
@@ -196,13 +203,13 @@
                     document.getElementById('timerInfo').innerText = `Sisa waktu nyala: ${remJ}j ${remM}m ${remD}d`;
                 } else {
                     clearInterval(countdownInterval);
-                    kirimMQTT('0'); // Matikan lampu setelah waktu habis
+                    client.publish(mqttTopic, '0');
                     document.getElementById('timerInfo').innerText = "Timer selesai, lampu dimatikan.";
                 }
             }, 1000);
         }
 
-        // Fitur Jadwal Jam Mulai - Selesai
+        // Fitur Jadwal Jam Mulai - Selesai dengan Sistem Rentang Menit
         function aktifkanJadwal() {
             const mulai = document.getElementById('jadwalMulai').value;
             const selesai = document.getElementById('jadwalSelesai').value;
@@ -213,26 +220,47 @@
             }
 
             isJadwalActive = true;
+            
+            // Nonaktifkan tombol manual agar user tidak bisa mengubah status secara manual
+            document.getElementById('btnNyala').classList.add('opacity-50', 'cursor-not-allowed');
+            document.getElementById('btnMati').classList.add('opacity-50', 'cursor-not-allowed');
+
             document.getElementById('jadwalInfo').innerText = `Jadwal aktif: ${mulai} s/d ${selesai}`;
             document.getElementById('jadwalInfo').className = "text-xs text-center text-emerald-400 font-semibold";
         }
 
         function matikanJadwal() {
             isJadwalActive = false;
+            
+            // Aktifkan kembali tombol manual
+            document.getElementById('btnNyala').classList.remove('opacity-50', 'cursor-not-allowed');
+            document.getElementById('btnMati').classList.remove('opacity-50', 'cursor-not-allowed');
+
             document.getElementById('jadwalInfo').innerText = "Jadwal otomatis nonaktif";
             document.getElementById('jadwalInfo').className = "text-xs text-center text-slate-400";
         }
 
-        function cekLogikaJadwal(jamSekarang, menitSekarang) {
-            const mulai = document.getElementById('jadwalMulai').value;
-            const selesai = document.getElementById('jadwalSelesai').value;
+        function cekRentangJadwal(jamSekarang, menitSekarang) {
+            const mulaiStr = document.getElementById('jadwalMulai').value;
+            const selesaiStr = document.getElementById('jadwalSelesai').value;
 
-            const waktuSekarangStr = `${jamSekarang}:${menitSekarang}`;
+            if (!mulaiStr || !selesaiStr) return;
 
-            if (waktuSekarangStr === mulai) {
-                kirimMQTT('1'); // Nyalakan saat jam mulai
-            } else if (waktuSekarangStr === selesai) {
-                kirimMQTT('0'); // Matikan saat jam selesai
+            // Konversi waktu ke total menit dari pukul 00:00 agar akurat dalam rentang
+            const [mJam, mMenit] = mulaiStr.split(':').map(Number);
+            const [sJam, sMenit] = selesaiStr.split(':').map(Number);
+
+            const totalMenitSekarang = (jamSekarang * 60) + menitSekarang;
+            const totalMenitMulai = (mJam * 60) + mMenit;
+            const totalMenitSelesai = (sJam * 60) + sMenit;
+
+            // Periksa apakah waktu saat ini berada di dalam rentang jadwal
+            if (totalMenitSekarang >= totalMenitMulai && totalMenitSekarang < totalMenitSelesai) {
+                // Jika masuk rentang dan lampu belum menyala, kirim perintah nyala
+                client.publish(mqttTopic, '1');
+            } else {
+                // Jika di luar rentang, matikan lampu
+                client.publish(mqttTopic, '0');
             }
         }
     </script>
