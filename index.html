@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Home IoT - Ultra Lightweight Mobile</title>
+    <title>Smart Home IoT - Multi-User Live Pro</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -94,6 +94,15 @@
                     <i class="fa-solid fa-ban"></i> Matikan Semua
                 </button>
 
+                <!-- Indikator Pengguna Lain yang Online -->
+                <div class="bg-indigo-500/10 dark:bg-indigo-950/50 border border-indigo-500/30 px-3 py-1.5 rounded-xl flex items-center space-x-2 flex-1 min-w-[130px]">
+                    <div class="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-ping shrink-0"></div>
+                    <div>
+                        <div class="text-[8px] text-indigo-500 dark:text-indigo-400 font-bold uppercase">Pengguna Aktif</div>
+                        <span id="activeUsersCount" class="font-bold text-[11px] text-indigo-700 dark:text-indigo-300 font-mono">1 Orang (Anda)</span>
+                    </div>
+                </div>
+
                 <div class="bg-slate-200/60 dark:bg-slate-900/80 px-3 py-1.5 rounded-xl flex items-center space-x-2 border border-slate-300/40 dark:border-white/5 flex-1 min-w-[100px]">
                     <div class="text-indigo-500 text-xs"><i id="wifiIcon" class="fa-solid fa-wifi-slash"></i></div>
                     <div>
@@ -132,19 +141,33 @@
         <!-- Grid 6 Kartu Lampu -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="lampuGrid"></div>
 
-        <!-- Panel Monitoring Log Aktivitas Real-Time -->
-        <div class="glass-panel p-4 sm:p-6 rounded-3xl space-y-3 shadow-lg border border-slate-200/80 dark:border-white/10">
-            <div class="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-2.5">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-rectangle-list text-indigo-500 text-sm"></i>
-                    <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-white">Monitoring Log Aktivitas</h3>
+        <!-- Panel Monitoring Log Aktivitas Real-Time & Live Users -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- Log Aktivitas -->
+            <div class="glass-panel p-4 sm:p-6 rounded-3xl space-y-3 shadow-lg border border-slate-200/80 dark:border-white/10 lg:col-span-2">
+                <div class="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-2.5">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-rectangle-list text-indigo-500 text-sm"></i>
+                        <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-white">Monitoring Log Aktivitas</h3>
+                    </div>
+                    <button onclick="clearLog()" class="text-[10px] text-slate-400 hover:text-rose-500 font-bold transition-colors">
+                        <i class="fa-solid fa-trash-can mr-1"></i> Bersihkan Log
+                    </button>
                 </div>
-                <button onclick="clearLog()" class="text-[10px] text-slate-400 hover:text-rose-500 font-bold transition-colors">
-                    <i class="fa-solid fa-trash-can mr-1"></i> Bersihkan Log
-                </button>
+                <div id="logContainer" class="bg-slate-200/50 dark:bg-slate-950/60 p-3 rounded-2xl h-36 overflow-y-auto space-y-1.5 font-mono text-[11px] border border-slate-300/40 dark:border-white/5">
+                    <div class="text-slate-400 italic">Menunggu aktivitas sistem...</div>
+                </div>
             </div>
-            <div id="logContainer" class="bg-slate-200/50 dark:bg-slate-950/60 p-3 rounded-2xl h-36 overflow-y-auto space-y-1.5 font-mono text-[11px] border border-slate-300/40 dark:border-white/5">
-                <div class="text-slate-400 italic">Menunggu aktivitas sistem...</div>
+
+            <!-- Daftar Pengguna Aktif (Live Session) -->
+            <div class="glass-panel p-4 sm:p-6 rounded-3xl space-y-3 shadow-lg border border-slate-200/80 dark:border-white/10">
+                <div class="flex items-center gap-2 border-b border-slate-200 dark:border-white/10 pb-2.5">
+                    <i class="fa-solid fa-users text-indigo-500 text-sm"></i>
+                    <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-white">Pengguna Terhubung</h3>
+                </div>
+                <div id="usersListContainer" class="bg-slate-200/50 dark:bg-slate-950/60 p-3 rounded-2xl h-36 overflow-y-auto space-y-2 font-mono text-[11px] border border-slate-300/40 dark:border-white/5">
+                    <div class="text-slate-400 italic">Memuat sesi pengguna...</div>
+                </div>
             </div>
         </div>
 
@@ -152,8 +175,12 @@
         <p id="brokerStatus" class="text-[11px] text-slate-500 dark:text-slate-400 text-center font-mono py-1">Menghubungkan ke broker...</p>
     </div>
 
-    <!-- Skrip Monitoring, Audio, & MQTT -->
+    <!-- Skrip Multi-User, Monitoring, Audio, & MQTT -->
     <script>
+        // Unique ID untuk sesi browser saat ini
+        const mySessionId = "User_" + Math.random().toString(36).substr(2, 5).toUpperCase();
+        let activeUsersMap = {};
+
         function addLog(message, type = 'info') {
             const logContainer = document.getElementById('logContainer');
             if (logContainer.children.length === 1 && logContainer.children[0].classList.contains('italic')) {
@@ -166,6 +193,7 @@
             if (type === 'success') { colorClass = 'text-emerald-600 dark:text-emerald-400 font-bold'; icon = 'fa-circle-check text-emerald-500'; }
             if (type === 'danger') { colorClass = 'text-rose-600 dark:text-rose-400 font-bold'; icon = 'fa-triangle-exclamation text-rose-500'; }
             if (type === 'warning') { colorClass = 'text-amber-600 dark:text-amber-400'; icon = 'fa-circle-exclamation text-amber-500'; }
+            if (type === 'user') { colorClass = 'text-indigo-600 dark:text-indigo-400 font-semibold'; icon = 'fa-user text-indigo-500'; }
 
             const logItem = document.createElement('div');
             logItem.className = `flex items-center gap-2 ${colorClass} border-b border-slate-300/20 dark:border-white/5 pb-1 animate-fadeIn`;
@@ -179,6 +207,34 @@
 
         function clearLog() {
             document.getElementById('logContainer').innerHTML = '<div class="text-slate-400 italic">Log dibersihkan...</div>';
+        }
+
+        function updateActiveUsersUI() {
+            const container = document.getElementById('usersListContainer');
+            container.innerHTML = '';
+            let keys = Object.keys(activeUsersMap);
+            
+            document.getElementById('activeCountUsers')?.innerText; // placeholder
+            document.getElementById('activeUsersCount').innerText = `${keys.length} Orang Online`;
+
+            if (keys.length === 0) {
+                container.innerHTML = '<div class="text-slate-400 italic">Tidak ada pengguna lain.</div>';
+                return;
+            }
+
+            keys.forEach(uid => {
+                let isMe = (uid === mySessionId);
+                let userItem = document.createElement('div');
+                userItem.className = `flex items-center justify-between p-1.5 rounded-xl bg-slate-200/80 dark:bg-slate-900 border border-slate-300/40 dark:border-white/5`;
+                userItem.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></div>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">${uid} ${isMe ? '(Anda)' : ''}</span>
+                    </div>
+                    <span class="text-[9px] text-slate-400 font-mono">Aktif</span>
+                `;
+                container.appendChild(userItem);
+            });
         }
 
         function playClickSound() {
@@ -242,11 +298,9 @@
             if (html.classList.contains('dark')) {
                 html.classList.remove('dark'); localStorage.setItem('theme', 'light');
                 themeIcon.className = "fa-solid fa-sun text-sm text-amber-500";
-                addLog("Tema diubah ke Light Mode", "info");
             } else {
                 html.classList.add('dark'); localStorage.setItem('theme', 'dark');
                 themeIcon.className = "fa-solid fa-moon text-sm text-yellow-400";
-                addLog("Tema diubah ke Dark Mode", "info");
             }
         }
 
@@ -261,6 +315,7 @@
         const mqttPort = 8884; 
         const mqttStatusTopic = "esp32s3/status/galang";
         const mqttRssiTopic = "esp32s3/rssi/galang";
+        const mqttPresenceTopic = "smart_home/presence/galang"; // Topik khusus deteksi user online
         
         const lampuList = [
             { id: 1, nama: "Lampu 1 (Utama)", topik: "esp32s3/lampu1/galang", icon: "fa-lightbulb", watt: 10 },
@@ -333,12 +388,34 @@
         });
 
         const mqttOptions = {
-            clientId: "WebClient_" + Math.random().toString(16).substr(2, 8),
+            clientId: "WebClient_" + mySessionId,
             username: "galanglinduaji", password: "galangganteng", protocol: "wss"
         };
 
         const client = mqtt.connect(`wss://${mqttHost}:${mqttPort}/mqtt`, mqttOptions);
         let espTimeout = null;
+
+        // Kirim sinyal presence berkala agar pengguna lain tahu kita online
+        function sendPresenceHeartbeat() {
+            if (client.connected) {
+                client.publish(mqttPresenceTopic, mySessionId, { qos: 0 });
+            }
+        }
+        setInterval(sendPresenceHeartbeat, 3000);
+
+        // Cek berkala pengguna yang tidak aktif (timeout 10 detik)
+        setInterval(() => {
+            let now = Date.now();
+            let changed = false;
+            for (let uid in activeUsersMap) {
+                if (now - activeUsersMap[uid] > 10000) {
+                    delete activeUsersMap[uid];
+                    changed = true;
+                    addLog(`Pengguna ${uid} meninggalkan sesi`, "warning");
+                }
+            }
+            if (changed) updateActiveUsersUI();
+        }, 3000);
 
         function updateStatsAndPower() {
             let activeCount = 0, totalWatt = 0;
@@ -351,15 +428,27 @@
 
         function kirimGlobal(nilai) {
             let actionName = nilai === '1' ? 'Menyalakan SEMUA lampu' : 'Mematikan SEMUA lampu';
-            addLog(actionName, 'warning');
+            addLog(`${mySessionId}: ${actionName}`, 'user');
             lampuList.forEach(l => { if (!jadwalStates[l.topik]) client.publish(l.topik, nilai); });
+        }
+
+        function kirimMQTT(topik, nilai) {
+            let lampuObj = lampuList.find(l => l.topik === topik);
+            if (jadwalStates[topik]) {
+                alert(`Kontrol manual ${lampuObj.nama} dikunci karena Jadwal Otomatis aktif!`);
+                return;
+            }
+            client.publish(topik, nilai);
         }
 
         client.on("connect", () => {
             document.getElementById("brokerStatus").innerText = "Status: Terhubung ke MQTT Cloud (WSS)";
-            addLog("Berhasil terhubung ke MQTT Broker Cloud", "success");
-            client.subscribe(mqttStatusTopic); client.subscribe(mqttRssiTopic);
+            addLog(`Sesi Anda dimulai sebagai [${mySessionId}]`, "success");
+            client.subscribe(mqttStatusTopic); 
+            client.subscribe(mqttRssiTopic);
+            client.subscribe(mqttPresenceTopic);
             lampuList.forEach(l => client.subscribe(l.topik));
+            sendPresenceHeartbeat();
         });
 
         client.on("error", (err) => {
@@ -369,6 +458,19 @@
 
         client.on("message", (topic, payload) => {
             let message = payload.toString();
+
+            // Deteksi Kehadiran Pengguna Lain
+            if (topic === mqttPresenceTopic) {
+                let uid = message;
+                let isNew = !activeUsersMap[uid];
+                activeUsersMap[uid] = Date.now();
+                updateActiveUsersUI();
+                if (isNew && uid !== mySessionId) {
+                    addLog(`Pengguna baru terdeteksi online: ${uid}`, "user");
+                }
+                return;
+            }
+
             if (topic === mqttStatusTopic && message === "ONLINE") {
                 let espDot = document.getElementById('espDot');
                 let espStatus = document.getElementById('espStatus');
@@ -398,13 +500,13 @@
                         dotDiv.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-breathing';
                         iconBox.className = "w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-md shadow-emerald-500/40 shrink-0 animate-breathing";
                         card.classList.add('card-active');
-                        addLog(`${l.nama} menyala`, "success");
+                        addLog(`${l.nama} dinyalakan`, "success");
                     } else {
                         textSpan.innerText = 'MATI'; textSpan.className = 'font-extrabold text-[10px] text-slate-400 uppercase';
                         dotDiv.className = 'w-2 h-2 rounded-full bg-slate-400';
                         iconBox.className = "w-10 h-10 rounded-xl bg-slate-200/80 dark:bg-slate-800/80 flex items-center justify-center text-slate-600 dark:text-slate-400 shadow-inner shrink-0";
                         card.classList.remove('card-active');
-                        addLog(`${l.nama} mati`, "info");
+                        addLog(`${l.nama} dimatikan`, "info");
                     }
                 }
             });
@@ -425,7 +527,7 @@
             if (timerIntervals[id]) clearInterval(timerIntervals[id]);
             let detik = parseInt(document.getElementById(`timerSec_${id}`).value) || 10;
             client.publish(topik, '1');
-            addLog(`Timer ${lampuObj.nama} dimulai selama ${detik} detik`, "warning");
+            addLog(`Timer ${lampuObj.nama} (${detik}s)`, "warning");
 
             timerIntervals[id] = setInterval(() => {
                 if (detik > 0) {
@@ -433,7 +535,6 @@
                 } else {
                     clearInterval(timerIntervals[id]); client.publish(topik, '0');
                     document.getElementById(`timerInfo_${id}`).innerText = "Selesai";
-                    addLog(`Timer ${lampuObj.nama} selesai (otomatis mati)`, "info");
                 }
             }, 1000);
         }
@@ -444,14 +545,14 @@
             if (!mulai || !selesai) return alert("Atur jam mulai & selesai!");
             jadwalStates[topik] = true;
             document.getElementById(`jadwalInfo_${id}`).innerText = `Aktif (${mulai}-${selesai})`;
-            addLog(`Jadwal otomatis ${lampuObj.nama} diaktifkan (${mulai} - ${selesai})`, "success");
+            addLog(`Jadwal ${lampuObj.nama} aktif (${mulai}-${selesai})`, "success");
         }
 
         function matikanJadwal(id) {
             let lampuObj = lampuList.find(l => l.id === id);
             jadwalStates[lampuObj.topik] = false;
             document.getElementById(`jadwalInfo_${id}`).innerText = "Nonaktif";
-            addLog(`Jadwal otomatis ${lampuObj.nama} dimatikan`, "warning");
+            addLog(`Jadwal ${lampuObj.nama} dimatikan`, "warning");
         }
 
         function cekRentangJadwal(id, topik, jam, menit) {
