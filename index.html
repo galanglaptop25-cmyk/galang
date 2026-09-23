@@ -115,7 +115,7 @@
             <!-- Panel Feedback Teks Suara Live -->
             <div id="voiceFeedbackBox" class="hidden bg-indigo-500/10 border border-indigo-500/30 px-3 py-2 rounded-2xl flex items-center gap-3 transition-all">
                 <i class="fa-solid fa-waveform text-indigo-500 animate-pulse text-sm"></i>
-                <div class="text-xs font-mono text-indigo-600 dark:text-indigo-300 truncate" id="voiceTranscriptText">Mendengarkan suara Anda... (Ucapkan: "Nyalakan lampu 1")</div>
+                <div class="text-xs font-mono text-indigo-600 dark:text-indigo-300 truncate" id="voiceTranscriptText">Mendengarkan suara Anda... (Contoh: "Matikan lampu 1")</div>
             </div>
 
             <!-- Tombol Master Tunggal & Bar Status -->
@@ -338,7 +338,7 @@
             deviceHours[l.id] = savedSec;
         });
 
-        // --- KONTROL SUARA PRESISI (DIPERBAIKI) ---
+        // --- KONTROL SUARA PRESISI TINGGI (DIPERBAIKI) ---
         let recognition = null;
         let isListening = false;
 
@@ -366,7 +366,7 @@
                         btnVoice.classList.add('listening-mic');
                         micIcon.className = "fa-solid fa-microphone-lines text-sm fa-bounce";
                         feedbackBox.classList.remove('hidden');
-                        transcriptText.innerText = "Mendengarkan... (Contoh: 'Matikan lampu utama' atau 'Nyalakan lampu 2')";
+                        transcriptText.innerText = "Mendengarkan... (Contoh: 'Matikan lampu utama')";
                         addLog("Voice: Mendengarkan...", "user");
                     };
 
@@ -423,7 +423,7 @@
         function prosesPerintahSuara(text) {
             addLog(`Suara diterima: "${text}"`, "user");
 
-            // 1. Cek Perintah Global (Harus mengandung kata "semua")
+            // 1. Cek Perintah Global (Harus mutlak mengandung kata "semua")
             if (text.includes("semua") || text.includes("all")) {
                 if (text.includes("nyala") || text.includes("hidup") || text.includes("on")) {
                     lampuList.forEach(l => { if (!jadwalStates[l.topik]) publishWithQueue(l.topik, '1'); });
@@ -437,36 +437,45 @@
                 }
             }
 
-            // 2. Cek Perintah Spesifik Per Lampu
-            let matched = false;
+            // 2. Tentukan status target (Nyala / Mati)
             let targetState = null;
-
             if (text.includes("nyala") || text.includes("hidup") || text.includes("on")) {
                 targetState = '1';
             } else if (text.includes("mati") || text.includes("off")) {
                 targetState = '0';
             }
 
-            if (targetState !== null) {
-                lampuList.forEach(l => {
-                    let namaLampuLower = l.nama.toLowerCase();
-                    // Cocokkan berdasarkan nomor ID (misal: "1", "satu") atau kata spesifik di nama lampu (misal: "utama", "kamar", "dapur")
-                    let keywordMatch = text.includes(`lampu ${l.id}`) || text.includes(`${l.id}`) || namaLampuLower.split(' ').some(word => word.length > 2 && text.includes(word));
-
-                    if (keywordMatch) {
-                        if (jadwalStates[l.topik]) {
-                            alert(translations[currentLang].alertManualLock);
-                            return;
-                        }
-                        publishWithQueue(l.topik, targetState);
-                        addLog(`Voice: ${targetState === '1' ? 'Menyalakan' : 'Mematikan'} ${l.nama}`, "success");
-                        matched = true;
-                    }
-                });
+            if (targetState === null) {
+                addLog(`Voice: Status perintah tidak jelas ("${text}")`, "warning");
+                return;
             }
 
+            // 3. Cek Spesifik Per Lampu (Pencocokan Ketat Berdasarkan ID atau Nama Ruangan)
+            let matched = false;
+            lampuList.forEach(l => {
+                let namaLower = l.nama.toLowerCase(); // contoh: "lampu 1 (utama)" atau "lampu 2 (kamar)"
+                let idStr = l.id.toString();
+                
+                // Pisahkan kata kunci spesifik dari nama lampu (misal: "utama", "kamar", "dapur", "teras", "mandi", "gudang")
+                let keywords = namaLower.replace(/[^a-z0-9]/g, ' ').split(/\s+/).filter(w => w.length > 2 && w !== 'lampu');
+
+                // Cek apakah teks suara mengandung nomor lampu (cth: "1") atau kata kunci unik ruangan (cth: "utama")
+                let isIdMatched = text.includes(idStr) || text.includes(`lampu ${idStr}`);
+                let isKeywordMatched = keywords.some(kw => text.includes(kw));
+
+                if (isIdMatched || isKeywordMatched) {
+                    if (jadwalStates[l.topik]) {
+                        alert(translations[currentLang].alertManualLock);
+                        return;
+                    }
+                    publishWithQueue(l.topik, targetState);
+                    addLog(`Voice: ${targetState === '1' ? 'Menyalakan' : 'Mematikan'} ${l.nama}`, "success");
+                    matched = true;
+                }
+            });
+
             if (!matched) {
-                addLog(`Voice: Perintah "${text}" tidak cocok dengan perangkat manapun.`, "warning");
+                addLog(`Voice: Lampu tidak ditemukan dalam perintah "${text}"`, "warning");
             }
         }
         // --------------------------------------------------
