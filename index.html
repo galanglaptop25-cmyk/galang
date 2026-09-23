@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Home IoT - 6 Lampu Dashboard Pro</title>
+    <title>Smart Home IoT - Ultimate Dashboard Pro</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -14,68 +14,172 @@
     <!-- HiveMQ MQTT Client Library -->
     <script src="https://unpkg.com/mqtt@4.3.7/dist/mqtt.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        .bg-grid-pattern {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        @keyframes breathingGlow {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.6)); }
+            50% { transform: scale(1.06); filter: drop-shadow(0 0 22px rgba(16, 185, 129, 0.95)); }
+        }
+        .animate-breathing { animation: breathingGlow 2.5s infinite ease-in-out; }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float { animation: floatSlow 4s infinite ease-in-out; }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(35px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+        }
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(35px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+        }
+        
+        .card-active {
+            border-color: rgba(16, 185, 129, 0.6) !important;
+            box-shadow: 0 20px 40px -10px rgba(16, 185, 129, 0.3) !important;
+        }
     </style>
 </head>
-<body class="bg-slate-100 dark:bg-slate-950 dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))] min-h-screen text-slate-800 dark:text-slate-100 p-4 md:p-8 transition-colors duration-300">
+<body class="bg-slate-100 dark:bg-slate-950 bg-grid-pattern min-h-screen text-slate-800 dark:text-slate-100 p-4 md:p-8 transition-colors duration-500 relative overflow-x-hidden">
 
-    <div class="max-w-6xl mx-auto space-y-6">
+    <!-- Efek Cahaya Ambient di Latar Belakang -->
+    <div class="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-600/15 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-violet-500/10 dark:bg-purple-600/15 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div class="max-w-6xl mx-auto space-y-6 relative z-10">
         
-        <!-- Header Utama & Jam -->
-        <div class="bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200 dark:border-white/10 p-6 rounded-[2rem] shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
-                <span class="inline-flex items-center gap-1.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider border border-indigo-500/20">
-                    <i class="fa-solid fa-cloud text-[10px]"></i> HiveMQ Cloud (6 Lampu)
-                </span>
-                <h1 class="text-2xl font-bold mt-2 text-slate-900 dark:text-white">Smart Home Master Control</h1>
+        <!-- Header Utama & Kontrol Global -->
+        <div class="glass-panel p-6 md:p-8 rounded-[2.5rem] flex flex-col lg:flex-row justify-between items-center gap-6 transition-all duration-300">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-fuchsia-600 flex items-center justify-center text-white shadow-xl shadow-indigo-500/30 animate-float">
+                    <i class="fa-solid fa-house-signal text-2xl"></i>
+                </div>
+                <div>
+                    <span class="inline-flex items-center gap-1.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-extrabold px-3.5 py-1 rounded-full uppercase tracking-widest border border-indigo-500/20 shadow-sm">
+                        <i class="fa-solid fa-bolt text-[9px] animate-bounce"></i> HiveMQ Cloud Pro
+                    </span>
+                    <h1 class="text-2xl md:text-3xl font-extrabold mt-1.5 text-slate-900 dark:text-white tracking-tight">Smart Home Automation</h1>
+                </div>
             </div>
 
-            <div class="flex items-center gap-6">
+            <div class="flex flex-wrap items-center justify-end gap-3.5">
+                <!-- Tombol Master Global -->
+                <div class="flex gap-2">
+                    <button onclick="playClickSound(); kirimGlobal('1')" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-95 text-white font-bold py-2.5 px-4 rounded-2xl text-xs transition-all shadow-md shadow-emerald-900/20 flex items-center gap-1.5">
+                        <i class="fa-solid fa-power-off"></i> Nyalakan Semua
+                    </button>
+                    <button onclick="playClickSound(); kirimGlobal('0')" class="bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 active:scale-95 text-white font-bold py-2.5 px-4 rounded-2xl text-xs transition-all shadow-md shadow-rose-900/20 flex items-center gap-1.5">
+                        <i class="fa-solid fa-ban"></i> Matikan Semua
+                    </button>
+                </div>
+
+                <!-- Indikator Monitoring Daya Virtual -->
+                <div class="bg-slate-200/70 dark:bg-slate-900/80 border border-slate-300/50 dark:border-white/5 px-4 py-2 rounded-2xl flex items-center space-x-3 shadow-inner">
+                    <div class="w-3 h-3 rounded-full bg-amber-500 animate-pulse"></div>
+                    <div>
+                        <div class="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Konsumsi Daya</div>
+                        <span id="powerUsage" class="font-bold text-xs text-amber-600 dark:text-amber-400 font-mono">0 W</span>
+                    </div>
+                </div>
+
+                <!-- Statistik Ringkasan Lampu Aktif -->
+                <div class="bg-slate-200/70 dark:bg-slate-900/80 border border-slate-300/50 dark:border-white/5 px-4 py-2 rounded-2xl flex items-center space-x-3 shadow-inner">
+                    <div class="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></div>
+                    <div>
+                        <div class="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Lampu Nyala</div>
+                        <span id="activeCount" class="font-bold text-xs text-slate-700 dark:text-slate-200 font-mono">0 / 6 Aktif</span>
+                    </div>
+                </div>
+
+                <!-- Indikator Ping -->
+                <div class="bg-slate-200/70 dark:bg-slate-900/80 border border-slate-300/50 dark:border-white/5 px-4 py-2 rounded-2xl flex items-center space-x-3 shadow-inner">
+                    <div id="pingDot" class="w-3 h-3 rounded-full bg-slate-400"></div>
+                    <div>
+                        <div class="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Ping Latency</div>
+                        <span id="pingText" class="font-bold text-xs text-slate-700 dark:text-slate-200 font-mono">Menghitung...</span>
+                    </div>
+                </div>
+
                 <!-- Status ESP32 -->
-                <div class="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 px-4 py-2 rounded-2xl flex items-center space-x-2.5 shadow-inner">
+                <div class="bg-slate-200/70 dark:bg-slate-900/80 border border-slate-300/50 dark:border-white/5 px-4 py-2 rounded-2xl flex items-center space-x-3 shadow-inner">
                     <div id="espDot" class="w-3.5 h-3.5 rounded-full bg-rose-500 animate-pulse"></div>
                     <div>
-                        <div class="text-[10px] text-slate-400 font-medium">ESP32 S3</div>
+                        <div class="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">ESP32 S3</div>
                         <span id="espStatus" class="font-bold text-xs text-rose-500 dark:text-rose-400 uppercase tracking-wide">Offline</span>
                     </div>
                 </div>
 
-                <!-- Jam -->
-                <div class="text-right">
-                    <div id="liveClock" class="text-xl font-bold font-mono text-indigo-600 dark:text-indigo-400 tracking-tight">00:00:00</div>
-                    <div id="liveDate" class="text-xs text-slate-500 dark:text-slate-400">Memuat tanggal...</div>
+                <!-- Jam Real-Time -->
+                <div class="text-right px-2">
+                    <div id="liveClock" class="text-xl font-extrabold font-mono text-indigo-600 dark:text-indigo-400 tracking-tight">00:00:00</div>
+                    <div id="liveDate" class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">Memuat tanggal...</div>
                 </div>
 
                 <!-- Toggle Tema -->
-                <button onclick="toggleTheme()" class="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-yellow-400 hover:scale-105 transition-all shadow-sm">
-                    <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
+                <button onclick="playClickSound(); toggleTheme()" class="w-11 h-11 rounded-2xl bg-slate-200/80 dark:bg-white/10 border border-slate-300/50 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-yellow-400 hover:scale-110 active:scale-95 transition-all shadow-lg">
+                    <i id="themeIcon" class="fa-solid fa-moon text-base"></i>
                 </button>
             </div>
         </div>
 
         <!-- Grid 6 Kartu Lampu -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="lampuGrid">
-            <!-- JavaScript akan merender 6 kartu lampu secara otomatis di sini -->
-        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="lampuGrid"></div>
 
         <!-- Footer Info Broker -->
-        <p id="brokerStatus" class="text-xs text-slate-500 text-center font-mono">Menghubungkan ke broker...</p>
+        <p id="brokerStatus" class="text-xs text-slate-500 dark:text-slate-400 text-center font-mono py-2">Menghubungkan ke broker...</p>
     </div>
 
     <!-- Skrip Logika & MQTT -->
     <script>
+        // Web Audio API untuk Efek Suara Interaktif
+        function playClickSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(600, audioCtx.currentTime); // Frekuensi nada klik
+                oscillator.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.05);
+
+                gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.05);
+            } catch (e) {
+                // AudioContext dicegah browser sebelum interaksi pertama, abaikan aman
+            }
+        }
+
         function toggleTheme() {
             const html = document.documentElement;
             const themeIcon = document.getElementById('themeIcon');
             if (html.classList.contains('dark')) {
                 html.classList.remove('dark');
                 localStorage.setItem('theme', 'light');
-                themeIcon.className = "fa-solid fa-sun text-sm text-amber-500";
+                themeIcon.className = "fa-solid fa-sun text-base text-amber-500";
             } else {
                 html.classList.add('dark');
                 localStorage.setItem('theme', 'dark');
-                themeIcon.className = "fa-solid fa-moon text-sm text-yellow-400";
+                themeIcon.className = "fa-solid fa-moon text-base text-yellow-400";
             }
         }
 
@@ -84,10 +188,10 @@
             const themeIcon = document.getElementById('themeIcon');
             if (savedTheme === 'light') {
                 document.documentElement.classList.remove('dark');
-                if(themeIcon) themeIcon.className = "fa-solid fa-sun text-sm text-amber-500";
+                if(themeIcon) themeIcon.className = "fa-solid fa-sun text-base text-amber-500";
             } else {
                 document.documentElement.classList.add('dark');
-                if(themeIcon) themeIcon.className = "fa-solid fa-moon text-sm text-yellow-400";
+                if(themeIcon) themeIcon.className = "fa-solid fa-moon text-base text-yellow-400";
             }
         })();
 
@@ -96,66 +200,75 @@
         const mqttStatusTopic = "esp32s3/status/galang";
         
         const lampuList = [
-            { id: 1, nama: "Lampu 1 (Utama)", topik: "esp32s3/lampu1/galang" },
-            { id: 2, nama: "Lampu 2 (Kamar Tidur)", topik: "esp32s3/lampu2/galang" },
-            { id: 3, nama: "Lampu 3 (Dapur)", topik: "esp32s3/lampu3/galang" },
-            { id: 4, nama: "Lampu 4 (Teras)", topik: "esp32s3/lampu4/galang" },
-            { id: 5, nama: "Lampu 5 (Kamar Mandi)", topik: "esp32s3/lampu5/galang" },
-            { id: 6, nama: "Lampu 6 (Gudang)", topik: "esp32s3/lampu6/galang" }
+            { id: 1, nama: "Lampu 1 (Utama)", topik: "esp32s3/lampu1/galang", icon: "fa-lightbulb", watt: 10 },
+            { id: 2, nama: "Lampu 2 (Kamar Tidur)", topik: "esp32s3/lampu2/galang", icon: "fa-bed", watt: 10 },
+            { id: 3, nama: "Lampu 3 (Dapur)", topik: "esp32s3/lampu3/galang", icon: "fa-kitchen-set", watt: 15 },
+            { id: 4, nama: "Lampu 4 (Teras)", topik: "esp32s3/lampu4/galang", icon: "fa-door-open", watt: 15 },
+            { id: 5, nama: "Lampu 5 (Kamar Mandi)", topik: "esp32s3/lampu5/galang", icon: "fa-bath", watt: 10 },
+            { id: 6, nama: "Lampu 6 (Gudang)", topik: "esp32s3/lampu6/galang", icon: "fa-box-archive", watt: 10 }
         ];
 
         let stateLampu = {};
         let timerIntervals = {};
         let jadwalStates = {};
 
-        // Render HTML Kartu Lampu secara dinamis
         const container = document.getElementById('lampuGrid');
         lampuList.forEach(lampu => {
             stateLampu[lampu.topik] = '0';
             jadwalStates[lampu.topik] = false;
 
             container.innerHTML += `
-                <div class="bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200 dark:border-white/10 p-5 rounded-[2rem] shadow-xl space-y-4">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-bold text-sm text-slate-800 dark:text-white">${lampu.nama}</h3>
-                        <div class="flex items-center space-x-2 bg-slate-50 dark:bg-slate-900/60 px-3 py-1 rounded-xl border border-slate-200 dark:border-white/5">
+                <div id="card_${lampu.id}" class="glass-panel p-6 rounded-[2.5rem] space-y-4 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-slate-200/80 dark:border-white/10 group relative overflow-hidden">
+                    <div id="bgGlow_${lampu.id}" class="absolute -right-12 -top-12 w-36 h-36 bg-indigo-500/10 rounded-full blur-3xl transition-all duration-700 pointer-events-none"></div>
+
+                    <div class="flex justify-between items-center relative z-10">
+                        <div class="flex items-center gap-3.5">
+                            <div id="iconBox_${lampu.id}" class="w-12 h-12 rounded-2xl bg-slate-200/80 dark:bg-slate-800/80 flex items-center justify-center text-slate-600 dark:text-slate-400 transition-all duration-500 shadow-inner">
+                                <i class="fa-solid ${lampu.icon} text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-extrabold text-sm text-slate-900 dark:text-white tracking-tight">${lampu.nama}</h3>
+                                <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Daya: ${lampu.watt} Watt</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 bg-slate-200/70 dark:bg-slate-900/80 px-3.5 py-1.5 rounded-2xl border border-slate-300/40 dark:border-white/5 shadow-inner">
                             <div id="dot_${lampu.id}" class="w-3 h-3 rounded-full bg-slate-400"></div>
-                            <span id="text_${lampu.id}" class="font-bold text-[11px] text-slate-500 dark:text-slate-400 uppercase">MATI</span>
+                            <span id="text_${lampu.id}" class="font-extrabold text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">MATI</span>
                         </div>
                     </div>
 
                     <!-- Tombol Manual -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <button id="btnNyala_${lampu.id}" onclick="kirimMQTT('${lampu.topik}', '1')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 px-3 rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-power-off"></i> NYALA
+                    <div class="grid grid-cols-2 gap-3 pt-1 relative z-10">
+                        <button id="btnNyala_${lampu.id}" onclick="playClickSound(); kirimMQTT('${lampu.topik}', '1')" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-95 text-white font-bold py-3.5 px-3 rounded-2xl text-xs transition-all duration-300 shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2 border border-emerald-400/20">
+                            <i class="fa-solid fa-power-off text-emerald-200"></i> NYALAKAN
                         </button>
-                        <button id="btnMati_${lampu.id}" onclick="kirimMQTT('${lampu.topik}', '0')" class="bg-rose-600 hover:bg-rose-500 text-white font-semibold py-2.5 px-3 rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-ban"></i> MATI
+                        <button id="btnMati_${lampu.id}" onclick="playClickSound(); kirimMQTT('${lampu.topik}', '0')" class="bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 active:scale-95 text-white font-bold py-3.5 px-3 rounded-2xl text-xs transition-all duration-300 shadow-lg shadow-rose-900/30 flex items-center justify-center gap-2 border border-rose-400/20">
+                            <i class="fa-solid fa-ban text-rose-200"></i> MATIKAN
                         </button>
                     </div>
 
                     <!-- Timer Durasi -->
-                    <div class="bg-slate-50 dark:bg-slate-900/50 p-3.5 rounded-xl border border-slate-200 dark:border-white/5 space-y-2">
-                        <span class="text-[10px] font-semibold text-indigo-600 dark:text-indigo-300 uppercase tracking-wider block"><i class="fa-solid fa-stopwatch"></i> Timer Durasi (Detik)</span>
+                    <div class="bg-slate-200/50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-300/30 dark:border-white/5 space-y-2.5 relative z-10 shadow-inner">
+                        <span class="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest block"><i class="fa-solid fa-stopwatch mr-1"></i> Timer Durasi (Detik)</span>
                         <div class="flex gap-2">
-                            <input type="number" id="timerSec_${lampu.id}" min="1" value="10" class="w-full p-2 rounded-lg text-center bg-white dark:bg-slate-900 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 font-mono text-xs">
-                            <button onclick="mulaiTimer(${lampu.id}, '${lampu.topik}')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg text-xs font-semibold">Mulai</button>
+                            <input type="number" id="timerSec_${lampu.id}" min="1" value="10" class="w-full p-2.5 rounded-xl text-center bg-white dark:bg-slate-900 text-slate-800 dark:text-white border border-slate-300 dark:border-slate-700 font-mono text-xs focus:outline-none focus:border-indigo-500 transition-colors shadow-sm">
+                            <button onclick="playClickSound(); mulaiTimer(${lampu.id}, '${lampu.topik}')" class="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-900/20">Mulai</button>
                         </div>
-                        <div id="timerInfo_${lampu.id}" class="text-[10px] text-center text-slate-500 dark:text-slate-400 font-mono">Nonaktif</div>
+                        <div id="timerInfo_${lampu.id}" class="text-[11px] text-center text-slate-500 dark:text-slate-400 font-mono font-medium">Nonaktif</div>
                     </div>
 
                     <!-- Jadwal Otomatis -->
-                    <div class="bg-slate-50 dark:bg-slate-900/50 p-3.5 rounded-xl border border-slate-200 dark:border-white/5 space-y-2">
-                        <span class="text-[10px] font-semibold text-indigo-600 dark:text-indigo-300 uppercase tracking-wider block"><i class="fa-regular fa-calendar-days"></i> Jadwal Otomatis</span>
+                    <div class="bg-slate-200/50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-300/30 dark:border-white/5 space-y-2.5 relative z-10 shadow-inner">
+                        <span class="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest block"><i class="fa-regular fa-calendar-days mr-1"></i> Jadwal Otomatis</span>
                         <div class="grid grid-cols-2 gap-2">
-                            <input type="time" id="mulai_${lampu.id}" class="p-1.5 rounded-lg bg-white dark:bg-slate-900 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 text-center text-xs font-mono">
-                            <input type="time" id="selesai_${lampu.id}" class="p-1.5 rounded-lg bg-white dark:bg-slate-900 text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 text-center text-xs font-mono">
+                            <input type="time" id="mulai_${lampu.id}" class="p-2 rounded-xl bg-white dark:bg-slate-900 text-slate-800 dark:text-white border border-slate-300 dark:border-slate-700 text-center text-xs font-mono focus:outline-none focus:border-indigo-500 shadow-sm">
+                            <input type="time" id="selesai_${lampu.id}" class="p-2 rounded-xl bg-white dark:bg-slate-900 text-slate-800 dark:text-white border border-slate-300 dark:border-slate-700 text-center text-xs font-mono focus:outline-none focus:border-indigo-500 shadow-sm">
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="aktifkanJadwal(${lampu.id}, '${lampu.topik}')" class="flex-1 bg-emerald-600 text-white py-1.5 rounded-lg text-[11px] font-semibold">Aktifkan</button>
-                            <button onclick="matikanJadwal(${lampu.id})" class="flex-1 bg-rose-600 text-white py-1.5 rounded-lg text-[11px] font-semibold">Matikan</button>
+                            <button onclick="playClickSound(); aktifkanJadwal(${lampu.id}, '${lampu.topik}')" class="flex-1 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white py-2.5 rounded-xl text-[11px] font-bold transition-all shadow-md shadow-emerald-900/20">Aktifkan</button>
+                            <button onclick="playClickSound(); matikanJadwal(${lampu.id})" class="flex-1 bg-rose-600 hover:bg-rose-500 active:scale-95 text-white py-2.5 rounded-xl text-[11px] font-bold transition-all shadow-md shadow-rose-900/20">Matikan</button>
                         </div>
-                        <div id="jadwalInfo_${lampu.id}" class="text-[10px] text-center text-slate-500 dark:text-slate-400 font-mono">Nonaktif</div>
+                        <div id="jadwalInfo_${lampu.id}" class="text-[11px] text-center text-slate-500 dark:text-slate-400 font-mono font-medium">Nonaktif</div>
                     </div>
                 </div>
             `;
@@ -172,10 +285,62 @@
         const client = mqtt.connect(brokerUrl, mqttOptions);
         let espTimeout = null;
 
+        function updateStatsAndPower() {
+            let activeCount = 0;
+            let totalWatt = 0;
+
+            lampuList.forEach(l => {
+                if (stateLampu[l.topik] === '1') {
+                    activeCount++;
+                    totalWatt += l.watt;
+                }
+            });
+
+            document.getElementById('activeCount').innerText = `${activeCount} / 6 Aktif`;
+            document.getElementById('powerUsage').innerText = `${totalWatt} W`;
+        }
+
+        function kirimGlobal(nilai) {
+            lampuList.forEach(l => {
+                if (!jadwalStates[l.topik]) {
+                    client.publish(l.topik, nilai);
+                }
+            });
+        }
+
+        function checkPing() {
+            const start = Date.now();
+            if (client.connected) {
+                client.publish("esp32s3/ping/galang", "ping", { qos: 0 }, () => {
+                    const latency = Date.now() - start;
+                    let pingText = document.getElementById('pingText');
+                    let pingDot = document.getElementById('pingDot');
+                    
+                    pingText.innerText = latency + " ms";
+                    if (latency < 150) {
+                        pingDot.className = "w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]";
+                    } else if (latency < 400) {
+                        pingDot.className = "w-3 h-3 rounded-full bg-amber-500";
+                    } else {
+                        pingDot.className = "w-3 h-3 rounded-full bg-rose-500";
+                    }
+                });
+            } else {
+                document.getElementById('pingText').innerText = "Terputus";
+                document.getElementById('pingDot').className = "w-3 h-3 rounded-full bg-rose-500 animate-pulse";
+            }
+        }
+        setInterval(checkPing, 4000);
+
         client.on("connect", () => {
-            document.getElementById("brokerStatus").innerText = "Status: Terhubung ke MQTT Cloud (Aman)";
+            document.getElementById("brokerStatus").innerText = "Status: Terhubung ke MQTT Cloud secara Aman (Encrypted WSS)";
             client.subscribe(mqttStatusTopic);
             lampuList.forEach(l => client.subscribe(l.topik));
+            checkPing();
+        });
+
+        client.on("error", (err) => {
+            document.getElementById("brokerStatus").innerText = "Status: Gagal Terhubung ke Broker";
         });
 
         client.on("message", (topic, payload) => {
@@ -185,7 +350,7 @@
                 let espDot = document.getElementById('espDot');
                 let espStatus = document.getElementById('espStatus');
                 if (message === "ONLINE") {
-                    espDot.className = "w-3.5 h-3.5 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]";
+                    espDot.className = "w-3.5 h-3.5 rounded-full bg-emerald-500 shadow-[0_0_14px_#10b981]";
                     espStatus.innerText = "Online";
                     espStatus.className = "font-bold text-xs text-emerald-500 dark:text-emerald-400 uppercase tracking-wide";
                     clearTimeout(espTimeout);
@@ -198,18 +363,28 @@
                     stateLampu[l.topik] = message;
                     let textSpan = document.getElementById(`text_${l.id}`);
                     let dotDiv = document.getElementById(`dot_${l.id}`);
+                    let iconBox = document.getElementById(`iconBox_${l.id}`);
+                    let card = document.getElementById(`card_${l.id}`);
+                    let bgGlow = document.getElementById(`bgGlow_${l.id}`);
                     
                     if (message === '1') {
                         textSpan.innerText = 'MENYALA';
-                        textSpan.className = 'font-bold text-[11px] text-emerald-500 dark:text-emerald-400 uppercase';
-                        dotDiv.className = 'w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] animate-none';
+                        textSpan.className = 'font-extrabold text-[11px] text-emerald-500 dark:text-emerald-400 uppercase tracking-wider';
+                        dotDiv.className = 'w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_16px_#10b981] animate-breathing';
+                        iconBox.className = "w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white transition-all duration-500 shadow-lg shadow-emerald-500/50 animate-breathing";
+                        card.classList.add('card-active');
+                        bgGlow.className = "absolute -right-12 -top-12 w-36 h-36 bg-emerald-500/20 rounded-full blur-3xl transition-all duration-700 pointer-events-none";
                     } else {
                         textSpan.innerText = 'MATI';
-                        textSpan.className = 'font-bold text-[11px] text-rose-500 dark:text-rose-400 uppercase';
+                        textSpan.className = 'font-extrabold text-[11px] text-rose-500 dark:text-rose-400 uppercase tracking-wider';
                         dotDiv.className = 'w-3 h-3 rounded-full bg-rose-500 animate-pulse';
+                        iconBox.className = "w-12 h-12 rounded-2xl bg-slate-200/80 dark:bg-slate-800/80 flex items-center justify-center text-slate-600 dark:text-slate-400 transition-all duration-500 shadow-inner";
+                        card.classList.remove('card-active');
+                        bgGlow.className = "absolute -right-12 -top-12 w-36 h-36 bg-indigo-500/10 rounded-full blur-3xl transition-all duration-700 pointer-events-none";
                     }
                 }
             });
+            updateStatsAndPower();
         });
 
         function setEspOffline() {
@@ -277,19 +452,19 @@
             }
 
             jadwalStates[topik] = true;
-            document.getElementById(`btnNyala_${id}`).classList.add('opacity-50', 'cursor-not-allowed');
-            document.getElementById(`btnMati_${id}`).classList.add('opacity-50', 'cursor-not-allowed');
+            document.getElementById(`btnNyala_${id}`).classList.add('opacity-40', 'cursor-not-allowed');
+            document.getElementById(`btnMati_${id}`).classList.add('opacity-40', 'cursor-not-allowed');
             document.getElementById(`jadwalInfo_${id}`).innerText = `Aktif (${mulai}-${selesai})`;
-            document.getElementById(`jadwalInfo_${id}`).className = "text-[10px] text-center text-emerald-500 font-semibold font-mono";
+            document.getElementById(`jadwalInfo_${id}`).className = "text-[11px] text-center text-emerald-500 font-semibold font-mono";
         }
 
         function matikanJadwal(id) {
             let lampuObj = lampuList.find(l => l.id === id);
             jadwalStates[lampuObj.topik] = false;
-            document.getElementById(`btnNyala_${id}`).classList.remove('opacity-50', 'cursor-not-allowed');
-            document.getElementById(`btnMati_${id}`).classList.remove('opacity-50', 'cursor-not-allowed');
+            document.getElementById(`btnNyala_${id}`).classList.remove('opacity-40', 'cursor-not-allowed');
+            document.getElementById(`btnMati_${id}`).classList.remove('opacity-40', 'cursor-not-allowed');
             document.getElementById(`jadwalInfo_${id}`).innerText = "Nonaktif";
-            document.getElementById(`jadwalInfo_${id}`).className = "text-[10px] text-center text-slate-500 dark:text-slate-400 font-mono";
+            document.getElementById(`jadwalInfo_${id}`).className = "text-[11px] text-center text-slate-500 dark:text-slate-400 font-mono";
         }
 
         function cekRentangJadwal(id, topik, jam, menit) {
