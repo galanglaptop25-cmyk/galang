@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Home - Secure MQTT Control</title>
+    <title>Smart Home - HiveMQ Cloud & Timer Schedule</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- HiveMQ MQTT Client Library -->
@@ -15,17 +15,22 @@
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 min-h-screen flex items-center justify-center p-4">
 
-    <div class="bg-white/10 backdrop-blur-lg border border-white/20 p-8 rounded-3xl shadow-2xl max-w-md w-full text-center text-white">
+    <div class="bg-white/10 backdrop-blur-lg border border-white/20 p-6 md:p-8 rounded-3xl shadow-2xl max-w-lg w-full text-white space-y-6">
         
-        <!-- Header -->
-        <div class="mb-6">
-            <span class="bg-purple-500/30 text-purple-300 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider border border-purple-500/30">Secure MQTT</span>
-            <h1 class="text-2xl font-bold mt-3">Kontrol Lampu IoT</h1>
-            <p class="text-slate-400 text-sm mt-1">Autentikasi Username & Password</p>
+        <!-- Header & Jam Real-Time -->
+        <div class="flex justify-between items-center border-b border-white/10 pb-4">
+            <div>
+                <span class="bg-purple-500/30 text-purple-300 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider border border-purple-500/30">HiveMQ Cloud</span>
+                <h1 class="text-xl font-bold mt-2">Kontrol Lampu IoT</h1>
+            </div>
+            <div class="text-right">
+                <div id="liveClock" class="text-2xl font-bold font-mono text-sky-400">00:00:00</div>
+                <div id="liveDate" class="text-xs text-slate-400">Memuat tanggal...</div>
+            </div>
         </div>
 
-        <!-- Indikator Status -->
-        <div class="bg-slate-900/50 border border-slate-700/50 p-5 rounded-2xl mb-8 flex items-center justify-between shadow-inner">
+        <!-- Indikator Status Perangkat -->
+        <div class="bg-slate-900/50 border border-slate-700/50 p-4 rounded-2xl flex items-center justify-between shadow-inner">
             <div class="flex items-center space-x-3">
                 <div id="statusDot" class="w-4 h-4 rounded-full bg-gray-500 animate-pulse"></div>
                 <span class="text-slate-300 text-sm font-medium">Status Perangkat</span>
@@ -33,48 +38,96 @@
             <span id="statusText" class="font-bold text-lg text-gray-400">Menghubungkan...</span>
         </div>
 
-        <!-- Tombol Kontrol -->
+        <!-- Tombol Kontrol Manual -->
         <div class="grid grid-cols-2 gap-4">
-            <button onclick="kirimMQTT('1')" class="group relative overflow-hidden bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-4 px-6 rounded-2xl transition-all duration-300 shadow-lg shadow-emerald-900/30 active:scale-95 flex flex-col items-center justify-center space-y-1">
-                <svg class="w-6 h-6 mb-1 text-emerald-200 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <button onclick="kirimMQTT('1')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg shadow-emerald-900/30 active:scale-95 flex items-center justify-center space-x-2">
+                <svg class="w-5 h-5 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 <span>NYALAKAN</span>
             </button>
 
-            <button onclick="kirimMQTT('0')" class="group relative overflow-hidden bg-rose-600 hover:bg-rose-500 text-white font-semibold py-4 px-6 rounded-2xl transition-all duration-300 shadow-lg shadow-rose-900/30 active:scale-95 flex flex-col items-center justify-center space-y-1">
-                <svg class="w-6 h-6 mb-1 text-rose-200 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728"/></svg>
+            <button onclick="kirimMQTT('0')" class="bg-rose-600 hover:bg-rose-500 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg shadow-rose-900/30 active:scale-95 flex items-center justify-center space-x-2">
+                <svg class="w-5 h-5 text-rose-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728"/></svg>
                 <span>MATIKAN</span>
             </button>
         </div>
 
-        <!-- Footer Info -->
-        <p id="brokerStatus" class="text-xs text-slate-500 mt-8">Menghubungkan ke broker...</p>
+        <!-- Pengaturan Timer Durasi -->
+        <div class="bg-slate-900/40 border border-slate-700/40 p-4 rounded-2xl space-y-3">
+            <h2 class="text-sm font-semibold text-indigo-300 flex items-center gap-2">
+                <span>⏱️ Pengaturan Durasi Nyala (Timer)</span>
+            </h2>
+            <div class="grid grid-cols-3 gap-2 text-black">
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">Jam</label>
+                    <input type="number" id="timerJam" min="0" value="0" class="w-full p-2 rounded-lg text-center bg-slate-800 text-white border border-slate-700">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">Menit</label>
+                    <input type="number" id="timerMenit" min="0" max="59" value="0" class="w-full p-2 rounded-lg text-center bg-slate-800 text-white border border-slate-700">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">Detik</label>
+                    <input type="number" id="timerDetik" min="0" max="59" value="10" class="w-full p-2 rounded-lg text-center bg-slate-800 text-white border border-slate-700">
+                </div>
+            </div>
+            <button onclick="mulaiTimer()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-xl transition-all shadow-md text-sm">
+                Mulai Timer Durasi
+            </button>
+            <div id="timerInfo" class="text-xs text-center text-slate-400">Timer tidak aktif</div>
+        </div>
+
+        <!-- Pengaturan Jadwal Jam -->
+        <div class="bg-slate-900/40 border border-slate-700/40 p-4 rounded-2xl space-y-3">
+            <h2 class="text-sm font-semibold text-indigo-300 flex items-center gap-2">
+                <span>📅 Jadwal Jam Aktif (Otomatis)</span>
+            </h2>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">Dari Jam:</label>
+                    <input type="time" id="jadwalMulai" class="w-full p-2 rounded-lg bg-slate-800 text-white border border-slate-700 text-center">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-400 block mb-1">Sampai Jam:</label>
+                    <input type="time" id="jadwalSelesai" class="w-full p-2 rounded-lg bg-slate-800 text-white border border-slate-700 text-center">
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="aktifkanJadwal()" class="flex-1 bg-emerald-700 hover:bg-emerald-600 text-white font-semibold py-2 rounded-xl text-sm transition-all">Aktifkan Jadwal</button>
+                <button onclick="matikanJadwal()" class="flex-1 bg-rose-800 hover:bg-rose-700 text-white font-semibold py-2 rounded-xl text-sm transition-all">Matikan Jadwal</button>
+            </div>
+            <div id="jadwalInfo" class="text-xs text-center text-slate-400">Jadwal otomatis nonaktif</div>
+        </div>
+
+        <!-- Footer Info Broker -->
+        <p id="brokerStatus" class="text-xs text-slate-500 text-center">Menghubungkan ke broker...</p>
     </div>
 
-    <!-- Skrip MQTT dengan Auth -->
+    <!-- Skrip Logika & MQTT -->
     <script>
         const mqttHost = "2908953d76114d82ae11bce6b3817745.s1.eu.hivemq.cloud";
-        const mqttPort = 8884; // Port WebSockets Secure HiveMQ Cloud
+        const mqttPort = 8883; 
         const mqttTopic = "esp32s3/lampu/galang";
         
         const mqttOptions = {
             clientId: "WebClient_" + Math.random().toString(16).substr(2, 8),
-            username: "galanglinduaji", // Ganti dengan username HiveMQ Cloud Anda
-            password: "galangganteng", // Ganti dengan password HiveMQ Cloud Anda
+            username: "USERNAME_ANDA", // Sesuaikan dengan username HiveMQ Cloud Anda
+            password: "PASSWORD_ANDA", // Sesuaikan dengan password HiveMQ Cloud Anda
             protocol: "wss"
         };
 
         const brokerUrl = `wss://${mqttHost}:${mqttPort}/mqtt`;
         const client = mqtt.connect(brokerUrl, mqttOptions);
 
+        let countdownInterval = null;
+        let isJadwalActive = false;
+
         client.on("connect", () => {
-            console.log("Terhubung ke HiveMQ Cloud!");
-            document.getElementById("brokerStatus").innerText = "Status: Terhubung (Cloud Aman)";
+            document.getElementById("brokerStatus").innerText = "Status: Terhubung ke MQTT Broker (Aman)";
             client.subscribe(mqttTopic);
         });
 
         client.on("error", (err) => {
-            console.error("Koneksi MQTT Gagal: ", err);
-            document.getElementById("brokerStatus").innerText = "Status: Gagal Terhubung";
+            document.getElementById("brokerStatus").innerText = "Status: Gagal Terhubung ke Broker";
         });
 
         client.on("message", (topic, payload) => {
@@ -94,9 +147,93 @@
         });
 
         function kirimMQTT(nilai) {
-            client.publish(mqttTopic, nilai, () => {
-                console.log("Pesan terkirim:", nilai);
-            });
+            client.publish(mqttTopic, nilai);
+        }
+
+        // Jam Real-Time
+        function updateClock() {
+            const now = new Date();
+            const jam = String(now.getHours()).padStart(2, '0');
+            const menit = String(now.getMinutes()).padStart(2, '0');
+            const detik = String(now.getSeconds()).padStart(2, '0');
+            
+            document.getElementById('liveClock').innerText = `${jam}:${menit}:${detik}`;
+            
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('liveDate').innerText = now.toLocaleDateString('id-ID', options);
+
+            // Cek pengecekan jadwal otomatis setiap detik jika diaktifkan
+            if (isJadwalActive) {
+                cekLogikaJadwal(jam, menit);
+            }
+        }
+        setInterval(updateClock, 1000);
+
+        // Fitur Timer Durasi (Jam, Menit, Detik)
+        function mulaiTimer() {
+            if (countdownInterval) clearInterval(countdownInterval);
+
+            let j = parseInt(document.getElementById('timerJam').value) || 0;
+            let m = parseInt(document.getElementById('timerMenit').value) || 0;
+            let d = parseInt(document.getElementById('timerDetik').value) || 0;
+
+            let totalDetik = (j * 3600) + (m * 60) + d;
+
+            if (totalDetik <= 0) {
+                alert("Masukkan durasi timer dengan benar!");
+                return;
+            }
+
+            // Nyalakan lampu terlebih dahulu
+            kirimMQTT('1');
+
+            countdownInterval = setInterval(() => {
+                if (totalDetik > 0) {
+                    totalDetik--;
+                    let remJ = Math.floor(totalDetik / 3600);
+                    let remM = Math.floor((totalDetik % 3600) / 60);
+                    let remD = totalDetik % 60;
+                    document.getElementById('timerInfo').innerText = `Sisa waktu nyala: ${remJ}j ${remM}m ${remD}d`;
+                } else {
+                    clearInterval(countdownInterval);
+                    kirimMQTT('0'); // Matikan lampu setelah waktu habis
+                    document.getElementById('timerInfo').innerText = "Timer selesai, lampu dimatikan.";
+                }
+            }, 1000);
+        }
+
+        // Fitur Jadwal Jam Mulai - Selesai
+        function aktifkanJadwal() {
+            const mulai = document.getElementById('jadwalMulai').value;
+            const selesai = document.getElementById('jadwalSelesai').value;
+
+            if (!mulai || !selesai) {
+                alert("Harap tentukan jam mulai dan jam selesai terlebih dahulu!");
+                return;
+            }
+
+            isJadwalActive = true;
+            document.getElementById('jadwalInfo').innerText = `Jadwal aktif: ${mulai} s/d ${selesai}`;
+            document.getElementById('jadwalInfo').className = "text-xs text-center text-emerald-400 font-semibold";
+        }
+
+        function matikanJadwal() {
+            isJadwalActive = false;
+            document.getElementById('jadwalInfo').innerText = "Jadwal otomatis nonaktif";
+            document.getElementById('jadwalInfo').className = "text-xs text-center text-slate-400";
+        }
+
+        function cekLogikaJadwal(jamSekarang, menitSekarang) {
+            const mulai = document.getElementById('jadwalMulai').value;
+            const selesai = document.getElementById('jadwalSelesai').value;
+
+            const waktuSekarangStr = `${jamSekarang}:${menitSekarang}`;
+
+            if (waktuSekarangStr === mulai) {
+                kirimMQTT('1'); // Nyalakan saat jam mulai
+            } else if (waktuSekarangStr === selesai) {
+                kirimMQTT('0'); // Matikan saat jam selesai
+            }
         }
     </script>
 </body>
