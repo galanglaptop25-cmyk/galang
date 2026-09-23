@@ -22,7 +22,7 @@
 
     <div class="max-w-6xl mx-auto space-y-6">
         
-        <!-- Header Utama & Jam -->
+        <!-- Header Utama, Jam, Ping, & Status -->
         <div class="bg-white dark:bg-white/[0.03] backdrop-blur-xl border border-slate-200 dark:border-white/10 p-6 rounded-[2rem] shadow-xl flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <span class="inline-flex items-center gap-1.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider border border-indigo-500/20">
@@ -31,7 +31,16 @@
                 <h1 class="text-2xl font-bold mt-2 text-slate-900 dark:text-white">Smart Home Master Control</h1>
             </div>
 
-            <div class="flex items-center gap-6">
+            <div class="flex flex-wrap items-center justify-end gap-4">
+                <!-- Indikator Ping / Latency -->
+                <div class="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 px-4 py-2 rounded-2xl flex items-center space-x-2.5 shadow-inner">
+                    <div id="pingDot" class="w-3 h-3 rounded-full bg-slate-400"></div>
+                    <div>
+                        <div class="text-[10px] text-slate-400 font-medium">Network Ping</div>
+                        <span id="pingText" class="font-bold text-xs text-slate-600 dark:text-slate-300 font-mono">Menghitung...</span>
+                    </div>
+                </div>
+
                 <!-- Status ESP32 -->
                 <div class="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 px-4 py-2 rounded-2xl flex items-center space-x-2.5 shadow-inner">
                     <div id="espDot" class="w-3.5 h-3.5 rounded-full bg-rose-500 animate-pulse"></div>
@@ -56,7 +65,7 @@
 
         <!-- Grid 6 Kartu Lampu -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="lampuGrid">
-            <!-- JavaScript akan merender 6 kartu lampu secara otomatis di sini -->
+            <!-- Render dinamis 6 lampu -->
         </div>
 
         <!-- Footer Info Broker -->
@@ -92,7 +101,7 @@
         })();
 
         const mqttHost = "2908953d76114d82ae11bce6b3817745.s1.eu.hivemq.cloud";
-        const mqttPort = 8884; 
+        const mqttPort = 8883; 
         const mqttStatusTopic = "esp32s3/status/galang";
         
         const lampuList = [
@@ -108,7 +117,6 @@
         let timerIntervals = {};
         let jadwalStates = {};
 
-        // Render HTML Kartu Lampu secara dinamis
         const container = document.getElementById('lampuGrid');
         lampuList.forEach(lampu => {
             stateLampu[lampu.topik] = '0';
@@ -124,7 +132,6 @@
                         </div>
                     </div>
 
-                    <!-- Tombol Manual -->
                     <div class="grid grid-cols-2 gap-3">
                         <button id="btnNyala_${lampu.id}" onclick="kirimMQTT('${lampu.topik}', '1')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 px-3 rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-1.5">
                             <i class="fa-solid fa-power-off"></i> NYALA
@@ -134,7 +141,6 @@
                         </button>
                     </div>
 
-                    <!-- Timer Durasi -->
                     <div class="bg-slate-50 dark:bg-slate-900/50 p-3.5 rounded-xl border border-slate-200 dark:border-white/5 space-y-2">
                         <span class="text-[10px] font-semibold text-indigo-600 dark:text-indigo-300 uppercase tracking-wider block"><i class="fa-solid fa-stopwatch"></i> Timer Durasi (Detik)</span>
                         <div class="flex gap-2">
@@ -144,7 +150,6 @@
                         <div id="timerInfo_${lampu.id}" class="text-[10px] text-center text-slate-500 dark:text-slate-400 font-mono">Nonaktif</div>
                     </div>
 
-                    <!-- Jadwal Otomatis -->
                     <div class="bg-slate-50 dark:bg-slate-900/50 p-3.5 rounded-xl border border-slate-200 dark:border-white/5 space-y-2">
                         <span class="text-[10px] font-semibold text-indigo-600 dark:text-indigo-300 uppercase tracking-wider block"><i class="fa-regular fa-calendar-days"></i> Jadwal Otomatis</span>
                         <div class="grid grid-cols-2 gap-2">
@@ -172,10 +177,37 @@
         const client = mqtt.connect(brokerUrl, mqttOptions);
         let espTimeout = null;
 
+        // Fungsi Pengukuran Ping (Latency) ke Broker MQTT
+        function checkPing() {
+            const start = Date.now();
+            if (client.connected) {
+                // Publikasikan paket kosong/ping ke topik khusus ping untuk mengukur round-trip time
+                client.publish("esp32s3/ping/galang", "ping", { qos: 0 }, () => {
+                    const latency = Date.now() - start;
+                    let pingText = document.getElementById('pingText');
+                    let pingDot = document.getElementById('pingDot');
+                    
+                    pingText.innerText = latency + " ms";
+                    if (latency < 150) {
+                        pingDot.className = "w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]";
+                    } else if (latency < 400) {
+                        pingDot.className = "w-3 h-3 rounded-full bg-amber-500";
+                    } else {
+                        pingDot.className = "w-3 h-3 rounded-full bg-rose-500";
+                    }
+                });
+            } else {
+                document.getElementById('pingText').innerText = "Terputus";
+                document.getElementById('pingDot').className = "w-3 h-3 rounded-full bg-rose-500 animate-pulse";
+            }
+        }
+        setInterval(checkPing, 4000); // Cek ping setiap 4 detik
+
         client.on("connect", () => {
             document.getElementById("brokerStatus").innerText = "Status: Terhubung ke MQTT Cloud (Aman)";
             client.subscribe(mqttStatusTopic);
             lampuList.forEach(l => client.subscribe(l.topik));
+            checkPing();
         });
 
         client.on("message", (topic, payload) => {
