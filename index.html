@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Home IoT - Ultimate Enterprise Pro</title>
+    <title>Smart Home IoT - Ultimate Multi-Language Pro</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -77,16 +77,23 @@
                         <span class="inline-flex items-center gap-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider border border-indigo-500/20">
                             <i class="fa-solid fa-bolt text-[8px]"></i> HiveMQ Cloud Pro
                         </span>
-                        <h1 class="text-lg sm:text-2xl font-extrabold mt-1 text-slate-900 dark:text-white tracking-tight">Smart Home Automation</h1>
+                        <h1 id="txtTitle" class="text-lg sm:text-2xl font-extrabold mt-1 text-slate-900 dark:text-white tracking-tight">Smart Home Automation</h1>
                     </div>
                 </div>
 
-                <!-- Jam & Toggle Tema -->
+                <!-- Jam, Tombol Bahasa, & Toggle Tema -->
                 <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-3 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200 dark:border-white/10">
                     <div class="text-left sm:text-right">
                         <div id="liveClock" class="text-base sm:text-lg font-extrabold font-mono text-indigo-600 dark:text-indigo-400">00:00:00</div>
                         <div id="liveDate" class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">Memuat...</div>
                     </div>
+
+                    <!-- Tombol Pengalih Bahasa (ID/EN) -->
+                    <button onclick="playClickSound(); toggleLanguage()" class="px-3 h-10 rounded-xl bg-slate-200/80 dark:bg-white/10 border border-slate-300/50 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-slate-200 font-bold text-xs active:scale-95 transition-all shrink-0">
+                        <i class="fa-solid fa-globe mr-1.5 text-indigo-500"></i> <span id="langLabel">ID</span>
+                    </button>
+
+                    <!-- Tombol Toggle Tema -->
                     <button onclick="playClickSound(); toggleTheme()" class="w-10 h-10 rounded-xl bg-slate-200/80 dark:bg-white/10 border border-slate-300/50 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-yellow-400 active:scale-95 transition-all shrink-0">
                         <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
                     </button>
@@ -99,14 +106,14 @@
                 <!-- Satu Tombol Toggle Master Global -->
                 <button id="btnMasterToggle" onclick="playClickSound(); toggleGlobalMaster()" class="bg-slate-300 dark:bg-slate-800 hover:opacity-90 active:scale-95 text-slate-800 dark:text-slate-100 font-extrabold py-2.5 px-4 rounded-xl text-[11px] shadow transition-all flex items-center justify-center gap-2 border border-slate-400/30 dark:border-white/10 col-span-2 sm:col-span-1 min-w-[180px]">
                     <i id="masterIcon" class="fa-solid fa-power-off"></i>
-                    <span id="masterText">MASTER: SEMUA MATI</span>
+                    <span id="masterText">MASTER: ALL OFF</span>
                 </button>
 
                 <!-- Estimasi Biaya Listrik Harian -->
                 <div class="bg-emerald-500/10 dark:bg-emerald-950/40 border border-emerald-500/30 px-3 py-1.5 rounded-xl flex items-center space-x-2.5 flex-1 min-w-[140px]">
                     <div class="text-emerald-500 text-sm shrink-0"><i class="fa-solid fa-wallet"></i></div>
                     <div>
-                        <div class="text-[8px] text-emerald-600 dark:text-emerald-400 font-bold uppercase">Estimasi Biaya / Hari</div>
+                        <div id="lblCostTitle" class="text-[8px] text-emerald-600 dark:text-emerald-400 font-bold uppercase">Estimasi Biaya / Hari</div>
                         <span id="dailyCost" class="font-bold text-[11px] text-emerald-700 dark:text-emerald-300 font-mono">Rp 0</span>
                     </div>
                 </div>
@@ -115,7 +122,7 @@
                 <div class="bg-sky-500/10 dark:bg-sky-950/40 border border-sky-500/30 px-3 py-1.5 rounded-xl flex items-center space-x-2.5 flex-1 min-w-[140px]">
                     <div id="weatherIconContainer" class="text-sky-500 text-sm shrink-0"><i class="fa-solid fa-cloud-sun animate-pulse"></i></div>
                     <div>
-                        <div class="text-[8px] text-sky-600 dark:text-sky-400 font-bold uppercase">Cuaca Luar</div>
+                        <div id="lblWeatherTitle" class="text-[8px] text-sky-600 dark:text-sky-400 font-bold uppercase">Cuaca Luar</div>
                         <span id="weatherInfo" class="font-bold text-[11px] text-sky-700 dark:text-sky-300 font-mono">Memuat...</span>
                     </div>
                 </div>
@@ -124,7 +131,7 @@
                 <div class="bg-indigo-500/10 dark:bg-indigo-950/50 border border-indigo-500/30 px-3 py-1.5 rounded-xl flex items-center space-x-2 flex-1 min-w-[110px]">
                     <div class="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-ping shrink-0"></div>
                     <div>
-                        <div class="text-[8px] text-indigo-500 dark:text-indigo-400 font-bold uppercase">Online</div>
+                        <div id="lblOnlineTitle" class="text-[8px] text-indigo-500 dark:text-indigo-400 font-bold uppercase">Online</div>
                         <span id="activeUsersCount" class="font-bold text-[11px] text-indigo-700 dark:text-indigo-300 font-mono">1 Orang</span>
                     </div>
                 </div>
@@ -141,7 +148,7 @@
                 <div class="bg-slate-200/60 dark:bg-slate-900/80 px-3 py-1.5 rounded-xl flex items-center space-x-2 border border-slate-300/40 dark:border-white/5 flex-1 min-w-[90px]">
                     <div class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></div>
                     <div>
-                        <div class="text-[8px] text-slate-400 font-bold uppercase">Aktif</div>
+                        <div id="lblActiveTitle" class="text-[8px] text-slate-400 font-bold uppercase">Aktif</div>
                         <span id="activeCount" class="font-bold text-[11px] font-mono">0 / 6</span>
                     </div>
                 </div>
@@ -167,9 +174,9 @@
                 <div class="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-2.5">
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-chart-line text-amber-500 text-sm"></i>
-                        <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-white">Statistik Konsumsi Daya Real-Time (Watt)</h3>
+                        <h3 id="txtChartTitle" class="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-white">Statistik Konsumsi Daya Real-Time (Watt)</h3>
                     </div>
-                    <span class="text-[10px] text-slate-400 font-mono">Live Update</span>
+                    <span id="txtLiveUpdate" class="text-[10px] text-slate-400 font-mono">Live Update</span>
                 </div>
                 <div class="h-48 relative">
                     <canvas id="energyChart"></canvas>
@@ -180,7 +187,7 @@
             <div class="glass-panel p-4 sm:p-6 rounded-3xl space-y-3 shadow-lg border border-slate-200/80 dark:border-white/10">
                 <div class="flex items-center gap-2 border-b border-slate-200 dark:border-white/10 pb-2.5">
                     <i class="fa-solid fa-users text-indigo-500 text-sm"></i>
-                    <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-white">Pengguna Terhubung</h3>
+                    <h3 id="txtUsersTitle" class="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-white">Pengguna Terhubung</h3>
                 </div>
                 <div id="usersListContainer" class="bg-slate-200/50 dark:bg-slate-950/60 p-3 rounded-2xl h-48 overflow-y-auto space-y-2 font-mono text-[11px] border border-slate-300/40 dark:border-white/5">
                     <div class="text-slate-400 italic">Memuat sesi pengguna...</div>
@@ -193,14 +200,14 @@
             <div class="flex justify-between items-center border-b border-slate-200 dark:border-white/10 pb-2.5">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-rectangle-list text-indigo-500 text-sm"></i>
-                    <h3 class="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-white">Monitoring Log Aktivitas</h3>
+                    <h3 id="txtLogTitle" class="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-white">Monitoring Log Aktivitas</h3>
                 </div>
                 <button onclick="clearLog()" class="text-[10px] text-slate-400 hover:text-rose-500 font-bold transition-colors">
-                    <i class="fa-solid fa-trash-can mr-1"></i> Bersihkan Log
+                    <i class="fa-solid fa-trash-can mr-1"></i> <span id="txtClearLog">Bersihkan Log</span>
                 </button>
             </div>
             <div id="logContainer" class="bg-slate-200/50 dark:bg-slate-950/60 p-3 rounded-2xl h-32 overflow-y-auto space-y-1.5 font-mono text-[11px] border border-slate-300/40 dark:border-white/5">
-                <div class="text-slate-400 italic">Menunggu aktivitas sistem...</div>
+                <div id="txtWaitingLog" class="text-slate-400 italic">Menunggu aktivitas sistem...</div>
             </div>
         </div>
 
@@ -212,6 +219,92 @@
     <script>
         const MAX_SAFE_POWER = 60;
         let isOverloadAlertTriggered = false;
+        let currentLang = localStorage.getItem('app_lang') || 'id';
+
+        const translations = {
+            id: {
+                title: "Smart Home Automation",
+                masterOff: "MASTER: SEMUA MATI",
+                masterOn: "MASTER: SEMUA NYALA",
+                costTitle: "Estimasi Biaya / Hari",
+                weatherTitle: "Cuaca Luar",
+                onlineTitle: "Online",
+                powerTitle: "Daya (Max 60W)",
+                activeTitle: "Aktif",
+                chartTitle: "Statistik Konsumsi Daya Real-Time (Watt)",
+                liveUpdate: "Pembaruan Langsung",
+                usersTitle: "Pengguna Terhubung",
+                logTitle: "Monitoring Log Aktivitas",
+                clearLog: "Bersihkan Log",
+                waitingLog: "Menunggu aktivitas sistem...",
+                statusOff: "STATUS: MATI",
+                statusOn: "STATUS: NYALA",
+                timerTitle: "Timer (Detik)",
+                timerStart: "Mulai",
+                timerOff: "Nonaktif",
+                timerDone: "Selesai",
+                scheduleTitle: "Jadwal Otomatis",
+                btnScheduleOn: "AKTIFKAN JADWAL",
+                btnScheduleOff: "MATIKAN JADWAL",
+                scheduleOff: "Nonaktif",
+                modalPromptName: "Ubah nama untuk",
+                alertSchedule: "Atur jam mulai dan selesai terlebih dahulu!",
+                alertManualLock: "Kontrol manual dikunci karena Jadwal Aktif!"
+            },
+            en: {
+                title: "Smart Home Automation",
+                masterOff: "MASTER: ALL OFF",
+                masterOn: "MASTER: ALL ON",
+                costTitle: "Est. Daily Cost",
+                weatherTitle: "Outdoor Weather",
+                onlineTitle: "Online",
+                powerTitle: "Power (Max 60W)",
+                activeTitle: "Active",
+                chartTitle: "Real-Time Power Consumption Stats (Watts)",
+                liveUpdate: "Live Update",
+                usersTitle: "Connected Users",
+                logTitle: "Activity Log Monitoring",
+                clearLog: "Clear Logs",
+                waitingLog: "Waiting for system activity...",
+                statusOff: "STATUS: OFF",
+                statusOn: "STATUS: ON",
+                timerTitle: "Timer (Seconds)",
+                timerStart: "Start",
+                timerOff: "Disabled",
+                timerDone: "Finished",
+                scheduleTitle: "Auto Schedule",
+                btnScheduleOn: "ENABLE SCHEDULE",
+                btnScheduleOff: "DISABLE SCHEDULE",
+                scheduleOff: "Disabled",
+                modalPromptName: "Change name for",
+                alertSchedule: "Please set start and end times first!",
+                alertManualLock: "Manual control locked because Schedule is Active!"
+            }
+        };
+
+        function updateLanguageUI() {
+            let t = translations[currentLang];
+            document.getElementById('langLabel').innerText = currentLang.toUpperCase();
+            document.getElementById('txtTitle').innerText = t.title;
+            document.getElementById('lblCostTitle').innerText = t.costTitle;
+            document.getElementById('lblWeatherTitle').innerText = t.weatherTitle;
+            document.getElementById('lblOnlineTitle').innerText = t.onlineTitle;
+            document.getElementById('powerLabel').innerText = t.powerTitle;
+            document.getElementById('lblActiveTitle').innerText = t.activeTitle;
+            document.getElementById('txtChartTitle').innerText = t.chartTitle;
+            document.getElementById('txtLiveUpdate').innerText = t.liveUpdate;
+            document.getElementById('txtUsersTitle').innerText = t.usersTitle;
+            document.getElementById('txtLogTitle').innerText = t.logTitle;
+            document.getElementById('txtClearLog').innerText = t.clearLog;
+            
+            updateStatsAndPower();
+        }
+
+        function toggleLanguage() {
+            currentLang = (currentLang === 'id') ? 'en' : 'id';
+            localStorage.setItem('app_lang', currentLang);
+            updateLanguageUI();
+        }
 
         async function fetchWeatherData() {
             try {
@@ -223,7 +316,7 @@
                     document.getElementById('weatherInfo').innerText = `${temp}°C, ${humidity}%`;
                 }
             } catch (e) {
-                document.getElementById('weatherInfo').innerText = "Gagal memuat";
+                document.getElementById('weatherInfo').innerText = currentLang === 'id' ? "Gagal memuat" : "Failed to load";
             }
         }
         fetchWeatherData();
@@ -235,7 +328,7 @@
             data: {
                 labels: [],
                 datasets: [{
-                    label: 'Total Daya (Watt)',
+                    label: 'Total Watt',
                     data: [],
                     borderColor: '#f59e0b',
                     backgroundColor: 'rgba(245, 158, 11, 0.15)',
@@ -294,17 +387,18 @@
         }
 
         function clearLog() {
-            document.getElementById('logContainer').innerHTML = '<div class="text-slate-400 italic">Log dibersihkan...</div>';
+            let t = translations[currentLang];
+            document.getElementById('logContainer').innerHTML = `<div class="text-slate-400 italic">${t.waitingLog}</div>`;
         }
 
         function updateActiveUsersUI() {
             const container = document.getElementById('usersListContainer');
             container.innerHTML = '';
             let keys = Object.keys(activeUsersMap);
-            document.getElementById('activeUsersCount').innerText = `${keys.length} Orang`;
+            document.getElementById('activeUsersCount').innerText = `${keys.length} ${currentLang === 'id' ? 'Orang' : 'Users'}`;
 
             if (keys.length === 0) {
-                container.innerHTML = '<div class="text-slate-400 italic">Tidak ada pengguna lain.</div>';
+                container.innerHTML = `<div class="text-slate-400 italic">${currentLang === 'id' ? 'Tidak ada pengguna lain.' : 'No other users.'}</div>`;
                 return;
             }
 
@@ -315,9 +409,9 @@
                 userItem.innerHTML = `
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></div>
-                        <span class="font-bold text-slate-800 dark:text-slate-200">${uid} ${isMe ? '(Anda)' : ''}</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">${uid} ${isMe ? (currentLang === 'id' ? '(Anda)' : '(You)') : ''}</span>
                     </div>
-                    <span class="text-[9px] text-slate-400 font-mono">Aktif</span>
+                    <span class="text-[9px] text-slate-400 font-mono">Active</span>
                 `;
                 container.appendChild(userItem);
             });
@@ -416,7 +510,6 @@
         let timerIntervals = {};
         let jadwalStates = {};
 
-        // Muat Data Tersimpan dari LocalStorage (jika ada)
         lampuList.forEach(l => {
             let savedName = localStorage.getItem(`lampu_nama_${l.id}`);
             if (savedName) l.nama = savedName;
@@ -427,9 +520,10 @@
             stateLampu[lampu.topik] = '0';
             jadwalStates[lampu.topik] = false;
 
-            // Muat nilai jadwal tersimpan jika ada
             let savedMulai = localStorage.getItem(`jadwal_mulai_${lampu.id}`) || "";
             let savedSelesai = localStorage.getItem(`jadwal_selesai_${lampu.id}`) || "";
+
+            let t = translations[currentLang];
 
             container.innerHTML += `
                 <div id="card_${lampu.id}" class="glass-panel p-4 rounded-3xl space-y-3 shadow-lg border border-slate-200/80 dark:border-white/10 relative overflow-hidden">
@@ -453,46 +547,46 @@
                     <div class="pt-1">
                         <button id="btnToggle_${lampu.id}" onclick="playClickSound(); toggleLampu(${lampu.id}, '${lampu.topik}')" class="w-full bg-slate-300 dark:bg-slate-800 hover:opacity-90 active:scale-95 text-slate-700 dark:text-slate-200 font-extrabold py-3 px-3 rounded-2xl text-xs shadow transition-all flex items-center justify-center gap-2 border border-slate-400/30 dark:border-white/10">
                             <i id="btnIcon_${lampu.id}" class="fa-solid fa-power-off text-sm"></i>
-                            <span id="btnText_${lampu.id}">STATUS: MATI</span>
+                            <span id="btnText_${lampu.id}">${t.statusOff}</span>
                         </button>
                     </div>
 
                     <div class="bg-slate-200/40 dark:bg-slate-900/40 p-3 rounded-xl space-y-1.5">
-                        <span class="text-[9px] font-extrabold text-indigo-500 uppercase">Timer (Detik)</span>
+                        <span id="lblTimerHeader_${lampu.id}" class="text-[9px] font-extrabold text-indigo-500 uppercase">${t.timerTitle}</span>
                         <div class="flex gap-2">
                             <input type="number" id="timerSec_${lampu.id}" min="1" value="10" class="w-full p-2 rounded-lg text-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 font-mono text-xs">
-                            <button onclick="playClickSound(); mulaiTimer(${lampu.id}, '${lampu.topik}')" class="bg-indigo-600 active:scale-95 text-white px-3 py-2 rounded-lg text-xs font-bold shrink-0">Mulai</button>
+                            <button id="btnTimerStart_${lampu.id}" onclick="playClickSound(); mulaiTimer(${lampu.id}, '${lampu.topik}')" class="bg-indigo-600 active:scale-95 text-white px-3 py-2 rounded-lg text-xs font-bold shrink-0">${t.timerStart}</button>
                         </div>
-                        <div id="timerInfo_${lampu.id}" class="text-[10px] text-center text-slate-400 font-mono">Nonaktif</div>
+                        <div id="timerInfo_${lampu.id}" class="text-[10px] text-center text-slate-400 font-mono">${t.timerOff}</div>
                     </div>
 
                     <!-- Satu Tombol Toggle Jadwal -->
                     <div class="bg-slate-200/40 dark:bg-slate-900/40 p-3 rounded-xl space-y-1.5">
-                        <span class="text-[9px] font-extrabold text-indigo-500 uppercase">Jadwal Otomatis</span>
+                        <span id="lblSchedHeader_${lampu.id}" class="text-[9px] font-extrabold text-indigo-500 uppercase">${t.scheduleTitle}</span>
                         <div class="grid grid-cols-2 gap-1.5">
                             <input type="time" id="mulai_${lampu.id}" value="${savedMulai}" class="p-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-center text-xs font-mono">
                             <input type="time" id="selesai_${lampu.id}" value="${savedSelesai}" class="p-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-center text-xs font-mono">
                         </div>
                         <div class="pt-1">
                             <button id="btnJadwalToggle_${lampu.id}" onclick="playClickSound(); toggleJadwal(${lampu.id}, '${lampu.topik}')" class="w-full bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white py-2 rounded-xl text-[11px] font-bold shadow transition-all">
-                                AKTIFKAN JADWAL
+                                ${t.btnScheduleOn}
                             </button>
                         </div>
-                        <div id="jadwalInfo_${lampu.id}" class="text-[10px] text-center text-slate-400 font-mono">Nonaktif</div>
+                        <div id="jadwalInfo_${lampu.id}" class="text-[10px] text-center text-slate-400 font-mono">${t.scheduleOff}</div>
                     </div>
                 </div>
             `;
         });
 
-        // Fungsi Kustomisasi Nama Perangkat dengan LocalStorage
         function ubahNamaLampu(id) {
             let lampuObj = lampuList.find(l => l.id === id);
-            let namaBaru = prompt(`Ubah nama untuk ${lampuObj.nama}:`, lampuObj.nama);
+            let t = translations[currentLang];
+            let namaBaru = prompt(`${t.modalPromptName} ${lampuObj.nama}:`, lampuObj.nama);
             if (namaBaru && namaBaru.trim() !== "") {
                 lampuObj.nama = namaBaru.trim();
                 localStorage.setItem(`lampu_nama_${id}`, lampuObj.nama);
                 document.getElementById(`labelNama_${id}`).innerText = lampuObj.nama;
-                addLog(`Nama perangkat ${id} diubah menjadi "${lampuObj.nama}"`, "success");
+                addLog(`Device ${id} renamed to "${lampuObj.nama}"`, "success");
             }
         }
 
@@ -531,6 +625,7 @@
             let estimatedCostDaily = estimatedKwhDaily * 1444.70;
             document.getElementById('dailyCost').innerText = `Rp ${Math.round(estimatedCostDaily).toLocaleString('id-ID')}`;
 
+            let t = translations[currentLang];
             const masterBtn = document.getElementById('btnMasterToggle');
             const masterIcon = document.getElementById('masterIcon');
             const masterText = document.getElementById('masterText');
@@ -538,11 +633,11 @@
             if (activeCount > 0) {
                 masterBtn.className = "bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-extrabold py-2.5 px-4 rounded-xl text-[11px] shadow-lg shadow-rose-500/25 transition-all flex items-center justify-center gap-2 border border-rose-400/30 col-span-2 sm:col-span-1 min-w-[180px]";
                 masterIcon.className = "fa-solid fa-power-off text-rose-200";
-                masterText.innerText = "MASTER: MATIKAN SEMUA";
+                masterText.innerText = currentLang === 'id' ? "MASTER: MATIKAN SEMUA" : "MASTER: ALL OFF";
             } else {
                 masterBtn.className = "bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-extrabold py-2.5 px-4 rounded-xl text-[11px] shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 border border-emerald-400/30 col-span-2 sm:col-span-1 min-w-[180px]";
                 masterIcon.className = "fa-solid fa-power-off text-emerald-200";
-                masterText.innerText = "MASTER: NYALAKAN SEMUA";
+                masterText.innerText = currentLang === 'id' ? "MASTER: NYALAKAN SEMUA" : "MASTER: ALL ON";
             }
 
             const powerCard = document.getElementById('powerCard');
@@ -557,7 +652,7 @@
                 powerUsageSpan.className = "font-bold text-[11px] text-rose-600 dark:text-rose-400 font-mono";
 
                 if (!isOverloadAlertTriggered) {
-                    addLog(`PERINGATAN: Beban daya (${totalWatt}W) melebihi batas aman (${MAX_SAFE_POWER}W)!`, "danger");
+                    addLog(`WARNING: Power (${totalWatt}W) exceeds safe limit (${MAX_SAFE_POWER}W)!`, "danger");
                     isOverloadAlertTriggered = true;
                 }
             } else {
@@ -573,7 +668,8 @@
 
         function toggleLampu(id, topik) {
             let lampuObj = lampuList.find(l => l.id === id);
-            if (jadwalStates[topik]) return alert(`Kontrol manual ${lampuObj.nama} dikunci karena Jadwal Aktif!`);
+            let t = translations[currentLang];
+            if (jadwalStates[topik]) return alert(t.alertManualLock);
             
             let currentState = stateLampu[topik] || '0';
             let targetState = (currentState === '1') ? '0' : '1';
@@ -585,7 +681,7 @@
             lampuList.forEach(l => { if (stateLampu[l.topik] === '1') activeCount++; });
 
             let targetState = (activeCount > 0) ? '0' : '1';
-            let actionName = targetState === '1' ? 'Menyalakan SEMUA lampu' : 'Mematikan SEMUA lampu';
+            let actionName = targetState === '1' ? 'Turning ON ALL lights' : 'Turning OFF ALL lights';
             
             addLog(`${mySessionId}: ${actionName}`, 'user');
             lampuList.forEach(l => { if (!jadwalStates[l.topik]) client.publish(l.topik, targetState); });
@@ -597,50 +693,51 @@
             let infoJadwal = document.getElementById(`jadwalInfo_${id}`);
             const mulai = document.getElementById(`mulai_${id}`).value;
             const selesai = document.getElementById(`selesai_${id}`).value;
+            let t = translations[currentLang];
 
             if (!jadwalStates[topik]) {
-                if (!mulai || !selesai) return alert("Atur jam mulai dan selesai terlebih dahulu!");
+                if (!mulai || !selesai) return alert(t.alertSchedule);
                 
-                // Simpan ke LocalStorage
                 localStorage.setItem(`jadwal_mulai_${id}`, mulai);
                 localStorage.setItem(`jadwal_selesai_${id}`, selesai);
 
                 jadwalStates[topik] = true;
                 btnJadwal.className = "w-full bg-rose-600 hover:bg-rose-500 active:scale-95 text-white py-2 rounded-xl text-[11px] font-bold shadow transition-all";
-                btnJadwal.innerText = "MATIKAN JADWAL";
-                infoJadwal.innerText = `Aktif (${mulai}-${selesai})`;
-                addLog(`Jadwal ${lampuObj.nama} diaktifkan (${mulai}-${selesai})`, "success");
+                btnJadwal.innerText = t.btnScheduleOff;
+                infoJadwal.innerText = `Active (${mulai}-${selesai})`;
+                addLog(`Schedule for ${lampuObj.nama} enabled (${mulai}-${selesai})`, "success");
             } else {
                 jadwalStates[topik] = false;
                 btnJadwal.className = "w-full bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white py-2 rounded-xl text-[11px] font-bold shadow transition-all";
-                btnJadwal.innerText = "AKTIFKAN JADWAL";
-                infoJadwal.innerText = "Nonaktif";
-                addLog(`Jadwal ${lampuObj.nama} dimatikan`, "warning");
+                btnJadwal.innerText = t.btnScheduleOn;
+                infoJadwal.innerText = t.scheduleOff;
+                addLog(`Schedule for ${lampuObj.nama} disabled`, "warning");
             }
         }
 
         client.on("connect", () => {
-            document.getElementById("brokerStatus").innerText = "Status: Terhubung ke MQTT Cloud (WSS)";
-            addLog(`Sesi Anda: [${mySessionId}]`, "success");
+            document.getElementById("brokerStatus").innerText = "Status: Connected to MQTT Cloud (WSS)";
+            addLog(`Session ID: [${mySessionId}]`, "success");
             client.subscribe(mqttStatusTopic); client.subscribe(mqttRssiTopic); client.subscribe(mqttPresenceTopic);
             lampuList.forEach(l => client.subscribe(l.topik));
             sendPresenceHeartbeat();
         });
 
         client.on("error", () => {
-            document.getElementById("brokerStatus").innerText = "Status: Gagal Terhubung ke Broker";
-            addLog("Koneksi MQTT Gagal!", "danger");
+            document.getElementById("brokerStatus").innerText = "Status: Connection Failed";
+            addLog("MQTT Connection Failed!", "danger");
         });
 
         client.on("message", (topic, payload) => {
             let message = payload.toString();
+            let t = translations[currentLang];
 
             if (topic === mqttPresenceTopic) {
                 let uid = message;
                 let isNew = !activeUsersMap[uid];
                 activeUsersMap[uid] = Date.now();
                 updateActiveUsersUI();
-                if (isNew && uid !== mySessionId) addLog(`Pengguna online: ${uid}`, "user");
+                if (isNew && uid !== mySessionId) addLog(`User online: ${uid}`, "user");
                 return;
             }
 
@@ -661,7 +758,6 @@
             if (topic === mqttRssiTopic) {
                 let rssiVal = parseInt(message);
                 document.getElementById('wifiRssi').innerText = `${rssiVal} dBm`;
-                document.getElementById('wifiIcon').className = `fa-solid fa-wifi ${rssiVal >= -60 ? 'text-emerald-500' : rssiVal >= -80 ? 'text-amber-500' : 'text-rose-500'}`;
             }
 
             lampuList.forEach(l => {
@@ -676,27 +772,29 @@
                         btnText = document.getElementById(`btnText_${l.id}`);
 
                     if (message === '1') {
-                        textSpan.innerText = 'NYALA'; textSpan.className = 'font-extrabold text-[10px] text-emerald-500 uppercase';
+                        textSpan.innerText = currentLang === 'id' ? 'NYALA' : 'ON'; 
+                        textSpan.className = 'font-extrabold text-[10px] text-emerald-500 uppercase';
                         dotDiv.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-breathing';
                         iconBox.className = "w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-md shadow-emerald-500/40 shrink-0 animate-breathing";
                         card.classList.add('card-active');
                         
                         btnToggle.className = "w-full bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-extrabold py-3 px-3 rounded-2xl text-xs shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 border border-emerald-400/30";
                         btnIcon.className = "fa-solid fa-power-off text-sm text-emerald-200";
-                        btnText.innerText = "STATUS: NYALA";
+                        btnText.innerText = t.statusOn;
 
-                        addLog(`${l.nama} menyala`, "success");
+                        addLog(`${l.nama} turned ON`, "success");
                     } else {
-                        textSpan.innerText = 'MATI'; textSpan.className = 'font-extrabold text-[10px] text-slate-400 uppercase';
+                        textSpan.innerText = currentLang === 'id' ? 'MATI' : 'OFF'; 
+                        textSpan.className = 'font-extrabold text-[10px] text-slate-400 uppercase';
                         dotDiv.className = 'w-2 h-2 rounded-full bg-slate-400';
                         iconBox.className = "w-10 h-10 rounded-xl bg-slate-200/80 dark:bg-slate-800/80 flex items-center justify-center text-slate-600 dark:text-slate-400 shadow-inner shrink-0";
                         card.classList.remove('card-active');
                         
                         btnToggle.className = "w-full bg-slate-300 dark:bg-slate-800 hover:opacity-90 active:scale-95 text-slate-700 dark:text-slate-200 font-extrabold py-3 px-3 rounded-2xl text-xs shadow transition-all flex items-center justify-center gap-2 border border-slate-400/30 dark:border-white/10";
                         btnIcon.className = "fa-solid fa-power-off text-sm";
-                        btnText.innerText = "STATUS: MATI";
+                        btnText.innerText = t.statusOff;
 
-                        addLog(`${l.nama} mati`, "info");
+                        addLog(`${l.nama} turned OFF`, "info");
                     }
                 }
             });
@@ -706,14 +804,15 @@
         function updateClock() {
             const now = new Date();
             document.getElementById('liveClock').innerText = now.toTimeString().split(' ')[0];
-            document.getElementById('liveDate').innerText = now.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
+            document.getElementById('liveDate').innerText = now.toLocaleDateString(currentLang === 'id' ? 'id-ID' : 'en-US', { weekday: 'short', day: 'numeric', month: 'short' });
             lampuList.forEach(l => { if (jadwalStates[l.topik]) cekRentangJadwal(l.id, l.topik, now.getHours(), now.getMinutes()); });
         }
         setInterval(updateClock, 1000);
 
         function mulaiTimer(id, topik) {
             let lampuObj = lampuList.find(l => l.id === id);
-            if (jadwalStates[topik]) return alert("Jadwal aktif!");
+            let t = translations[currentLang];
+            if (jadwalStates[topik]) return alert(currentLang === 'id' ? "Jadwal aktif!" : "Schedule is active!");
             if (timerIntervals[id]) clearInterval(timerIntervals[id]);
             let detik = parseInt(document.getElementById(`timerSec_${id}`).value) || 10;
             client.publish(topik, '1');
@@ -721,10 +820,10 @@
 
             timerIntervals[id] = setInterval(() => {
                 if (detik > 0) {
-                    detik--; document.getElementById(`timerInfo_${id}`).innerText = `Sisa: ${detik}s`;
+                    detik--; document.getElementById(`timerInfo_${id}`).innerText = `${currentLang === 'id' ? 'Sisa' : 'Remaining'}: ${detik}s`;
                 } else {
                     clearInterval(timerIntervals[id]); client.publish(topik, '0');
-                    document.getElementById(`timerInfo_${id}`).innerText = "Selesai";
+                    document.getElementById(`timerInfo_${id}`).innerText = t.timerDone;
                 }
             }, 1000);
         }
@@ -736,6 +835,9 @@
             const nowMin = (jam * 60) + menit;
             client.publish(topik, (nowMin >= (m[0]*60+m[1]) && nowMin < (s[0]*60+s[1])) ? '1' : '0');
         }
+
+        // Inisialisasi Bahasa Awal
+        updateLanguageUI();
     </script>
 </body>
 </html>
