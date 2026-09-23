@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Home IoT - Ultimate Energy & Safety Pro</title>
+    <title>Smart Home IoT - Daily Energy Cost Pro</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -102,12 +102,12 @@
                     <i class="fa-solid fa-ban"></i> Matikan Semua
                 </button>
 
-                <!-- Estimasi Biaya Listrik Bulanan -->
+                <!-- Estimasi Biaya Listrik Harian -->
                 <div class="bg-emerald-500/10 dark:bg-emerald-950/40 border border-emerald-500/30 px-3 py-1.5 rounded-xl flex items-center space-x-2.5 flex-1 min-w-[140px]">
                     <div class="text-emerald-500 text-sm shrink-0"><i class="fa-solid fa-wallet"></i></div>
                     <div>
-                        <div class="text-[8px] text-emerald-600 dark:text-emerald-400 font-bold uppercase">Estimasi Biaya / Bln</div>
-                        <span id="monthlyCost" class="font-bold text-[11px] text-emerald-700 dark:text-emerald-300 font-mono">Rp 0</span>
+                        <div class="text-[8px] text-emerald-600 dark:text-emerald-400 font-bold uppercase">Estimasi Biaya / Hari</div>
+                        <span id="dailyCost" class="font-bold text-[11px] text-emerald-700 dark:text-emerald-300 font-mono">Rp 0</span>
                     </div>
                 </div>
 
@@ -210,7 +210,6 @@
 
     <!-- Skrip Utama -->
     <script>
-        // Batas maksimal daya aman sebelum peringatan Overload (Watt)
         const MAX_SAFE_POWER = 60;
         let isOverloadAlertTriggered = false;
 
@@ -505,11 +504,11 @@
             document.getElementById('activeCount').innerText = `${activeCount} / 6`;
             document.getElementById('powerUsage').innerText = `${totalWatt} W`;
 
-            // Simulasi Biaya Listrik Bulanan (Asumsi menyala 5 jam/hari dengan tarif PLN Rp 1.444,70 / kWh)
-            // kWh per bulan = (Total Watt * 5 jam * 30 hari) / 1000
-            let estimatedKwhMonthly = (totalWatt * 5 * 30) / 1000;
-            let estimatedCostMonthly = estimatedKwhMonthly * 1444.70;
-            document.getElementById('monthlyCost').innerText = `Rp ${Math.round(estimatedCostMonthly).toLocaleString('id-ID')}`;
+            // Simulasi Biaya Listrik Harian (Asumsi menyala 5 jam/hari dengan tarif PLN Rp 1.444,70 / kWh)
+            // kWh per hari = (Total Watt * 5 jam) / 1000
+            let estimatedKwhDaily = (totalWatt * 5) / 1000;
+            let estimatedCostDaily = estimatedKwhDaily * 1444.70;
+            document.getElementById('dailyCost').innerText = `Rp ${Math.round(estimatedCostDaily).toLocaleString('id-ID')}`;
 
             // Peringatan Beban Daya Berlebih (Overload Warning)
             const powerCard = document.getElementById('powerCard');
