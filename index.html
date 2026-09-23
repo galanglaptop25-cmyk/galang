@@ -79,7 +79,7 @@
                         <div id="liveClock" class="text-base sm:text-lg font-extrabold font-mono text-indigo-600 dark:text-indigo-400">00:00:00</div>
                         <div id="liveDate" class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">Memuat...</div>
                     </div>
-                    <button onclick="triggerFeedback(); toggleTheme()" class="w-10 h-10 rounded-xl bg-slate-200/80 dark:bg-white/10 border border-slate-300/50 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-yellow-400 active:scale-95 transition-all shrink-0">
+                    <button onclick="playClickSound(); toggleTheme()" class="w-10 h-10 rounded-xl bg-slate-200/80 dark:bg-white/10 border border-slate-300/50 dark:border-white/10 flex items-center justify-center text-slate-700 dark:text-yellow-400 active:scale-95 transition-all shrink-0">
                         <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
                     </button>
                 </div>
@@ -87,10 +87,10 @@
 
             <!-- Tombol Master & Bar Status -->
             <div class="grid grid-cols-2 sm:grid-cols-4 lg:flex lg:flex-wrap items-center gap-2 pt-2 border-t border-slate-200/80 dark:border-white/10">
-                <button onclick="triggerFeedback(); kirimGlobal('1')" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold py-2 px-3 rounded-xl text-[11px] shadow transition-all flex items-center justify-center gap-1.5">
+                <button onclick="playClickSound(); kirimGlobal('1')" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold py-2 px-3 rounded-xl text-[11px] shadow transition-all flex items-center justify-center gap-1.5">
                     <i class="fa-solid fa-power-off"></i> Nyalakan Semua
                 </button>
-                <button onclick="triggerFeedback(); kirimGlobal('0')" class="bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-bold py-2 px-3 rounded-xl text-[11px] shadow transition-all flex items-center justify-center gap-1.5">
+                <button onclick="playClickSound(); kirimGlobal('0')" class="bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-bold py-2 px-3 rounded-xl text-[11px] shadow transition-all flex items-center justify-center gap-1.5">
                     <i class="fa-solid fa-ban"></i> Matikan Semua
                 </button>
 
@@ -136,16 +136,10 @@
         <p id="brokerStatus" class="text-[11px] text-slate-500 dark:text-slate-400 text-center font-mono py-1">Menghubungkan ke broker...</p>
     </div>
 
-    <!-- Skrip Haptic, Audio, & MQTT -->
+    <!-- Skrip Audio, Partikel, & MQTT -->
     <script>
-        // Efek Getar Haptic & Web Audio Gabungan
-        function triggerFeedback() {
-            // Getar HP (jika didukung perangkat mobile)
-            if ("vibrate" in navigator) {
-                navigator.vibrate(30); // Getar singkat 30 milidetik
-            }
-
-            // Efek Suara Klik
+        // Efek Suara Audio Saja (Haptic/Getar Dihapus)
+        function playClickSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = audioCtx.createOscillator();
@@ -262,10 +256,10 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 pt-1">
-                        <button id="btnNyala_${lampu.id}" onclick="triggerFeedback(); kirimMQTT('${lampu.topik}', '1')" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold py-2.5 px-2 rounded-xl text-[11px] shadow flex items-center justify-center gap-1.5">
+                        <button id="btnNyala_${lampu.id}" onclick="playClickSound(); kirimMQTT('${lampu.topik}', '1')" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold py-2.5 px-2 rounded-xl text-[11px] shadow flex items-center justify-center gap-1.5">
                             <i class="fa-solid fa-power-off text-emerald-200"></i> NYALA
                         </button>
-                        <button id="btnMati_${lampu.id}" onclick="triggerFeedback(); kirimMQTT('${lampu.topik}', '0')" class="bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-bold py-2.5 px-2 rounded-xl text-[11px] shadow flex items-center justify-center gap-1.5">
+                        <button id="btnMati_${lampu.id}" onclick="playClickSound(); kirimMQTT('${lampu.topik}', '0')" class="bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-bold py-2.5 px-2 rounded-xl text-[11px] shadow flex items-center justify-center gap-1.5">
                             <i class="fa-solid fa-ban text-rose-200"></i> MATI
                         </button>
                     </div>
@@ -274,7 +268,7 @@
                         <span class="text-[9px] font-extrabold text-indigo-500 uppercase">Timer (Detik)</span>
                         <div class="flex gap-2">
                             <input type="number" id="timerSec_${lampu.id}" min="1" value="10" class="w-full p-2 rounded-lg text-center bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 font-mono text-xs">
-                            <button onclick="triggerFeedback(); mulaiTimer(${lampu.id}, '${lampu.topik}')" class="bg-indigo-600 active:scale-95 text-white px-3 py-2 rounded-lg text-xs font-bold shrink-0">Mulai</button>
+                            <button onclick="playClickSound(); mulaiTimer(${lampu.id}, '${lampu.topik}')" class="bg-indigo-600 active:scale-95 text-white px-3 py-2 rounded-lg text-xs font-bold shrink-0">Mulai</button>
                         </div>
                         <div id="timerInfo_${lampu.id}" class="text-[10px] text-center text-slate-400 font-mono">Nonaktif</div>
                     </div>
@@ -286,8 +280,8 @@
                             <input type="time" id="selesai_${lampu.id}" class="p-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-center text-xs font-mono">
                         </div>
                         <div class="flex gap-1.5 pt-1">
-                            <button onclick="triggerFeedback(); aktifkanJadwal(${lampu.id}, '${lampu.topik}')" class="flex-1 bg-emerald-600 active:scale-95 text-white py-1.5 rounded-lg text-[10px] font-bold">Aktif</button>
-                            <button onclick="triggerFeedback(); matikanJadwal(${lampu.id})" class="flex-1 bg-rose-600 active:scale-95 text-white py-1.5 rounded-lg text-[10px] font-bold">Mati</button>
+                            <button onclick="playClickSound(); aktifkanJadwal(${lampu.id}, '${lampu.topik}')" class="flex-1 bg-emerald-600 active:scale-95 text-white py-1.5 rounded-lg text-[10px] font-bold">Aktif</button>
+                            <button onclick="playClickSound(); matikanJadwal(${lampu.id})" class="flex-1 bg-rose-600 active:scale-95 text-white py-1.5 rounded-lg text-[10px] font-bold">Mati</button>
                         </div>
                         <div id="jadwalInfo_${lampu.id}" class="text-[10px] text-center text-slate-400 font-mono">Nonaktif</div>
                     </div>
