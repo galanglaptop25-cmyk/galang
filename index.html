@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galang Smart Home Automation - Enterprise Pro</title>
+    <title>Galang Smart Home Automation - Mobile Optimized</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -37,177 +37,179 @@
     <!-- Chart.js Library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-500 font-sans flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-500 font-sans flex flex-col justify-between selection:bg-indigo-500 selection:text-white text-sm sm:text-base">
 
     <!-- Container Utama -->
-    <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex-grow">
+    <div class="max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 flex-grow">
         
         <!-- Header & Navigasi Atas -->
-        <header class="w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 shadow-2xl rounded-3xl px-6 py-5 mb-8 flex flex-col md:flex-row justify-between items-center gap-4 transition-colors duration-500">
-            <div class="flex items-center space-x-4">
-                <div class="bg-gradient-to-tr from-indigo-600 to-purple-600 text-white p-3.5 rounded-2xl shadow-lg shadow-indigo-500/30 animate-float">
-                    <i class="fa-solid fa-house-signal text-2xl"></i>
-                </div>
-                <div>
-                    <div class="flex items-center space-x-2">
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30">Galtech IOT</span>
+        <header class="w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 shadow-2xl rounded-2xl sm:rounded-3xl p-4 sm:px-6 sm:py-5 mb-6 flex flex-col gap-4 transition-colors duration-500">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-tr from-indigo-600 to-purple-600 text-white p-3 rounded-xl sm:rounded-2xl shadow-lg shadow-indigo-500/30 animate-float">
+                        <i class="fa-solid fa-house-signal text-xl sm:text-2xl"></i>
                     </div>
-                    <h1 class="font-black text-2xl tracking-tight bg-gradient-to-r from-slate-900 via-slate-700 to-slate-500 dark:from-white dark:via-slate-200 dark:to-slate-400 bg-clip-text text-transparent mt-0.5">Smart Home Automation</h1>
+                    <div>
+                        <span class="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30">Galtech IOT</span>
+                        <h1 class="font-black text-lg sm:text-2xl tracking-tight bg-gradient-to-r from-slate-900 via-slate-700 to-slate-500 dark:from-white dark:via-slate-200 dark:to-slate-400 bg-clip-text text-transparent">Smart Home</h1>
+                    </div>
+                </div>
+
+                <!-- Tombol Aksi Kanan Atas (Theme & Lang) -->
+                <div class="flex items-center space-x-2">
+                    <button onclick="toggleLanguage()" id="langBtn" class="px-3 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs hover:text-indigo-600 dark:hover:text-white transition-all shadow-inner">
+                        🌐 <span id="langText">EN</span>
+                    </button>
+                    <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white transition-all shadow-inner">
+                        <i id="themeIcon" class="fa-solid fa-moon text-base"></i>
+                    </button>
                 </div>
             </div>
 
-            <!-- Bagian Tombol-Tombol di Kanan Header -->
-            <div class="flex items-center flex-wrap gap-3">
-                <!-- Jam Real-time -->
-                <div id="clockDisplay" class="px-4 py-2 rounded-2xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-sm font-mono font-bold text-indigo-600 dark:text-indigo-400 flex items-center space-x-2">
-                    <i class="fa-regular fa-clock"></i>
-                    <span id="timeText">00:00:00</span>
+            <!-- Baris Kedua Header: Jam, Status MQTT, & Tombol Voice -->
+            <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+                <div class="flex items-center space-x-2">
+                    <!-- Jam Real-time -->
+                    <div id="clockDisplay" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-xs sm:text-sm font-mono font-bold text-indigo-600 dark:text-indigo-400 flex items-center space-x-1.5">
+                        <i class="fa-regular fa-clock"></i>
+                        <span id="timeText">00:00:00</span>
+                    </div>
+
+                    <!-- Status MQTT -->
+                    <div id="connectionStatus" class="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] sm:text-xs font-semibold flex items-center space-x-1.5">
+                        <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+                        <span id="statusText">Menghubungkan...</span>
+                    </div>
                 </div>
 
-                <!-- Status MQTT -->
-                <div id="connectionStatus" class="px-4 py-2 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-semibold flex items-center space-x-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
-                    <span id="statusText">Menghubungkan...</span>
-                </div>
-
-                <!-- TOMBOL VOICE CONTROL (MIKROFON) -->
-                <button onclick="toggleVoiceControl()" id="voiceBtn" title="Perintah Suara" class="px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-500/30 active:scale-95 transition-all flex items-center space-x-2 relative">
+                <!-- Tombol Voice Control -->
+                <button onclick="toggleVoiceControl()" id="voiceBtn" title="Perintah Suara" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-500/30 active:scale-95 transition-all flex items-center space-x-1.5 relative">
                     <i id="voiceIcon" class="fa-solid fa-microphone"></i>
                     <span id="voiceBtnText">Voice</span>
-                    <span id="voicePulse" class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-rose-500 hidden animate-ping"></span>
-                </button>
-
-                <!-- Tombol Ganti Bahasa (ID / EN) -->
-                <button onclick="toggleLanguage()" id="langBtn" class="px-3.5 py-2.5 rounded-2xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs hover:text-indigo-600 dark:hover:text-white hover:scale-105 active:scale-95 transition-all shadow-inner">
-                    🌐 <span id="langText">EN</span>
-                </button>
-
-                <!-- Tombol Light/Dark Mode -->
-                <button onclick="toggleDarkMode()" class="p-3 rounded-2xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white hover:scale-105 active:scale-95 transition-all shadow-inner">
-                    <i id="themeIcon" class="fa-solid fa-moon text-lg"></i>
+                    <span id="voicePulse" class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-500 hidden animate-ping"></span>
                 </button>
             </div>
         </header>
 
         <!-- Baris Feedback Suara -->
-        <div id="voiceFeedback" class="hidden mb-6 p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 text-sm font-semibold flex items-center space-x-3 animate-pulse">
-            <i class="fa-solid fa-microphone-lines text-lg animate-bounce"></i>
+        <div id="voiceFeedback" class="hidden mb-4 p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 text-xs sm:text-sm font-semibold flex items-center space-x-3 animate-pulse">
+            <i class="fa-solid fa-microphone-lines text-base animate-bounce"></i>
             <div>
-                <span id="voiceFeedbackText">Mendengarkan... (Contoh: "Nyalakan lampu utama" atau "Hidupkan lampu satu")</span>
+                <span id="voiceFeedbackText">Mendengarkan...</span>
             </div>
         </div>
 
         <!-- Baris Statistik & Kontrol Utama -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6">
             <!-- Master Switch -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-3xl shadow-lg flex flex-col justify-between transition-colors duration-500">
-                <span id="txtMasterLabel" class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">Kontrol Master</span>
-                <button onclick="toggleMaster()" id="masterBtn" class="w-full py-3.5 px-4 rounded-2xl font-bold text-xs tracking-wider bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/30 active:scale-95 transition-all flex items-center justify-center space-x-2">
+            <div class="col-span-2 sm:col-span-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg flex flex-col justify-between transition-colors duration-500">
+                <span id="txtMasterLabel" class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Kontrol Master</span>
+                <button onclick="toggleMaster()" id="masterBtn" class="w-full py-3 px-3 rounded-xl sm:rounded-2xl font-bold text-xs tracking-wider bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/30 active:scale-95 transition-all flex items-center justify-center space-x-2">
                     <i class="fa-solid fa-power-off"></i>
                     <span id="masterText" data-state="off">MATIKAN SEMUA</span>
                 </button>
             </div>
 
             <!-- Total Aktif -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-3xl shadow-lg flex flex-col justify-between transition-colors duration-500">
-                <span id="txtRelayStatus" class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center space-x-1.5">
-                    <i class="fa-solid fa-lightbulb text-indigo-500 dark:text-indigo-400"></i>
-                    <span>Status Relay</span>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg flex flex-col justify-between transition-colors duration-500">
+                <span id="txtRelayStatus" class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center space-x-1">
+                    <i class="fa-solid fa-lightbulb text-indigo-500"></i>
+                    <span>Relay</span>
                 </span>
                 <div class="mt-2 flex items-baseline justify-between">
                     <div>
-                        <span id="txtActiveLamps" class="text-xs text-slate-400">Lampu Aktif</span>
-                        <h3 id="activeCount" class="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-0.5">0 / 8</h3>
+                        <span id="txtActiveLamps" class="text-[10px] sm:text-xs text-slate-400">Aktif</span>
+                        <h3 id="activeCount" class="text-xl sm:text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-0.5">0 / 8</h3>
                     </div>
-                    <div class="p-3 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-500">
-                        <i class="fa-solid fa-sliders text-xl"></i>
+                    <div class="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-500">
+                        <i class="fa-solid fa-sliders text-base sm:text-xl"></i>
                     </div>
                 </div>
             </div>
 
             <!-- Kecepatan Jaringan / Latensi Cloud -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-3xl shadow-lg flex flex-col justify-between transition-colors duration-500">
-                <span id="txtNetworkSpeed" class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center space-x-1.5">
-                    <i class="fa-solid fa-gauge-high text-cyan-500 dark:text-cyan-400"></i>
-                    <span>Kecepatan Jaringan</span>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg flex flex-col justify-between transition-colors duration-500">
+                <span id="txtNetworkSpeed" class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center space-x-1">
+                    <i class="fa-solid fa-gauge-high text-cyan-500"></i>
+                    <span>Jaringan</span>
                 </span>
                 <div class="mt-2 flex items-baseline justify-between">
                     <div>
-                        <span id="txtCloudLatency" class="text-xs text-slate-400">Latensi Cloud</span>
-                        <h3 id="networkLatency" class="text-2xl font-black text-cyan-600 dark:text-cyan-400 mt-0.5">-- ms</h3>
+                        <span id="txtCloudLatency" class="text-[10px] sm:text-xs text-slate-400">Latensi</span>
+                        <h3 id="networkLatency" class="text-xl sm:text-2xl font-black text-cyan-600 dark:text-cyan-400 mt-0.5">-- ms</h3>
                     </div>
-                    <div class="p-3 rounded-2xl bg-cyan-50 dark:bg-cyan-950/50 text-cyan-500">
-                        <i class="fa-solid fa-signal text-xl"></i>
+                    <div class="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-cyan-50 dark:bg-cyan-950/50 text-cyan-500">
+                        <i class="fa-solid fa-signal text-base sm:text-xl"></i>
                     </div>
                 </div>
             </div>
 
             <!-- Status ESP32 -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-3xl shadow-lg flex flex-col justify-between transition-colors duration-500">
-                <span id="txtMicrocontroller" class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center space-x-1.5">
-                    <i class="fa-solid fa-microchip text-purple-500 dark:text-purple-400"></i>
-                    <span>Mikrokontroler</span>
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg flex flex-col justify-between transition-colors duration-500">
+                <span id="txtMicrocontroller" class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center space-x-1">
+                    <i class="fa-solid fa-microchip text-purple-500"></i>
+                    <span>Hardware</span>
                 </span>
                 <div class="mt-2 flex items-center justify-between">
                     <div>
-                        <span id="txtHwConnection" class="text-xs text-slate-400">Koneksi Hardware</span>
-                        <h3 class="text-base font-black text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-center space-x-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span id="txtHwConnection" class="text-[10px] sm:text-xs text-slate-400">Status</span>
+                        <h3 class="text-sm sm:text-base font-black text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-center space-x-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                             <span>ONLINE</span>
                         </h3>
                     </div>
-                    <div class="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-500">
-                        <i class="fa-solid fa-wifi text-xl"></i>
+                    <div class="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-500">
+                        <i class="fa-solid fa-wifi text-base sm:text-xl"></i>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Kartu Grafik Pemakaian Daya -->
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-3xl shadow-lg mb-8 transition-colors duration-500">
-            <div class="flex justify-between items-center mb-4">
-                <span id="txtChartTitle" class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center space-x-1.5">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg mb-6 transition-colors duration-500">
+            <div class="flex justify-between items-center mb-3">
+                <span id="txtChartTitle" class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center space-x-1.5">
                     <i class="fa-solid fa-chart-line text-indigo-500"></i>
-                    <span>Grafik Pemakaian Daya (Watt)</span>
+                    <span>Grafik Daya (Watt)</span>
                 </span>
-                <span id="currentPowerVal" class="text-xs font-mono font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-xl transition-colors duration-300">0 Watt</span>
+                <span id="currentPowerVal" class="text-xs font-mono font-bold text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-xl transition-colors duration-300">0 Watt</span>
             </div>
-            <div class="w-full h-64">
+            <div class="w-full h-52 sm:h-64">
                 <canvas id="powerChart"></canvas>
             </div>
         </div>
 
         <!-- Banner Peringatan Sensor Air (Water Sensor) -->
-        <div id="waterAlertBanner" class="hidden mb-8 p-5 rounded-3xl bg-rose-500/20 border-2 border-rose-500 text-rose-600 dark:text-rose-300 shadow-xl shadow-rose-500/10 flex items-center justify-between animate-shake">
-            <div class="flex items-center space-x-4">
-                <div class="bg-rose-500 text-white p-3 rounded-2xl animate-bounce">
-                    <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+        <div id="waterAlertBanner" class="hidden mb-6 p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-rose-500/20 border-2 border-rose-500 text-rose-600 dark:text-rose-300 shadow-xl shadow-rose-500/10 flex items-center justify-between animate-shake">
+            <div class="flex items-center space-x-3 sm:space-x-4">
+                <div class="bg-rose-500 text-white p-2.5 sm:p-3 rounded-xl sm:rounded-2xl animate-bounce">
+                    <i class="fa-solid fa-triangle-exclamation text-base sm:text-xl"></i>
                 </div>
                 <div>
-                    <h4 id="waterAlertTitle" class="font-extrabold text-lg text-rose-700 dark:text-rose-200">PERINGATAN DARURAT: KEBOCORAN AIR TERDETEKSI!</h4>
-                    <p id="waterAlertDesc" class="text-xs text-rose-600 dark:text-rose-300/80 mt-0.5">Sensor air pada GPIO 4 mendeteksi adanya cairan atau genangan air.</p>
+                    <h4 id="waterAlertTitle" class="font-extrabold text-sm sm:text-lg text-rose-700 dark:text-rose-200">PERINGATAN DARURAT: KEBOCORAN AIR!</h4>
+                    <p id="waterAlertDesc" class="text-[11px] sm:text-xs text-rose-600 dark:text-rose-300/80 mt-0.5">Sensor air mendeteksi adanya cairan atau genangan.</p>
                 </div>
             </div>
-            <span id="waterDangerBadge" class="px-4 py-2 bg-rose-500 text-white text-xs font-bold rounded-xl uppercase tracking-wider animate-pulse">Bahaya</span>
+            <span id="waterDangerBadge" class="px-3 py-1.5 bg-rose-500 text-white text-[10px] sm:text-xs font-bold rounded-xl uppercase tracking-wider animate-pulse">Bahaya</span>
         </div>
 
         <!-- Judul Bagian Panel 8 Lampu -->
-        <div class="mb-6 flex items-center justify-between">
-            <h3 id="txtPanelTitle" class="text-lg font-extrabold tracking-wide flex items-center space-x-2">
+        <div class="mb-4 flex items-center justify-between">
+            <h3 id="txtPanelTitle" class="text-base sm:text-lg font-extrabold tracking-wide flex items-center space-x-2">
                 <i class="fa-solid fa-network-wired text-indigo-500"></i>
-                <span>Panel Kontrol 8 Lampu (Galang)</span>
+                <span>Panel 8 Lampu</span>
             </h3>
         </div>
 
         <!-- Grid 8 Lampu -->
-        <div id="lampsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div id="lampsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
             <!-- Dirender secara dinamis melalui skrip JavaScript -->
         </div>
 
     </div>
 
     <!-- Footer -->
-    <footer id="footerText" class="text-center py-6 text-xs text-slate-500 border-t border-slate-200 dark:border-slate-900 bg-white dark:bg-slate-950 transition-colors duration-500">
+    <footer id="footerText" class="text-center py-5 text-[11px] sm:text-xs text-slate-500 border-t border-slate-200 dark:border-slate-900 bg-white dark:bg-slate-950 transition-colors duration-500 px-3">
         &copy; 2026 Galang Smart Home IoT System. Powered by Galtech IOT & Tailwind CSS.
     </footer>
 
@@ -215,22 +217,22 @@
     <script>
         const langData = {
             id: {
-                connected: "Online (Terhubung)",
-                failedConn: "Gagal Terhubung",
+                connected: "Online",
+                failedConn: "Gagal Konek",
                 masterLabel: "Kontrol Master",
                 masterOff: "MATIKAN SEMUA",
                 masterOn: "NYALAKAN SEMUA",
-                relayStatus: "Status Relay",
-                activeLamps: "Lampu Aktif",
-                networkSpeed: "Kecepatan Jaringan",
-                cloudLatency: "Latensi Cloud",
-                microcontroller: "Mikrokontroler",
-                hwConnection: "Koneksi Hardware",
-                chartTitle: "Grafik Pemakaian Daya (Watt)",
-                waterTitle: "PERINGATAN DARURAT: KEBOCORAN AIR TERDETEKSI!",
-                waterDesc: "Sensor air pada GPIO 4 mendeteksi adanya cairan atau genangan air.",
+                relayStatus: "Relay",
+                activeLamps: "Aktif",
+                networkSpeed: "Jaringan",
+                cloudLatency: "Latensi",
+                microcontroller: "Hardware",
+                hwConnection: "Status",
+                chartTitle: "Grafik Daya (Watt)",
+                waterTitle: "PERINGATAN DARURAT: KEBOCORAN AIR!",
+                waterDesc: "Sensor air mendeteksi adanya cairan atau genangan.",
                 danger: "Bahaya",
-                panelTitle: "Panel Kontrol 8 Lampu (Galang)",
+                panelTitle: "Panel 8 Lampu",
                 turnOn: "NYALAKAN",
                 turnOff: "MATIKAN",
                 stateOn: "NYALA",
@@ -240,28 +242,28 @@
                 timerStop: "Stop",
                 timerDone: "Selesai",
                 scheduleLabel: "Jadwal Otomatis",
-                voiceListening: "Mendengarkan... (Contoh: 'Nyalakan lampu utama' atau 'Hidupkan lampu satu')",
+                voiceListening: "Mendengarkan...",
                 footer: "&copy; 2026 Galang Smart Home IoT System. Dipacu oleh Galtech IOT & Tailwind CSS."
             },
             en: {
-                connected: "Online (Connected)",
-                failedConn: "Connection Failed",
+                connected: "Online",
+                failedConn: "Failed",
                 masterLabel: "Master Control",
                 masterOff: "TURN OFF ALL",
                 masterOn: "TURN ON ALL",
-                relayStatus: "Relay Status",
-                activeLamps: "Active Lamps",
-                networkSpeed: "Network Speed",
-                cloudLatency: "Cloud Latency",
-                microcontroller: "Microcontroller",
-                hwConnection: "Hardware Connection",
+                relayStatus: "Relay",
+                activeLamps: "Active",
+                networkSpeed: "Network",
+                cloudLatency: "Latency",
+                microcontroller: "Hardware",
+                hwConnection: "Status",
                 chartTitle: "Power Usage Chart (Watts)",
-                waterTitle: "EMERGENCY WARNING: WATER LEAK DETECTED!",
-                waterDesc: "Water sensor on GPIO 4 detected liquid or a water puddle.",
+                waterTitle: "EMERGENCY: WATER LEAK!",
+                waterDesc: "Water sensor detected liquid or a puddle.",
                 danger: "Danger",
-                panelTitle: "8-Lamp Control Panel (Galang)",
+                panelTitle: "8-Lamp Panel",
                 turnOn: "TURN ON",
-                turnOFF: "TURN OFF",
+                turnOff: "TURN OFF",
                 stateOn: "ON",
                 stateOff: "OFF",
                 timerLabel: "Timer (Minutes)",
@@ -269,7 +271,7 @@
                 timerStop: "Stop",
                 timerDone: "Finished",
                 scheduleLabel: "Auto Schedule",
-                voiceListening: "Listening... (Example: 'Turn on main lamp' or 'Turn on lamp 1')",
+                voiceListening: "Listening...",
                 footer: "&copy; 2026 Galang Smart Home IoT System. Powered by Galtech IOT & Tailwind CSS."
             }
         };
@@ -285,11 +287,11 @@
         function updateLanguageUI() {
             const t = langData[currentLang];
             document.getElementById('txtMasterLabel').innerText = t.masterLabel;
-            document.getElementById('txtRelayStatus').innerHTML = `<i class="fa-solid fa-lightbulb text-indigo-500 dark:text-indigo-400"></i><span>${t.relayStatus}</span>`;
+            document.getElementById('txtRelayStatus').innerHTML = `<i class="fa-solid fa-lightbulb text-indigo-500"></i><span>${t.relayStatus}</span>`;
             document.getElementById('txtActiveLamps').innerText = t.activeLamps;
-            document.getElementById('txtNetworkSpeed').innerHTML = `<i class="fa-solid fa-gauge-high text-cyan-500 dark:text-cyan-400"></i><span>${t.networkSpeed}</span>`;
+            document.getElementById('txtNetworkSpeed').innerHTML = `<i class="fa-solid fa-gauge-high text-cyan-500"></i><span>${t.networkSpeed}</span>`;
             document.getElementById('txtCloudLatency').innerText = t.cloudLatency;
-            document.getElementById('txtMicrocontroller').innerHTML = `<i class="fa-solid fa-microchip text-purple-500 dark:text-purple-400"></i><span>${t.microcontroller}</span>`;
+            document.getElementById('txtMicrocontroller').innerHTML = `<i class="fa-solid fa-microchip text-purple-500"></i><span>${t.microcontroller}</span>`;
             document.getElementById('txtHwConnection').innerText = t.hwConnection;
             document.getElementById('txtChartTitle').innerHTML = `<i class="fa-solid fa-chart-line text-indigo-500"></i><span>${t.chartTitle}</span>`;
             document.getElementById('waterAlertTitle').innerText = t.waterTitle;
@@ -340,15 +342,15 @@
                         const {ctx, chartArea} = chart;
                         if (!chartArea) return null;
                         const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                        gradient.addColorStop(0, 'rgba(239, 68, 68, 0.4)');    // Merah di bagian atas
-                        gradient.addColorStop(0.5, 'rgba(245, 158, 11, 0.35)'); // Oranye di tengah
-                        gradient.addColorStop(1, 'rgba(16, 185, 129, 0.45)');   // HIJAU JELAS di bagian bawah
+                        gradient.addColorStop(0, 'rgba(239, 68, 68, 0.4)');
+                        gradient.addColorStop(0.5, 'rgba(245, 158, 11, 0.35)');
+                        gradient.addColorStop(1, 'rgba(16, 185, 129, 0.45)');
                         return gradient;
                     },
-                    borderWidth: 3,
+                    borderWidth: 2.5,
                     fill: true,
                     tension: 0.4,
-                    pointRadius: 4,
+                    pointRadius: 3,
                     pointBackgroundColor: '#10b981'
                 }]
             },
@@ -358,13 +360,13 @@
                 scales: {
                     x: {
                         grid: { display: false },
-                        ticks: { color: '#94a3b8', font: { family: 'sans-serif', size: 10 } }
+                        ticks: { color: '#94a3b8', font: { size: 9 } }
                     },
                     y: {
                         beginAtZero: true,
                         max: 100,
                         grid: { color: 'rgba(148, 163, 184, 0.1)' },
-                        ticks: { color: '#94a3b8', font: { family: 'sans-serif', size: 10 } }
+                        ticks: { color: '#94a3b8', font: { size: 9 } }
                     }
                 },
                 plugins: {
@@ -375,7 +377,7 @@
 
         function updateChartData(totalWatt) {
             const now = new Date().toTimeString().split(' ')[0];
-            if (powerChart.data.labels.length > 15) {
+            if (powerChart.data.labels.length > 12) {
                 powerChart.data.labels.shift();
                 powerChart.data.datasets[0].data.shift();
             }
@@ -395,7 +397,7 @@
 
             let powerValEl = document.getElementById('currentPowerVal');
             powerValEl.innerText = `${totalWatt} Watt`;
-            powerValEl.className = `text-xs font-mono font-bold px-3 py-1 rounded-xl transition-colors duration-300 ${
+            powerValEl.className = `text-xs font-mono font-bold px-2.5 py-1 rounded-xl transition-colors duration-300 ${
                 totalWatt > 60 ? 'text-rose-500 bg-rose-500/10' :
                 totalWatt > 30 ? 'text-amber-500 bg-amber-500/10' : 'text-emerald-500 bg-emerald-500/10'
             }`;
@@ -422,7 +424,7 @@
 
         function toggleVoiceControl() {
             if (!recognition) {
-                alert("Browser Anda tidak mendukung Web Speech API. Gunakan Google Chrome atau Microsoft Edge.");
+                alert("Browser HP Anda tidak mendukung Web Speech API. Gunakan Google Chrome.");
                 return;
             }
 
@@ -438,14 +440,14 @@
 
         function startVoiceUI() {
             isListening = true;
-            document.getElementById('voiceBtn').className = "px-4 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-lg shadow-rose-500/30 active:scale-95 transition-all flex items-center space-x-2 relative animate-pulse";
+            document.getElementById('voiceBtn').className = "px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-lg shadow-rose-500/30 active:scale-95 transition-all flex items-center space-x-1.5 relative animate-pulse";
             document.getElementById('voicePulse').classList.remove('hidden');
             document.getElementById('voiceFeedback').classList.remove('hidden');
         }
 
         function stopVoiceUI() {
             isListening = false;
-            document.getElementById('voiceBtn').className = "px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-500/30 active:scale-95 transition-all flex items-center space-x-2 relative";
+            document.getElementById('voiceBtn').className = "px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-500/30 active:scale-95 transition-all flex items-center space-x-1.5 relative";
             document.getElementById('voicePulse').classList.add('hidden');
             document.getElementById('voiceFeedback').classList.add('hidden');
         }
@@ -540,14 +542,14 @@
             const icon = document.getElementById('themeIcon');
             if (html.classList.contains('dark')) {
                 html.classList.remove('dark');
-                icon.className = "fa-solid fa-sun text-lg";
+                icon.className = "fa-solid fa-sun text-base";
             } else {
                 html.classList.add('dark');
-                icon.className = "fa-solid fa-moon text-lg";
+                icon.className = "fa-solid fa-moon text-base";
             }
         }
 
-        // Data 8 Lampu & Watt (Lampu 1 = 20W, Lampu 2-8 = 10W)
+        // Data 8 Lampu & Watt
         const lampNames = [
             "Lampu 1 (Utama)", 
             "Lampu 2 (Kamar)", 
@@ -570,38 +572,38 @@
         for (let i = 1; i <= 8; i++) {
             let idx = i - 1;
             grid.innerHTML += `
-            <div id="cardBox${i}" class="group bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 p-5 rounded-3xl shadow-xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between">
+            <div id="cardBox${i}" class="group bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between">
                 <div>
-                    <div class="flex justify-between items-start mb-4">
-                        <div id="iconBg${i}" class="p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors duration-300">
-                            <i class="fa-solid fa-lightbulb text-xl"></i>
+                    <div class="flex justify-between items-start mb-3">
+                        <div id="iconBg${i}" class="p-3 rounded-xl sm:rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors duration-300">
+                            <i class="fa-solid fa-lightbulb text-lg sm:text-xl"></i>
                         </div>
-                        <span id="badge${i}" class="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors duration-300">MATI</span>
+                        <span id="badge${i}" class="px-2.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors duration-300">MATI</span>
                     </div>
-                    <h4 class="text-base font-bold text-slate-800 dark:text-slate-100 mb-0.5">${lampNames[idx]}</h4>
-                    <p class="text-[10px] text-slate-400 mb-4 font-mono">${lampWatts[idx]}W • esp32s3/lampu${i}/galang</p>
+                    <h4 class="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100 mb-0.5">${lampNames[idx]}</h4>
+                    <p class="text-[10px] text-slate-400 mb-3 font-mono">${lampWatts[idx]}W • lampu${i}</p>
                 </div>
                 
-                <div class="space-y-4">
-                    <button onclick="toggleLamp(${i})" id="btn${i}" class="w-full py-3 px-4 rounded-2xl font-bold text-xs tracking-wider bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 dark:hover:text-white active:scale-95 transition-all shadow-sm flex items-center justify-center space-x-2">
+                <div class="space-y-3">
+                    <button onclick="toggleLamp(${i})" id="btn${i}" class="w-full py-2.5 px-4 rounded-xl sm:rounded-2xl font-bold text-xs tracking-wider bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 dark:hover:text-white active:scale-95 transition-all shadow-sm flex items-center justify-center space-x-2">
                         <i class="fa-solid fa-power-off text-xs"></i>
                         <span id="btnText${i}" data-state="off">NYALAKAN</span>
                     </button>
 
-                    <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
-                        <span id="timerLbl_${i}" class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Timer (Menit)</span>
+                    <div class="p-2.5 sm:p-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
+                        <span id="timerLbl_${i}" class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Timer (Menit)</span>
                         <div class="flex space-x-2">
-                            <input type="number" id="timerInput_${i}" value="5" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs font-mono text-center focus:outline-none focus:border-indigo-500">
-                            <button onclick="toggleTimer(${i})" id="startBtn_${i}" data-active="false" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all">Mulai</button>
+                            <input type="number" id="timerInput_${i}" value="5" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg sm:rounded-xl px-2.5 py-1 text-xs font-mono text-center focus:outline-none focus:border-indigo-500">
+                            <button onclick="toggleTimer(${i})" id="startBtn_${i}" data-active="false" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg sm:rounded-xl text-xs font-bold transition-all">Mulai</button>
                         </div>
-                        <p id="timerInfo_${i}" class="text-[10px] text-slate-400 text-center mt-1.5 font-mono">Nonaktif</p>
+                        <p id="timerInfo_${i}" class="text-[10px] text-slate-400 text-center mt-1 font-mono">Nonaktif</p>
                     </div>
 
-                    <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
-                        <span id="schedLbl_${i}" class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Jadwal Otomatis</span>
+                    <div class="p-2.5 sm:p-3 rounded-xl sm:rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
+                        <span id="schedLbl_${i}" class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Jadwal Otomatis</span>
                         <div class="grid grid-cols-2 gap-2">
-                            <input type="time" id="mulai_${i}" onchange="cekRentangJadwal(${i})" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-2 py-1 text-xs text-center focus:outline-none">
-                            <input type="time" id="selesai_${i}" onchange="cekRentangJadwal(${i})" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-2 py-1 text-xs text-center focus:outline-none">
+                            <input type="time" id="mulai_${i}" onchange="cekRentangJadwal(${i})" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg sm:rounded-xl px-2 py-1 text-xs text-center focus:outline-none">
+                            <input type="time" id="selesai_${i}" onchange="cekRentangJadwal(${i})" class="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg sm:rounded-xl px-2 py-1 text-xs text-center focus:outline-none">
                         </div>
                     </div>
                 </div>
@@ -629,8 +631,8 @@
         function onConnect() {
             const t = langData[currentLang];
             const statusDiv = document.getElementById('connectionStatus');
-            statusDiv.className = "px-4 py-2 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold flex items-center space-x-2";
-            statusDiv.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span><span>${t.connected}</span>`;
+            statusDiv.className = "px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] sm:text-xs font-semibold flex items-center space-x-1.5";
+            statusDiv.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>${t.connected}</span>`;
 
             for (let i = 1; i <= 8; i++) {
                 client.subscribe(`esp32s3/lampu${i}/galang`);
@@ -641,8 +643,8 @@
         function onFailure(message) {
             const t = langData[currentLang];
             const statusDiv = document.getElementById('connectionStatus');
-            statusDiv.className = "px-4 py-2 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-semibold flex items-center space-x-2";
-            statusDiv.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span><span>${t.failedConn}</span>`;
+            statusDiv.className = "px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-[11px] sm:text-xs font-semibold flex items-center space-x-1.5";
+            statusDiv.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500"></span><span>${t.failedConn}</span>`;
         }
 
         function onConnectionLost(responseObject) {
@@ -656,7 +658,6 @@
         function onMessageArrived(message) {
             for (let i = 1; i <= 8; i++) {
                 if (message.destinationName === `esp32s3/lampu${i}/galang`) {
-                    // Active-HIGH: "1" = Nyala, "0" = Mati
                     updateLampUI(i, message.payloadString === "1");
                 }
             }
@@ -672,7 +673,6 @@
 
         function toggleLamp(id) {
             let newState = !lampStates[id - 1];
-            // Active-HIGH: Kirim "1" untuk Nyala, "0" untuk Mati
             publishMQTT(id, newState ? "1" : "0");
         }
 
@@ -693,19 +693,19 @@
             let btnText = document.getElementById(`btnText${id}`);
 
             if (state) {
-                cardBox.className = "group bg-emerald-50/40 dark:bg-slate-900 border-2 border-emerald-500/80 p-5 rounded-3xl shadow-xl shadow-emerald-500/5 transition-all duration-300 relative overflow-hidden flex flex-col justify-between";
-                iconBg.className = "p-3.5 rounded-2xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 transition-colors duration-300";
-                badge.className = "px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 transition-colors duration-300";
+                cardBox.className = "group bg-emerald-50/40 dark:bg-slate-900 border-2 border-emerald-500/80 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl shadow-emerald-500/5 transition-all duration-300 relative overflow-hidden flex flex-col justify-between";
+                iconBg.className = "p-3 rounded-xl sm:rounded-2xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 transition-colors duration-300";
+                badge.className = "px-2.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 transition-colors duration-300";
                 badge.innerText = t.stateOn;
-                btn.className = "w-full py-3 px-4 rounded-2xl font-bold text-xs tracking-wider bg-emerald-500 hover:bg-emerald-600 text-white active:scale-95 transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center space-x-2";
+                btn.className = "w-full py-2.5 px-4 rounded-xl sm:rounded-2xl font-bold text-xs tracking-wider bg-emerald-500 hover:bg-emerald-600 text-white active:scale-95 transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center space-x-2";
                 btnText.innerText = t.turnOff;
                 btnText.dataset.state = "on";
             } else {
-                cardBox.className = "group bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 p-5 rounded-3xl shadow-xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between";
-                iconBg.className = "p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors duration-300";
-                badge.className = "px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors duration-300";
+                cardBox.className = "group bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between";
+                iconBg.className = "p-3 rounded-xl sm:rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors duration-300";
+                badge.className = "px-2.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors duration-300";
                 badge.innerText = t.stateOff;
-                btn.className = "w-full py-3 px-4 rounded-2xl font-bold text-xs tracking-wider bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 dark:hover:text-white active:scale-95 transition-all shadow-sm flex items-center justify-center space-x-2";
+                btn.className = "w-full py-2.5 px-4 rounded-xl sm:rounded-2xl font-bold text-xs tracking-wider bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 dark:hover:text-white active:scale-95 transition-all shadow-sm flex items-center justify-center space-x-2";
                 btnText.innerText = t.turnOn;
                 btnText.dataset.state = "off";
 
@@ -730,11 +730,11 @@
             let allActive = lampStates.every(state => state === true);
 
             if (allActive) {
-                mBtn.className = "w-full py-3.5 px-4 rounded-2xl font-bold text-xs tracking-wider bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/30 active:scale-95 transition-all flex items-center justify-center space-x-2";
+                mBtn.className = "w-full py-3 px-3 rounded-xl sm:rounded-2xl font-bold text-xs tracking-wider bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/30 active:scale-95 transition-all flex items-center justify-center space-x-2";
                 mText.innerText = t.masterOff;
                 mText.dataset.state = "off";
             } else {
-                mBtn.className = "w-full py-3.5 px-4 rounded-2xl font-bold text-xs tracking-wider bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/30 active:scale-95 transition-all flex items-center justify-center space-x-2";
+                mBtn.className = "w-full py-3 px-3 rounded-xl sm:rounded-2xl font-bold text-xs tracking-wider bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/30 active:scale-95 transition-all flex items-center justify-center space-x-2";
                 mText.innerText = t.masterOn;
                 mText.dataset.state = "on";
             }
@@ -748,7 +748,6 @@
 
         function executeMaster(turnOn) {
             for (let i = 1; i <= 8; i++) {
-                // Active-HIGH: "1" = Nyala, "0" = Mati
                 publishMQTT(i, turnOn ? "1" : "0");
             }
         }
@@ -771,14 +770,14 @@
                 timerSecondsLeft[id - 1] = menit * 60;
             }
 
-            publishMQTT(id, '1'); // Nyalakan saat timer dimulai
+            publishMQTT(id, '1');
             if (timerIntervals[id]) clearInterval(timerIntervals[id]);
 
             timerActiveStates[id - 1] = true;
             timerIsPaused[id - 1] = false;
 
             startBtn.dataset.active = "true";
-            startBtn.className = "px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all";
+            startBtn.className = "px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg sm:rounded-xl text-xs font-bold transition-all";
             startBtn.innerText = t.timerStop;
 
             function formatTime(sec) {
@@ -795,7 +794,7 @@
                     document.getElementById(`timerInfo_${id}`).innerText = `${currentLang === 'id' ? 'Sisa' : 'Left'}: ${formatTime(timerSecondsLeft[id - 1])}`;
                 } else {
                     resetTimerCompletely(id);
-                    publishMQTT(id, '0'); // Matikan saat timer selesai
+                    publishMQTT(id, '0');
                     document.getElementById(`timerInfo_${id}`).innerText = t.timerDone;
                 }
             }, 1000);
@@ -813,7 +812,7 @@
             let startBtn = document.getElementById(`startBtn_${id}`);
             if (startBtn) {
                 startBtn.dataset.active = "false";
-                startBtn.className = "px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all";
+                startBtn.className = "px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg sm:rounded-xl text-xs font-bold transition-all";
                 startBtn.innerText = t.timerBtn;
             }
 
@@ -838,7 +837,7 @@
             let startBtn = document.getElementById(`startBtn_${id}`);
             if (startBtn) {
                 startBtn.dataset.active = "false";
-                startBtn.className = "px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all";
+                startBtn.className = "px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg sm:rounded-xl text-xs font-bold transition-all";
                 startBtn.innerText = t.timerBtn;
             }
             let timerInfo = document.getElementById(`timerInfo_${id}`);
@@ -861,9 +860,9 @@
             const endMin = eH * 60 + eM;
 
             if (nowMin >= startMin && nowMin < endMin) {
-                publishMQTT(id, '1'); // Nyala
+                publishMQTT(id, '1');
             } else {
-                publishMQTT(id, '0'); // Mati
+                publishMQTT(id, '0');
             }
         }
 
