@@ -261,7 +261,7 @@
                 danger: "Danger",
                 panelTitle: "8-Lamp Control Panel (Galang)",
                 turnOn: "TURN ON",
-                turnOff: "TURN OFF",
+                turnOFF: "TURN OFF",
                 stateOn: "ON",
                 stateOff: "OFF",
                 timerLabel: "Timer (Minutes)",
@@ -656,8 +656,8 @@
         function onMessageArrived(message) {
             for (let i = 1; i <= 8; i++) {
                 if (message.destinationName === `esp32s3/lampu${i}/galang`) {
-                    // Karena hardware relay Active-LOW (0 = Nyala, 1 = Mati)
-                    updateLampUI(i, message.payloadString === "0");
+                    // Active-HIGH: "1" = Nyala, "0" = Mati
+                    updateLampUI(i, message.payloadString === "1");
                 }
             }
             if (message.destinationName === "esp32s3/watersensor/galang") {
@@ -672,8 +672,8 @@
 
         function toggleLamp(id) {
             let newState = !lampStates[id - 1];
-            // Active-LOW: Kirim "0" untuk Nyala, "1" untuk Mati
-            publishMQTT(id, newState ? "0" : "1");
+            // Active-HIGH: Kirim "1" untuk Nyala, "0" untuk Mati
+            publishMQTT(id, newState ? "1" : "0");
         }
 
         function publishMQTT(id, payload) {
@@ -748,8 +748,8 @@
 
         function executeMaster(turnOn) {
             for (let i = 1; i <= 8; i++) {
-                // Active-LOW: "0" untuk nyala, "1" untuk mati
-                publishMQTT(i, turnOn ? "0" : "1");
+                // Active-HIGH: "1" = Nyala, "0" = Mati
+                publishMQTT(i, turnOn ? "1" : "0");
             }
         }
 
@@ -771,7 +771,7 @@
                 timerSecondsLeft[id - 1] = menit * 60;
             }
 
-            publishMQTT(id, '0'); // Nyalakan saat timer dimulai
+            publishMQTT(id, '1'); // Nyalakan saat timer dimulai
             if (timerIntervals[id]) clearInterval(timerIntervals[id]);
 
             timerActiveStates[id - 1] = true;
@@ -795,7 +795,7 @@
                     document.getElementById(`timerInfo_${id}`).innerText = `${currentLang === 'id' ? 'Sisa' : 'Left'}: ${formatTime(timerSecondsLeft[id - 1])}`;
                 } else {
                     resetTimerCompletely(id);
-                    publishMQTT(id, '1'); // Matikan saat timer selesai
+                    publishMQTT(id, '0'); // Matikan saat timer selesai
                     document.getElementById(`timerInfo_${id}`).innerText = t.timerDone;
                 }
             }, 1000);
@@ -861,9 +861,9 @@
             const endMin = eH * 60 + eM;
 
             if (nowMin >= startMin && nowMin < endMin) {
-                publishMQTT(id, '0'); // Nyala
+                publishMQTT(id, '1'); // Nyala
             } else {
-                publishMQTT(id, '1'); // Mati
+                publishMQTT(id, '0'); // Mati
             }
         }
 
