@@ -325,7 +325,7 @@
             }
         }
 
-        // --- INISIALISASI GRAFIK PEMAKAIAN (CHART.JS DENGAN GRADASI HIJAU DI BAGIAN BAWAH) ---
+        // --- INISIALISASI GRAFIK PEMAKAIAN (CHART.JS) ---
         const ctx = document.getElementById('powerChart').getContext('2d');
         const powerChart = new Chart(ctx, {
             type: 'line',
@@ -340,7 +340,7 @@
                         const {ctx, chartArea} = chart;
                         if (!chartArea) return null;
                         const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                        gradient.addColorStop(0, 'rgba(239, 68, 68, 0.4)');    // Merah di bagian atas (beban tinggi)
+                        gradient.addColorStop(0, 'rgba(239, 68, 68, 0.4)');    // Merah di bagian atas
                         gradient.addColorStop(0.5, 'rgba(245, 158, 11, 0.35)'); // Oranye di tengah
                         gradient.addColorStop(1, 'rgba(16, 185, 129, 0.45)');   // HIJAU JELAS di bagian bawah
                         return gradient;
@@ -382,11 +382,11 @@
             powerChart.data.labels.push(now);
             powerChart.data.datasets[0].data.push(totalWatt);
 
-            let lineColor = '#10b981'; // Hijau
+            let lineColor = '#10b981';
             if (totalWatt > 60) {
-                lineColor = '#ef4444'; // Merah
+                lineColor = '#ef4444';
             } else if (totalWatt > 30) {
-                lineColor = '#f59e0b'; // Oranye
+                lineColor = '#f59e0b';
             }
 
             powerChart.data.datasets[0].borderColor = lineColor;
@@ -656,7 +656,8 @@
         function onMessageArrived(message) {
             for (let i = 1; i <= 8; i++) {
                 if (message.destinationName === `esp32s3/lampu${i}/galang`) {
-                    updateLampUI(i, message.payloadString === "1");
+                    // Karena hardware relay Active-LOW (0 = Nyala, 1 = Mati)
+                    updateLampUI(i, message.payloadString === "0");
                 }
             }
             if (message.destinationName === "esp32s3/watersensor/galang") {
@@ -671,7 +672,8 @@
 
         function toggleLamp(id) {
             let newState = !lampStates[id - 1];
-            publishMQTT(id, newState ? "1" : "0");
+            // Active-LOW: Kirim "0" untuk Nyala, "1" untuk Mati
+            publishMQTT(id, newState ? "0" : "1");
         }
 
         function publishMQTT(id, payload) {
@@ -746,7 +748,8 @@
 
         function executeMaster(turnOn) {
             for (let i = 1; i <= 8; i++) {
-                publishMQTT(i, turnOn ? "1" : "0");
+                // Active-LOW: "0" untuk nyala, "1" untuk mati
+                publishMQTT(i, turnOn ? "0" : "1");
             }
         }
 
@@ -768,7 +771,7 @@
                 timerSecondsLeft[id - 1] = menit * 60;
             }
 
-            publishMQTT(id, '1');
+            publishMQTT(id, '0'); // Nyalakan saat timer dimulai
             if (timerIntervals[id]) clearInterval(timerIntervals[id]);
 
             timerActiveStates[id - 1] = true;
@@ -792,7 +795,7 @@
                     document.getElementById(`timerInfo_${id}`).innerText = `${currentLang === 'id' ? 'Sisa' : 'Left'}: ${formatTime(timerSecondsLeft[id - 1])}`;
                 } else {
                     resetTimerCompletely(id);
-                    publishMQTT(id, '0');
+                    publishMQTT(id, '1'); // Matikan saat timer selesai
                     document.getElementById(`timerInfo_${id}`).innerText = t.timerDone;
                 }
             }, 1000);
@@ -858,9 +861,9 @@
             const endMin = eH * 60 + eM;
 
             if (nowMin >= startMin && nowMin < endMin) {
-                publishMQTT(id, '1');
+                publishMQTT(id, '0'); // Nyala
             } else {
-                publishMQTT(id, '0');
+                publishMQTT(id, '1'); // Mati
             }
         }
 
