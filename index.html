@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
-  <title>GALTECH IoT // CYBER-HUD v3.7</title>
+  <title>GALTECH IoT // SCADA TELEMETRY HUD v4.0</title>
 
-  <!-- Google Fonts: Retro Pixel, Digital LED & Tech Mono -->
+  <!-- Google Fonts: Aerospace Orbitron, Digital LED & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Orbitron:wght@600;700;800&family=VT323&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS, MQTT.js & Chart.js CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -20,9 +20,9 @@
       theme: {
         extend: {
           fontFamily: {
-            pixel: ['"Press Start 2P"', 'monospace'],
+            hud: ['"Orbitron"', 'sans-serif'],
             digital: ['"VT323"', 'monospace'],
-            mono: ['"Share Tech Mono"', 'monospace'],
+            mono: ['"JetBrains Mono"', 'monospace'],
           },
           colors: {
             hud: {
@@ -41,39 +41,41 @@
   <style>
     /* ================= VARIABEL TEMA: DARK MODE (DEFAULT) ================= */
     :root {
-      --bg-body: #04070f;
-      --bg-radial: rgba(0, 243, 255, 0.12);
-      --grid-line: rgba(0, 243, 255, 0.04);
-      --panel-grad-1: rgba(12, 19, 38, 0.92);
-      --panel-grad-2: rgba(7, 11, 22, 0.95);
-      --panel-border: rgba(0, 243, 255, 0.35);
-      --panel-shadow: 0 0 20px rgba(0, 243, 255, 0.08), inset 0 0 18px rgba(0, 243, 255, 0.04);
+      --bg-body: #03060d;
+      --bg-radial: rgba(0, 243, 255, 0.14);
+      --bg-radial-2: rgba(0, 255, 136, 0.06);
+      --grid-line: rgba(0, 243, 255, 0.045);
+      --panel-grad-1: rgba(11, 18, 36, 0.88);
+      --panel-grad-2: rgba(6, 10, 20, 0.94);
+      --panel-border: rgba(0, 243, 255, 0.32);
+      --panel-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), inset 0 0 20px rgba(0, 243, 255, 0.04);
       --corner-color: #00f3ff;
-      --sub-bg: rgba(0, 0, 0, 0.78);
-      --sub-border: #1f2937;
-      --btn-bg: rgba(12, 19, 38, 0.85);
-      --bar-empty: #374151;
+      --sub-bg: rgba(3, 7, 16, 0.82);
+      --sub-border: rgba(51, 65, 85, 0.7);
+      --btn-bg: rgba(12, 20, 38, 0.9);
+      --bar-empty: #1e293b;
       --led-stripe: rgba(255, 255, 255, 0.06);
-      --text-primary: #ffffff;
+      --text-primary: #f8fafc;
       --text-body: #e2e8f0;
       --text-muted: #94a3b8;
       --c-cyan: #00f3ff;
-      --c-pink: #ff007f;
-      --c-green: #00ff66;
-      --c-yellow: #ffe600;
-      --c-red: #ff2a55;
-      --scanline-opacity: 1;
+      --c-pink: #ff2a85;
+      --c-green: #00ff88;
+      --c-yellow: #ffbe0b;
+      --c-red: #ff3355;
+      --scanline-opacity: 0.65;
     }
 
     /* ================= VARIABEL TEMA: WHITE MODE (LIGHT HUD) ================= */
     [data-theme="light"] {
-      --bg-body: #eef3f8;
-      --bg-radial: rgba(2, 132, 199, 0.08);
-      --grid-line: rgba(15, 23, 42, 0.06);
+      --bg-body: #eaf0f6;
+      --bg-radial: rgba(2, 132, 199, 0.1);
+      --bg-radial-2: rgba(5, 150, 105, 0.05);
+      --grid-line: rgba(15, 23, 42, 0.055);
       --panel-grad-1: rgba(255, 255, 255, 0.96);
       --panel-grad-2: rgba(248, 250, 252, 0.98);
-      --panel-border: rgba(2, 132, 199, 0.45);
-      --panel-shadow: 0 4px 16px rgba(15, 23, 42, 0.07), inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+      --panel-border: rgba(2, 132, 199, 0.38);
+      --panel-shadow: 0 6px 24px rgba(15, 23, 42, 0.07), inset 0 0 0 1px rgba(255, 255, 255, 0.9);
       --corner-color: #0284c7;
       --sub-bg: #f1f5f9;
       --sub-border: #cbd5e1;
@@ -88,7 +90,7 @@
       --c-green: #059669;
       --c-yellow: #d97706;
       --c-red: #dc2626;
-      --scanline-opacity: 0.25;
+      --scanline-opacity: 0.15;
     }
 
     html, body {
@@ -99,10 +101,11 @@
     body {
       background-color: var(--bg-body);
       background-image: 
-        radial-gradient(circle at 50% 0%, var(--bg-radial) 0%, transparent 55%),
+        radial-gradient(circle at 18% 0%, var(--bg-radial) 0%, transparent 50%),
+        radial-gradient(circle at 85% 15%, var(--bg-radial-2) 0%, transparent 45%),
         linear-gradient(var(--grid-line) 1px, transparent 1px),
         linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-      background-size: 100% 100%, 26px 26px, 26px 26px;
+      background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
       color: var(--text-body);
       transition: background-color 0.25s ease, color 0.25s ease;
     }
@@ -115,7 +118,7 @@
     .crt-scanlines {
       background: linear-gradient(
         rgba(18, 16, 16, 0) 50%, 
-        rgba(0, 0, 0, 0.25) 50%
+        rgba(0, 0, 0, 0.22) 50%
       );
       background-size: 100% 4px;
       pointer-events: none;
@@ -124,9 +127,12 @@
 
     .hud-panel {
       background: linear-gradient(180deg, var(--panel-grad-1) 0%, var(--panel-grad-2) 100%);
-      border: 1.5px solid var(--panel-border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--panel-border);
       box-shadow: var(--panel-shadow);
       position: relative;
+      border-radius: 4px;
       transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
     }
 
@@ -140,38 +146,39 @@
     }
     @media (min-width: 640px) {
       .hud-panel::before, .hud-panel::after {
-        width: 12px;
-        height: 12px;
+        width: 13px;
+        height: 13px;
       }
     }
     .hud-panel::before {
-      top: -1.5px; left: -1.5px;
-      border-top: 2.5px solid var(--corner-color);
-      border-left: 2.5px solid var(--corner-color);
+      top: -1px; left: -1px;
+      border-top: 2px solid var(--corner-color);
+      border-left: 2px solid var(--corner-color);
     }
     .hud-panel::after {
-      bottom: -1.5px; right: -1.5px;
-      border-bottom: 2.5px solid var(--corner-color);
-      border-right: 2.5px solid var(--corner-color);
+      bottom: -1px; right: -1px;
+      border-bottom: 2px solid var(--corner-color);
+      border-right: 2px solid var(--corner-color);
     }
 
     .hud-subbox {
       background-color: var(--sub-bg);
       border: 1px solid var(--sub-border);
+      border-radius: 3px;
       transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
-    [data-theme="dark"] .glow-cyan { text-shadow: 0 0 10px rgba(0, 243, 255, 0.8); }
-    [data-theme="dark"] .glow-green { text-shadow: 0 0 10px rgba(0, 255, 102, 0.85); }
-    [data-theme="dark"] .glow-pink { text-shadow: 0 0 10px rgba(255, 0, 127, 0.85); }
-    [data-theme="dark"] .glow-yellow { text-shadow: 0 0 10px rgba(255, 230, 0, 0.85); }
-    [data-theme="dark"] .glow-red { text-shadow: 0 0 12px rgba(255, 42, 85, 0.9); }
+    [data-theme="dark"] .glow-cyan { text-shadow: 0 0 12px rgba(0, 243, 255, 0.75); }
+    [data-theme="dark"] .glow-green { text-shadow: 0 0 12px rgba(0, 255, 136, 0.8); }
+    [data-theme="dark"] .glow-pink { text-shadow: 0 0 12px rgba(255, 42, 133, 0.8); }
+    [data-theme="dark"] .glow-yellow { text-shadow: 0 0 12px rgba(255, 190, 11, 0.8); }
+    [data-theme="dark"] .glow-red { text-shadow: 0 0 14px rgba(255, 51, 85, 0.9); }
 
     .arcade-switch {
       transition: all 0.14s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .arcade-switch:active {
-      transform: translateY(2px) scale(0.97);
+      transform: translateY(1.5px) scale(0.98);
     }
 
     .led-bar-bg {
@@ -184,34 +191,46 @@
       );
     }
 
+    /* Animasi Aliran Arus Energi pada Diagram Topologi */
+    @keyframes energyFlow {
+      from { stroke-dashoffset: 24; }
+      to { stroke-dashoffset: 0; }
+    }
+    .flow-active {
+      stroke-dasharray: 6 6;
+      animation: energyFlow 0.75s linear infinite;
+    }
+
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: var(--bg-body); }
-    ::-webkit-scrollbar-thumb { background: var(--c-cyan); }
+    ::-webkit-scrollbar-thumb { background: var(--c-cyan); border-radius: 2px; }
   </style>
 </head>
 <body class="font-mono min-h-screen relative pb-8 sm:pb-10 selection:bg-hud-pink selection:text-white">
 
   <div id="crtOverlay" class="crt-scanlines fixed inset-0 z-50"></div>
 
-  <div class="max-w-7xl mx-auto px-2.5 sm:px-4 pt-3 sm:pt-5 relative z-10 space-y-4 sm:space-y-6">
+  <div class="max-w-7xl mx-auto px-2.5 sm:px-4 pt-3 sm:pt-5 relative z-10 space-y-4 sm:space-y-5">
 
-    <!-- ================= TOP CYBER HEADER (RESPONSIVE HP / TABLET / DESKTOP) ================= -->
+    <!-- ================= TOP AEROSPACE / SCADA HEADER ================= -->
     <header class="hud-panel p-3 sm:p-4 md:p-5">
       <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-3 sm:gap-4">
         
-        <!-- Baris 1 HP/Tablet: Identitas Sistem + Status Koneksi -->
+        <!-- Baris 1 HP/Tablet: Brand Sistem + Status Koneksi -->
         <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2.5 sm:gap-4 min-w-0">
-            <div class="hidden sm:flex w-11 h-11 md:w-12 md:h-12 border border-hud-cyan bg-hud-cyan/10 items-center justify-center shrink-0">
-              <span class="font-pixel text-hud-cyan text-sm md:text-base glow-cyan">G//</span>
+          <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+            <!-- Emblem Hex/Tech -->
+            <div class="hidden sm:flex w-12 h-12 border border-hud-cyan/60 bg-hud-cyan/10 items-center justify-center shrink-0 relative">
+              <span class="font-hud font-extrabold text-hud-cyan text-base glow-cyan">GT</span>
+              <span class="absolute -bottom-1 -right-1 w-2 h-2 bg-hud-green"></span>
             </div>
             <div class="min-w-0">
               <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
-                <span class="bg-hud-cyan font-pixel text-[8px] sm:text-[9px] px-1.5 sm:px-2 py-0.5 shrink-0" style="color: var(--bg-body)">ESP32-S3</span>
-                <span class="text-[10px] sm:text-xs text-hud-cyan font-semibold truncate">EMQX WSS // LIVE SYNC</span>
+                <span class="bg-hud-cyan font-hud font-bold text-[8px] sm:text-[9px] px-2 py-0.5 tracking-wider shrink-0" style="color: var(--bg-body)">ESP32-S3</span>
+                <span class="text-[10px] sm:text-xs text-hud-cyan font-semibold tracking-wide truncate">SMART ENERGY &amp; IOT TELEMETRY</span>
               </div>
-              <h1 class="font-pixel text-sm sm:text-xl md:text-2xl tracking-wider glow-cyan truncate" style="color: var(--text-primary)">
-                GALTECH <span class="text-hud-cyan">//</span> SYSTEM
+              <h1 class="font-hud font-extrabold text-base sm:text-2xl md:text-[26px] tracking-wider glow-cyan truncate" style="color: var(--text-primary)">
+                GALTECH <span class="text-hud-cyan">//</span> SCADA HUD
               </h1>
             </div>
           </div>
@@ -220,17 +239,17 @@
           <div id="connBadgeMobile"
             class="xl:hidden hud-subbox flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-2 sm:py-2.5 border border-hud-red shrink-0">
             <span id="connDotMobile" class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-hud-red animate-ping"></span>
-            <span id="connTextMobile" class="font-pixel text-[8px] sm:text-[9px] text-hud-red">CONNECTING</span>
+            <span id="connTextMobile" class="font-hud font-bold text-[8px] sm:text-[9px] tracking-wider text-hud-red">CONNECTING</span>
           </div>
         </div>
 
-        <!-- Baris 2 & 3 HP/Tablet: Telemetry Jam & Ping + Tombol Kontrol -->
+        <!-- Baris 2 & 3 HP/Tablet: Jam, Ping & Kontrol Sistem -->
         <div class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2">
           
           <!-- Grid 2 Kolom di HP untuk Jam Real-Time & Ping Sinyal -->
           <div class="grid grid-cols-2 sm:flex items-center gap-2">
             <!-- Widget Jam Real-Time -->
-            <div class="hud-subbox px-2.5 sm:px-3 py-1.5 flex flex-col justify-center min-w-0 sm:min-w-[136px]">
+            <div class="hud-subbox px-2.5 sm:px-3 py-1.5 flex flex-col justify-center min-w-0 sm:min-w-[138px]">
               <span id="liveDate" class="text-[9px] sm:text-[10px] text-hud-cyan font-bold tracking-wider uppercase truncate">-- --- ----</span>
               <span id="liveClock" class="font-digital text-xl sm:text-2xl leading-none glow-cyan tracking-widest mt-0.5" style="color: var(--text-primary)">00:00:00</span>
             </div>
@@ -251,45 +270,47 @@
           </div>
 
           <!-- Grid Tombol Pengaturan -->
-          <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1.5 sm:gap-2">
-            <!-- Tombol Switch Bahasa (ID / EN) -->
+          <div class="grid grid-cols-3 sm:flex sm:flex-wrap items-center gap-1.5 sm:gap-2">
             <button id="langBtn" onclick="toggleLanguage()"
-              class="font-pixel text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border border-hud-pink text-hud-pink hover:bg-hud-pink hover:text-white transition cursor-pointer text-center"
+              class="font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border border-hud-pink/70 text-hud-pink hover:bg-hud-pink hover:text-white transition cursor-pointer text-center tracking-wider"
               style="background-color: var(--btn-bg)">
               LANG: ID
             </button>
 
-            <!-- Tombol Switch Tema (DARK / WHITE) -->
             <button id="themeBtn" onclick="toggleTheme()"
-              class="font-pixel text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border border-hud-yellow text-hud-yellow hover:bg-hud-yellow hover:text-black transition cursor-pointer text-center"
+              class="font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border border-hud-yellow/70 text-hud-yellow hover:bg-hud-yellow hover:text-black transition cursor-pointer text-center tracking-wider"
               style="background-color: var(--btn-bg)">
               MODE: DARK
             </button>
 
-            <!-- Tombol SFX & CRT -->
+            <button id="simBtn" onclick="toggleDemoMode()"
+              class="font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border transition cursor-pointer hover:border-hud-green hover:text-hud-green text-center tracking-wider"
+              style="background-color: var(--btn-bg); border-color: var(--sub-border); color: var(--text-muted)">
+              SIM: OFF
+            </button>
+
             <button id="sfxBtn" onclick="toggleSFX()"
-              class="font-pixel text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border transition cursor-pointer hover:border-hud-cyan hover:text-hud-cyan text-center"
+              class="font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border transition cursor-pointer hover:border-hud-cyan hover:text-hud-cyan text-center tracking-wider"
               style="background-color: var(--btn-bg); border-color: var(--sub-border); color: var(--text-muted)">
               SFX: ON
             </button>
 
             <button id="crtBtn" onclick="toggleCRT()"
-              class="font-pixel text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border transition cursor-pointer hover:border-hud-cyan hover:text-hud-cyan text-center"
+              class="font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border transition cursor-pointer hover:border-hud-cyan hover:text-hud-cyan text-center tracking-wider"
               style="background-color: var(--btn-bg); border-color: var(--sub-border); color: var(--text-muted)">
               CRT: ON
             </button>
 
-            <!-- Tombol Mode Hybrid -->
             <button id="modeBtn" onclick="toggleHybridMode()"
-              class="col-span-2 sm:col-span-1 font-pixel text-[8px] sm:text-[9px] px-3 py-2.5 border border-hud-cyan bg-hud-cyan/15 text-hud-cyan hover:bg-hud-cyan hover:text-white transition cursor-pointer text-center">
-              NET: CLOUD WSS
+              class="font-hud font-bold text-[8px] sm:text-[9px] px-2.5 sm:px-3 py-2.5 border border-hud-cyan bg-hud-cyan/15 text-hud-cyan hover:bg-hud-cyan hover:text-white transition cursor-pointer text-center tracking-wider">
+              NET: CLOUD
             </button>
 
             <!-- Status Koneksi Khusus Desktop XL -->
             <div id="connBadgeDesktop"
               class="hidden xl:flex hud-subbox items-center gap-2 px-3.5 py-2.5 border border-hud-red">
               <span id="connDotDesktop" class="w-2.5 h-2.5 rounded-full bg-hud-red animate-ping"></span>
-              <span id="connTextDesktop" class="font-pixel text-[9px] text-hud-red">CONNECTING</span>
+              <span id="connTextDesktop" class="font-hud font-bold text-[9px] tracking-wider text-hud-red">CONNECTING</span>
             </div>
           </div>
         </div>
@@ -303,7 +324,7 @@
             <input type="text" id="espIpInput" value="192.168.18.100"
               class="hud-subbox border-hud-yellow text-hud-yellow px-3 py-1.5 text-xs flex-1 sm:w-40 font-bold focus:outline-none" />
             <button onclick="saveLocalIp()" data-i18n="setIpBtn"
-              class="font-pixel text-[8px] sm:text-[9px] bg-hud-yellow text-black px-3 py-2 hover:brightness-110 cursor-pointer shrink-0">
+              class="font-hud font-bold text-[8px] sm:text-[9px] bg-hud-yellow text-black px-3 py-2 hover:brightness-110 cursor-pointer shrink-0">
               SIMPAN IP
             </button>
           </div>
@@ -314,12 +335,109 @@
       </div>
     </header>
 
+    <!-- ================= SECTION 0: SYSTEM POWER ANALYTICS & LIVE ENERGY TOPOLOGY ================= -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4">
+      
+      <!-- Kiri: 3 Kartu Analitik Cepat (5 Kolom) -->
+      <div class="lg:col-span-5 grid grid-cols-3 gap-2 sm:gap-3">
+        <!-- Estimasi SoC Baterai (dari V2) -->
+        <div class="hud-panel p-2.5 sm:p-3.5 flex flex-col justify-between">
+          <span data-i18n="kpiBattLabel" class="text-[9px] sm:text-[10px] font-bold tracking-wider uppercase truncate" style="color: var(--text-muted)">BATERAI SoC</span>
+          <div class="my-1 flex items-baseline gap-1">
+            <span id="socValue" class="font-digital text-3xl sm:text-4xl text-hud-green glow-green leading-none">0%</span>
+          </div>
+          <div class="hud-subbox w-full h-2 p-0.5">
+            <div id="socBar" class="h-full bg-hud-green transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Status Charging Solar (V1 vs V2) -->
+        <div class="hud-panel p-2.5 sm:p-3.5 flex flex-col justify-between">
+          <span data-i18n="kpiSolarLabel" class="text-[9px] sm:text-[10px] font-bold tracking-wider uppercase truncate" style="color: var(--text-muted)">SOLAR INPUT</span>
+          <div class="my-1">
+            <span id="chargeStateBadge" class="font-hud font-bold text-[10px] sm:text-xs text-hud-cyan glow-cyan tracking-wider">STANDBY</span>
+          </div>
+          <span id="solarDeltaText" class="text-[9px] sm:text-[10px] font-semibold truncate" style="color: var(--text-muted)">&Delta;V: +0.00V</span>
+        </div>
+
+        <!-- Proteksi Sistem & Paket RX -->
+        <div class="hud-panel p-2.5 sm:p-3.5 flex flex-col justify-between">
+          <span data-i18n="kpiGuardLabel" class="text-[9px] sm:text-[10px] font-bold tracking-wider uppercase truncate" style="color: var(--text-muted)">PROTEKSI DC</span>
+          <div class="my-1">
+            <span id="guardStatusBadge" class="font-hud font-bold text-[10px] sm:text-xs text-hud-green glow-green tracking-wider">NOMINAL</span>
+          </div>
+          <span id="rxCountBadge" class="text-[9px] sm:text-[10px] font-semibold truncate" style="color: var(--text-muted)">PKT: 0</span>
+        </div>
+      </div>
+
+      <!-- Kanan: Live Energy Flow Topology Diagram (7 Kolom) -->
+      <div class="lg:col-span-7 hud-panel p-2.5 sm:p-3.5 flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-1.5">
+          <span data-i18n="flowTitle" class="font-hud font-bold text-[9px] sm:text-[10px] text-hud-cyan tracking-wider uppercase">
+            TOPOLOGI ALIRAN ENERGI REAL-TIME
+          </span>
+          <span class="text-[9px] sm:text-[10px] font-bold" style="color: var(--text-muted)">DC BUS 12V–25V</span>
+        </div>
+
+        <!-- 4 Node Aliran Daya dengan Garis Animasi SVG -->
+        <div class="grid grid-cols-7 items-center gap-1 text-center my-auto py-1">
+          <!-- Node 1: Solar -->
+          <div class="col-span-1 hud-subbox p-1.5 sm:p-2 border-hud-cyan/50">
+            <div class="text-[8px] sm:text-[9px] font-bold text-hud-cyan truncate">PV SOLAR</div>
+            <div id="flowVal-1" class="font-digital text-base sm:text-xl leading-tight" style="color: var(--text-primary)">0.0V</div>
+          </div>
+
+          <!-- Connector 1 -> 2 -->
+          <div class="col-span-1 flex items-center justify-center">
+            <svg class="w-full h-4" viewBox="0 0 40 12" preserveAspectRatio="none">
+              <line x1="0" y1="6" x2="40" y2="6" stroke="var(--bar-empty)" stroke-width="2" />
+              <line id="flowLine-1" x1="0" y1="6" x2="40" y2="6" stroke="var(--c-cyan)" stroke-width="2.5" />
+            </svg>
+          </div>
+
+          <!-- Node 2: Battery -->
+          <div class="col-span-1 hud-subbox p-1.5 sm:p-2 border-hud-green/50">
+            <div class="text-[8px] sm:text-[9px] font-bold text-hud-green truncate">BATTERY</div>
+            <div id="flowVal-2" class="font-digital text-base sm:text-xl leading-tight" style="color: var(--text-primary)">0.0V</div>
+          </div>
+
+          <!-- Connector 2 -> 3 -->
+          <div class="col-span-1 flex items-center justify-center">
+            <svg class="w-full h-4" viewBox="0 0 40 12" preserveAspectRatio="none">
+              <line x1="0" y1="6" x2="40" y2="6" stroke="var(--bar-empty)" stroke-width="2" />
+              <line id="flowLine-2" x1="0" y1="6" x2="40" y2="6" stroke="var(--c-green)" stroke-width="2.5" />
+            </svg>
+          </div>
+
+          <!-- Node 3: Buck Converter -->
+          <div class="col-span-1 hud-subbox p-1.5 sm:p-2 border-hud-pink/50">
+            <div class="text-[8px] sm:text-[9px] font-bold text-hud-pink truncate">STEP-DN</div>
+            <div id="flowVal-3" class="font-digital text-base sm:text-xl leading-tight" style="color: var(--text-primary)">0.0V</div>
+          </div>
+
+          <!-- Connector 3 -> 4 -->
+          <div class="col-span-1 flex items-center justify-center">
+            <svg class="w-full h-4" viewBox="0 0 40 12" preserveAspectRatio="none">
+              <line x1="0" y1="6" x2="40" y2="6" stroke="var(--bar-empty)" stroke-width="2" />
+              <line id="flowLine-3" x1="0" y1="6" x2="40" y2="6" stroke="var(--c-yellow)" stroke-width="2.5" />
+            </svg>
+          </div>
+
+          <!-- Node 4: Load Bus -->
+          <div class="col-span-1 hud-subbox p-1.5 sm:p-2 border-hud-yellow/50">
+            <div class="text-[8px] sm:text-[9px] font-bold text-hud-yellow truncate">LOAD BUS</div>
+            <div id="flowVal-4" class="font-digital text-base sm:text-xl leading-tight" style="color: var(--text-primary)">0.0V</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ================= SECTION 1: 4-CHANNEL DC VOLTAGE TELEMETRY ================= -->
     <section>
       <div class="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
         <div class="flex items-center gap-2 min-w-0">
           <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-hud-cyan inline-block shrink-0"></span>
-          <h2 data-i18n="voltageHeader" class="font-pixel text-[10px] sm:text-xs text-hud-cyan tracking-wider truncate">SENSOR TEGANGAN DC (4-CH)</h2>
+          <h2 data-i18n="voltageHeader" class="font-hud font-bold text-xs sm:text-sm text-hud-cyan tracking-wider truncate">SENSOR TEGANGAN DC (4-CH)</h2>
         </div>
         <span id="rxTimestamp" class="text-[11px] sm:text-xs text-hud-cyan font-bold shrink-0">RX: --:--:--</span>
       </div>
@@ -330,11 +448,11 @@
         <div id="sensorCard-1" class="hud-panel p-2.5 sm:p-4 transition-all">
           <div class="flex items-center justify-between gap-1 mb-1">
             <span class="text-[10px] sm:text-xs font-bold text-hud-cyan uppercase tracking-wide truncate">INPUT SOLAR (V1)</span>
-            <span class="hud-subbox text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.5 font-bold shrink-0" style="color: var(--text-muted)">GPIO 9</span>
+            <span class="hud-subbox text-[9px] sm:text-[10px] px-1.5 py-0.5 font-bold shrink-0" style="color: var(--text-muted)">GPIO 9</span>
           </div>
           
-          <div class="hud-subbox my-1.5 sm:my-2 px-2 sm:px-3 py-1.5 sm:py-2 flex items-baseline justify-between gap-1">
-            <span id="sensorStatus-1" class="text-[8px] sm:text-[10px] font-pixel text-hud-cyan shrink-0">IDLE</span>
+          <div class="hud-subbox my-1.5 sm:my-2 px-2.5 sm:px-3 py-1.5 sm:py-2 flex items-baseline justify-between gap-1">
+            <span id="sensorStatus-1" class="text-[8px] sm:text-[10px] font-hud font-bold text-hud-cyan shrink-0">IDLE</span>
             <div class="text-right truncate">
               <span id="sensorVal-1" class="font-digital text-3xl sm:text-4xl xl:text-5xl glow-cyan tracking-wider" style="color: var(--text-primary)">00.00</span>
               <span class="font-digital text-lg sm:text-2xl text-hud-cyan ml-0.5 sm:ml-1">V</span>
@@ -344,10 +462,10 @@
           <div class="hud-subbox w-full h-2.5 sm:h-3 p-0.5 led-bar-bg">
             <div id="sensorBar-1" class="h-full bg-hud-cyan transition-all duration-300" style="width: 0%"></div>
           </div>
-          <div class="flex justify-between text-[9px] sm:text-[10px] mt-1 font-bold" style="color: var(--text-muted)">
-            <span>0V</span>
+          <div class="flex justify-between text-[9px] sm:text-[10px] mt-1.5 font-semibold" style="color: var(--text-muted)">
+            <span id="sensorMin-1">MIN: --</span>
             <span data-i18n="safeRange" class="truncate px-1">10.5-15V</span>
-            <span>25V</span>
+            <span id="sensorPeak-1">MAX: --</span>
           </div>
         </div>
 
@@ -355,11 +473,11 @@
         <div id="sensorCard-2" class="hud-panel p-2.5 sm:p-4 transition-all">
           <div class="flex items-center justify-between gap-1 mb-1">
             <span class="text-[10px] sm:text-xs font-bold text-hud-green uppercase tracking-wide truncate">BATTERY BANK (V2)</span>
-            <span class="hud-subbox text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.5 font-bold shrink-0" style="color: var(--text-muted)">GPIO 10</span>
+            <span class="hud-subbox text-[9px] sm:text-[10px] px-1.5 py-0.5 font-bold shrink-0" style="color: var(--text-muted)">GPIO 10</span>
           </div>
           
-          <div class="hud-subbox my-1.5 sm:my-2 px-2 sm:px-3 py-1.5 sm:py-2 flex items-baseline justify-between gap-1">
-            <span id="sensorStatus-2" class="text-[8px] sm:text-[10px] font-pixel text-hud-green shrink-0">IDLE</span>
+          <div class="hud-subbox my-1.5 sm:my-2 px-2.5 sm:px-3 py-1.5 sm:py-2 flex items-baseline justify-between gap-1">
+            <span id="sensorStatus-2" class="text-[8px] sm:text-[10px] font-hud font-bold text-hud-green shrink-0">IDLE</span>
             <div class="text-right truncate">
               <span id="sensorVal-2" class="font-digital text-3xl sm:text-4xl xl:text-5xl glow-green tracking-wider" style="color: var(--text-primary)">00.00</span>
               <span class="font-digital text-lg sm:text-2xl text-hud-green ml-0.5 sm:ml-1">V</span>
@@ -369,10 +487,10 @@
           <div class="hud-subbox w-full h-2.5 sm:h-3 p-0.5 led-bar-bg">
             <div id="sensorBar-2" class="h-full bg-hud-green transition-all duration-300" style="width: 0%"></div>
           </div>
-          <div class="flex justify-between text-[9px] sm:text-[10px] mt-1 font-bold" style="color: var(--text-muted)">
-            <span>0V</span>
+          <div class="flex justify-between text-[9px] sm:text-[10px] mt-1.5 font-semibold" style="color: var(--text-muted)">
+            <span id="sensorMin-2">MIN: --</span>
             <span data-i18n="safeRange" class="truncate px-1">10.5-15V</span>
-            <span>25V</span>
+            <span id="sensorPeak-2">MAX: --</span>
           </div>
         </div>
 
@@ -380,11 +498,11 @@
         <div id="sensorCard-3" class="hud-panel p-2.5 sm:p-4 transition-all">
           <div class="flex items-center justify-between gap-1 mb-1">
             <span class="text-[10px] sm:text-xs font-bold text-hud-pink uppercase tracking-wide truncate">STEP-DOWN OUT (V3)</span>
-            <span class="hud-subbox text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.5 font-bold shrink-0" style="color: var(--text-muted)">GPIO 11</span>
+            <span class="hud-subbox text-[9px] sm:text-[10px] px-1.5 py-0.5 font-bold shrink-0" style="color: var(--text-muted)">GPIO 11</span>
           </div>
           
-          <div class="hud-subbox my-1.5 sm:my-2 px-2 sm:px-3 py-1.5 sm:py-2 flex items-baseline justify-between gap-1">
-            <span id="sensorStatus-3" class="text-[8px] sm:text-[10px] font-pixel text-hud-pink shrink-0">IDLE</span>
+          <div class="hud-subbox my-1.5 sm:my-2 px-2.5 sm:px-3 py-1.5 sm:py-2 flex items-baseline justify-between gap-1">
+            <span id="sensorStatus-3" class="text-[8px] sm:text-[10px] font-hud font-bold text-hud-pink shrink-0">IDLE</span>
             <div class="text-right truncate">
               <span id="sensorVal-3" class="font-digital text-3xl sm:text-4xl xl:text-5xl glow-pink tracking-wider" style="color: var(--text-primary)">00.00</span>
               <span class="font-digital text-lg sm:text-2xl text-hud-pink ml-0.5 sm:ml-1">V</span>
@@ -394,10 +512,10 @@
           <div class="hud-subbox w-full h-2.5 sm:h-3 p-0.5 led-bar-bg">
             <div id="sensorBar-3" class="h-full bg-hud-pink transition-all duration-300" style="width: 0%"></div>
           </div>
-          <div class="flex justify-between text-[9px] sm:text-[10px] mt-1 font-bold" style="color: var(--text-muted)">
-            <span>0V</span>
+          <div class="flex justify-between text-[9px] sm:text-[10px] mt-1.5 font-semibold" style="color: var(--text-muted)">
+            <span id="sensorMin-3">MIN: --</span>
             <span data-i18n="safeRange" class="truncate px-1">10.5-15V</span>
-            <span>25V</span>
+            <span id="sensorPeak-3">MAX: --</span>
           </div>
         </div>
 
@@ -405,11 +523,11 @@
         <div id="sensorCard-4" class="hud-panel p-2.5 sm:p-4 transition-all">
           <div class="flex items-center justify-between gap-1 mb-1">
             <span class="text-[10px] sm:text-xs font-bold text-hud-yellow uppercase tracking-wide truncate">LOAD BUS (V4)</span>
-            <span class="hud-subbox text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.5 font-bold shrink-0" style="color: var(--text-muted)">GPIO 12</span>
+            <span class="hud-subbox text-[9px] sm:text-[10px] px-1.5 py-0.5 font-bold shrink-0" style="color: var(--text-muted)">GPIO 12</span>
           </div>
           
-          <div class="hud-subbox my-1.5 sm:my-2 px-2 sm:px-3 py-1.5 sm:py-2 flex items-baseline justify-between gap-1">
-            <span id="sensorStatus-4" class="text-[8px] sm:text-[10px] font-pixel text-hud-yellow shrink-0">IDLE</span>
+          <div class="hud-subbox my-1.5 sm:my-2 px-2.5 sm:px-3 py-1.5 sm:py-2 flex items-baseline justify-between gap-1">
+            <span id="sensorStatus-4" class="text-[8px] sm:text-[10px] font-hud font-bold text-hud-yellow shrink-0">IDLE</span>
             <div class="text-right truncate">
               <span id="sensorVal-4" class="font-digital text-3xl sm:text-4xl xl:text-5xl glow-yellow tracking-wider" style="color: var(--text-primary)">00.00</span>
               <span class="font-digital text-lg sm:text-2xl text-hud-yellow ml-0.5 sm:ml-1">V</span>
@@ -419,10 +537,10 @@
           <div class="hud-subbox w-full h-2.5 sm:h-3 p-0.5 led-bar-bg">
             <div id="sensorBar-4" class="h-full bg-hud-yellow transition-all duration-300" style="width: 0%"></div>
           </div>
-          <div class="flex justify-between text-[9px] sm:text-[10px] mt-1 font-bold" style="color: var(--text-muted)">
-            <span>0V</span>
+          <div class="flex justify-between text-[9px] sm:text-[10px] mt-1.5 font-semibold" style="color: var(--text-muted)">
+            <span id="sensorMin-4">MIN: --</span>
             <span data-i18n="safeRange" class="truncate px-1">10.5-15V</span>
-            <span>25V</span>
+            <span id="sensorPeak-4">MAX: --</span>
           </div>
         </div>
 
@@ -430,57 +548,63 @@
     </section>
 
     <!-- ================= SECTION 2: OSCILLOSCOPE & 8-CH RELAY MATRIX ================= -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
       
       <!-- KIRI: REAL-TIME VOLTAGE OSCILLOSCOPE -->
       <section class="lg:col-span-5 hud-panel p-3 sm:p-4 md:p-5 flex flex-col justify-between">
         <div class="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
           <div class="flex items-center gap-2 min-w-0">
             <span class="w-2 h-2 bg-hud-green inline-block shrink-0"></span>
-            <h2 data-i18n="oscHeader" class="font-pixel text-[10px] sm:text-[11px] truncate" style="color: var(--text-primary)">OSILOSKOP TELEMETRI</h2>
+            <h2 data-i18n="oscHeader" class="font-hud font-bold text-[11px] sm:text-xs tracking-wider truncate" style="color: var(--text-primary)">OSILOSKOP TELEMETRI</h2>
           </div>
-          <button onclick="resetChart()" data-i18n="clearWaveBtn"
-            class="text-[10px] sm:text-[11px] text-hud-cyan border border-hud-cyan/40 px-2 py-1 hover:bg-hud-cyan hover:text-white transition cursor-pointer font-bold shrink-0">
-            RESET GRAFIK
-          </button>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="exportTelemetryCSV()" data-i18n="exportCsvBtn"
+              class="text-[9px] sm:text-[10px] text-hud-green border border-hud-green/50 px-2 py-1 hover:bg-hud-green hover:text-black transition cursor-pointer font-bold">
+              EXPORT CSV
+            </button>
+            <button onclick="resetChart()" data-i18n="clearWaveBtn"
+              class="text-[9px] sm:text-[10px] text-hud-cyan border border-hud-cyan/50 px-2 py-1 hover:bg-hud-cyan hover:text-white transition cursor-pointer font-bold">
+              RESET
+            </button>
+          </div>
         </div>
 
-        <div class="hud-subbox h-48 sm:h-60 lg:h-64 w-full p-1.5 sm:p-2">
+        <div class="hud-subbox h-52 sm:h-64 lg:h-64 w-full p-1.5 sm:p-2">
           <canvas id="telemetryChart"></canvas>
         </div>
 
         <div class="mt-2.5 sm:mt-3 flex justify-between text-[10px] sm:text-[11px] font-bold" style="color: var(--text-muted)">
           <span data-i18n="bufferText">BUFFER: 25 SAMPEL</span>
-          <span>INTERVAL: 2000ms</span>
+          <span>SAMPLING: 0.5 Hz (2000ms)</span>
         </div>
       </section>
 
-      <!-- KANAN: 8-CHANNEL RELAY MATRIX CONTROL -->
+      <!-- KANAN: 8-CHANNEL RELAY MATRIX CONTROL (1 TOMBOL TOGGLE PER RELAY) -->
       <section class="lg:col-span-7 hud-panel p-3 sm:p-4 md:p-5 flex flex-col justify-between">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3 sm:mb-4">
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 bg-hud-pink inline-block shrink-0"></span>
-            <h2 data-i18n="relayHeader" class="font-pixel text-[10px] sm:text-[11px]" style="color: var(--text-primary)">KONTROL MATRIKS RELAY (8-CH)</h2>
+            <h2 data-i18n="relayHeader" class="font-hud font-bold text-[11px] sm:text-xs tracking-wider" style="color: var(--text-primary)">KONTROL MATRIKS RELAY (8-CH)</h2>
           </div>
 
           <!-- Master Action Buttons -->
           <div class="grid grid-cols-3 sm:flex gap-1.5 sm:gap-2 w-full sm:w-auto">
             <button onclick="runWaveTest()" data-i18n="waveTestBtn"
-              class="font-pixel text-[7.5px] sm:text-[9px] px-1.5 sm:px-2.5 py-2 sm:py-1.5 border border-hud-yellow text-hud-yellow hover:bg-hud-yellow hover:text-black transition cursor-pointer text-center leading-tight">
+              class="font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2 sm:py-1.5 border border-hud-yellow text-hud-yellow hover:bg-hud-yellow hover:text-black transition cursor-pointer text-center tracking-wider leading-tight">
               TES GELOMBANG
             </button>
             <button onclick="setAllRelays(true)" data-i18n="allOnBtn"
-              class="font-pixel text-[7.5px] sm:text-[9px] px-1.5 sm:px-2.5 py-2 sm:py-1.5 border border-hud-green bg-hud-green/10 text-hud-green hover:bg-hud-green hover:text-white transition cursor-pointer text-center leading-tight">
+              class="font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2 sm:py-1.5 border border-hud-green bg-hud-green/10 text-hud-green hover:bg-hud-green hover:text-black transition cursor-pointer text-center tracking-wider leading-tight">
               NYALAKAN SEMUA
             </button>
             <button onclick="setAllRelays(false)" data-i18n="allOffBtn"
-              class="font-pixel text-[7.5px] sm:text-[9px] px-1.5 sm:px-2.5 py-2 sm:py-1.5 border border-hud-red bg-hud-red/10 text-hud-red hover:bg-hud-red hover:text-white transition cursor-pointer text-center leading-tight">
+              class="font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2 sm:py-1.5 border border-hud-red bg-hud-red/10 text-hud-red hover:bg-hud-red hover:text-white transition cursor-pointer text-center tracking-wider leading-tight">
               MATIKAN SEMUA
             </button>
           </div>
         </div>
 
-        <!-- 8 Relay Cards Grid (1 Tombol Toggle per Relay) -->
+        <!-- 8 Relay Cards Grid -->
         <div id="relayGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 my-auto"></div>
 
         <div class="mt-3 sm:mt-4 pt-2 border-t border-hud-cyan/25 flex justify-between gap-2 text-[10px] sm:text-[11px] font-bold" style="color: var(--text-muted)">
@@ -494,7 +618,7 @@
     <!-- ================= SECTION 3: LIVE PACKET TERMINAL ================= -->
     <section class="hud-panel p-3 sm:p-3.5">
       <div class="flex items-center justify-between gap-2 border-b border-hud-cyan/25 pb-2 mb-2">
-        <span data-i18n="terminalHeader" class="font-pixel text-[9px] sm:text-[10px] text-hud-green truncate">&gt;_ MONITOR PAKET SERIAL / MQTT</span>
+        <span data-i18n="terminalHeader" class="font-hud font-bold text-[9px] sm:text-[10px] text-hud-green tracking-wider truncate">&gt;_ MONITOR PAKET SERIAL / MQTT LANGSUNG</span>
         <button onclick="document.getElementById('packetLog').innerHTML=''" data-i18n="clearLogBtn"
           class="text-[10px] sm:text-[11px] font-bold hover:text-hud-cyan cursor-pointer shrink-0" style="color: var(--text-muted)">
           [ BERSIHKAN ]
@@ -513,10 +637,15 @@
         localIpTitle: 'TARGET IP LOKAL ESP32-S3:',
         setIpBtn: 'SIMPAN IP',
         localIpNote: '*Gunakan mode LOCAL hanya jika membuka web lewat jaringan Wi-Fi yang sama dengan ESP32-S3.',
+        kpiBattLabel: 'BATERAI SoC',
+        kpiSolarLabel: 'SOLAR INPUT',
+        kpiGuardLabel: 'PROTEKSI DC',
+        flowTitle: 'TOPOLOGI ALIRAN ENERGI REAL-TIME',
         voltageHeader: 'SENSOR TEGANGAN DC (4-CH)',
         safeRange: '10.5-15V',
         oscHeader: 'OSILOSKOP TELEMETRI',
-        clearWaveBtn: 'RESET GRAFIK',
+        exportCsvBtn: 'EXPORT CSV',
+        clearWaveBtn: 'RESET',
         bufferText: 'BUFFER: 25 SAMPEL',
         relayHeader: 'KONTROL MATRIKS RELAY (8-CH)',
         waveTestBtn: 'TES GELOMBANG',
@@ -525,34 +654,47 @@
         btnTurnOn: 'NYALAKAN',
         btnTurnOff: 'MATIKAN',
         activeCountLabel: 'AKTIF:',
-        terminalHeader: '>_ MONITOR PAKET SERIAL / MQTT',
+        terminalHeader: '>_ MONITOR PAKET SERIAL / MQTT LANGSUNG',
         clearLogBtn: '[ BERSIHKAN ]',
         sysReady: 'SISTEM SIAP',
         syncLive: 'SINKRON: REAL-TIME',
         safeStatus: 'AMAN',
         lowStatus: 'RENDAH!',
         highStatus: 'TINGGI!',
+        guardNominal: 'NOMINAL',
+        guardAlert: 'PERINGATAN!',
+        solarCharging: 'CHARGING',
+        solarStandby: 'STANDBY',
         locale: 'id-ID',
         msgBrokerConnecting: (url) => `Menghubungkan ke ${url}...`,
-        msgBrokerConnected: 'TERHUBUNG ke EMQX Cloud Broker (Sinkronisasi Aktif)!',
+        msgBrokerConnected: 'TERHUBUNG ke EMQX Cloud Broker (Sinkronisasi Real-Time Aktif)!',
         msgBrokerDisconnected: 'Koneksi broker terputus. Menghubungkan ulang...',
         msgAllAlready: (s) => `Semua relay sudah dalam kondisi ${s}.`,
         msgMasterExec: (s, n) => `Eksekusi MASTER ${s} (${n} channel)...`,
         msgWaveExec: 'Menjalankan TES GELOMBANG R1 -> R8...',
         msgFailOffline: (p) => `GAGAL kirim ${p}: MQTT belum terhubung!`,
         msgSavedIp: (ip) => `IP Lokal disimpan: ${ip}`,
-        msgChartCleared: 'Buffer osiloskop dibersihkan.',
-        msgRelaySynced: (detail) => `SYNC [ESP32-S3] -> Status relay diperbarui (${detail})`
+        msgChartCleared: 'Buffer osiloskop dan statistik Min/Max direset.',
+        msgRelaySynced: (detail) => `SYNC [ESP32-S3] -> Status relay diperbarui (${detail})`,
+        msgCsvExported: (rows) => `Berhasil mengekspor ${rows} baris data telemetri ke CSV.`,
+        msgCsvEmpty: 'Belum ada data telemetri untuk diekspor.',
+        msgSimOn: 'MODE SIMULASI DIAKTIFKAN (Data demo real-time berjalan).',
+        msgSimOff: 'MODE SIMULASI DIMATIKAN (Kembali ke data perangkat keras).'
       },
       en: {
         pingLabel: 'PING LATENCY',
         localIpTitle: 'ESP32-S3 LOCAL TARGET IP:',
         setIpBtn: 'SET IP',
         localIpNote: '*Use LOCAL mode only when accessing the dashboard on the same Wi-Fi network as ESP32-S3.',
+        kpiBattLabel: 'BATTERY SoC',
+        kpiSolarLabel: 'SOLAR INPUT',
+        kpiGuardLabel: 'DC PROTECTION',
+        flowTitle: 'REAL-TIME ENERGY FLOW TOPOLOGY',
         voltageHeader: 'DC VOLTAGE SENSORS (4-CH)',
         safeRange: '10.5-15V',
         oscHeader: 'TELEMETRY OSCILLOSCOPE',
-        clearWaveBtn: 'CLEAR WAVE',
+        exportCsvBtn: 'EXPORT CSV',
+        clearWaveBtn: 'RESET',
         bufferText: 'BUFFER: 25 SAMPLES',
         relayHeader: 'RELAY MATRIX CONTROL (8-CH)',
         waveTestBtn: 'WAVE TEST',
@@ -561,13 +703,17 @@
         btnTurnOn: 'TURN ON',
         btnTurnOff: 'TURN OFF',
         activeCountLabel: 'ACTIVE:',
-        terminalHeader: '>_ LIVE SERIAL / MQTT MONITOR',
+        terminalHeader: '>_ LIVE SERIAL / MQTT PACKET MONITOR',
         clearLogBtn: '[ CLEAR ]',
         sysReady: 'SYSTEM READY',
         syncLive: 'SYNCED: LIVE STATE',
         safeStatus: 'SAFE',
         lowStatus: 'LOW!',
         highStatus: 'HIGH!',
+        guardNominal: 'NOMINAL',
+        guardAlert: 'ALERT!',
+        solarCharging: 'CHARGING',
+        solarStandby: 'STANDBY',
         locale: 'en-US',
         msgBrokerConnecting: (url) => `Connecting to ${url}...`,
         msgBrokerConnected: 'CONNECTED to EMQX Cloud Broker (Live Sync Active)!',
@@ -577,8 +723,12 @@
         msgWaveExec: 'Running WAVE SEQUENCE TEST R1 -> R8...',
         msgFailOffline: (p) => `FAILED sending ${p}: MQTT broker offline!`,
         msgSavedIp: (ip) => `Local IP saved: ${ip}`,
-        msgChartCleared: 'Oscilloscope buffer cleared.',
-        msgRelaySynced: (detail) => `SYNC [ESP32-S3] -> Relay state updated (${detail})`
+        msgChartCleared: 'Oscilloscope buffer and Min/Max stats cleared.',
+        msgRelaySynced: (detail) => `SYNC [ESP32-S3] -> Relay state updated (${detail})`,
+        msgCsvExported: (rows) => `Exported ${rows} telemetry records to CSV.`,
+        msgCsvEmpty: 'No telemetry samples available to export.',
+        msgSimOn: 'SIMULATION MODE ENABLED (Running live demo telemetry).',
+        msgSimOff: 'SIMULATION MODE DISABLED (Switched back to live hardware).'
       }
     };
 
@@ -599,10 +749,16 @@
     let currentLang = localStorage.getItem('galtech_lang') || 'id';
     let currentTheme = localStorage.getItem('galtech_theme') || 'dark';
     let isCloudMode = true;
+    let isSimMode = false;
     let sfxEnabled = true;
     let crtEnabled = true;
     let client = null;
+
     let latestVoltages = [0, 0, 0, 0];
+    let minVoltages = [null, null, null, null];
+    let maxVoltages = [null, null, null, null];
+    let rxPacketCount = 0;
+    let csvHistory = [];
     const browserPingId = 'web_' + Math.random().toString(16).substring(2, 8);
 
     // ================= PENERAPAN TEMA (DARK MODE / WHITE MODE) =================
@@ -617,9 +773,9 @@
       if (typeof telemetryChart !== 'undefined') {
         const isLight = theme === 'light';
         telemetryChart.data.datasets[0].borderColor = isLight ? '#0284c7' : '#00f3ff';
-        telemetryChart.data.datasets[1].borderColor = isLight ? '#059669' : '#00ff66';
-        telemetryChart.data.datasets[2].borderColor = isLight ? '#db2777' : '#ff007f';
-        telemetryChart.data.datasets[3].borderColor = isLight ? '#d97706' : '#ffe600';
+        telemetryChart.data.datasets[1].borderColor = isLight ? '#059669' : '#00ff88';
+        telemetryChart.data.datasets[2].borderColor = isLight ? '#db2777' : '#ff2a85';
+        telemetryChart.data.datasets[3].borderColor = isLight ? '#d97706' : '#ffbe0b';
 
         telemetryChart.options.scales.x.ticks.color = isLight ? '#475569' : '#64748b';
         telemetryChart.options.scales.y.ticks.color = isLight ? '#0284c7' : '#00f3ff';
@@ -659,7 +815,7 @@
       playRetroBeep(760, 0.05);
     }
 
-    // ================= JAM REAL-TIME (TICK TIAP 1 DETIK) =================
+    // ================= JAM REAL-TIME =================
     function updateRealTimeClock() {
       const now = new Date();
       const locale = I18N[currentLang].locale;
@@ -722,6 +878,11 @@
     }
 
     setInterval(() => {
+      if (isSimMode) {
+        updateSignalUI(Math.floor(24 + Math.random() * 18));
+        return;
+      }
+
       if (isCloudMode) {
         if (client && client.connected) {
           client.publish(MQTT_CFG.pingTopic, JSON.stringify({ id: browserPingId, ts: performance.now() }));
@@ -743,6 +904,36 @@
       }
     }, 2500);
 
+    // ================= DEMO SIMULATOR UNTUK PRESENTASI LOMBA =================
+    setInterval(() => {
+      if (!isSimMode) return;
+      const v1 = +(13.8 + (Math.random() - 0.5) * 0.6).toFixed(2);
+      const v2 = +(12.65 + (Math.random() - 0.5) * 0.15).toFixed(2);
+      const v3 = +(12.02 + (Math.random() - 0.5) * 0.08).toFixed(2);
+      const activeCount = relayStates.filter(Boolean).length;
+      const v4 = activeCount > 0 ? +(11.95 - activeCount * 0.04 + (Math.random() - 0.5) * 0.06).toFixed(2) : 0.0;
+      updateSensorsUI(v1, v2, v3, v4, true);
+    }, 2000);
+
+    function toggleDemoMode() {
+      isSimMode = !isSimMode;
+      const btn = document.getElementById('simBtn');
+      if (isSimMode) {
+        btn.textContent = 'SIM: ON';
+        btn.className = 'font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border border-hud-green bg-hud-green/20 text-hud-green transition cursor-pointer text-center tracking-wider';
+        logPacket(I18N[currentLang].msgSimOn, 'ok');
+        playRetroBeep(980, 0.07);
+      } else {
+        btn.textContent = 'SIM: OFF';
+        btn.className = 'font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border transition cursor-pointer hover:border-hud-green hover:text-hud-green text-center tracking-wider';
+        btn.style.backgroundColor = 'var(--btn-bg)';
+        btn.style.borderColor = 'var(--sub-border)';
+        btn.style.color = 'var(--text-muted)';
+        logPacket(I18N[currentLang].msgSimOff, 'info');
+        playRetroBeep(480, 0.07);
+      }
+    }
+
     // Load Saved Local IP
     const savedIp = localStorage.getItem('galtech_esp_ip');
     if (savedIp) document.getElementById('espIpInput').value = savedIp;
@@ -756,7 +947,7 @@
       const gain = audioCtx.createGain();
       osc.type = type;
       osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.045, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
       osc.connect(gain);
       gain.connect(audioCtx.destination);
@@ -818,15 +1009,16 @@
 
         const card = document.createElement('div');
         card.className = isOn
-          ? 'border border-hud-green bg-hud-green/10 p-2.5 sm:p-3 transition-all'
-          : 'hud-subbox p-2.5 sm:p-3 transition-all';
+          ? 'border border-hud-green bg-hud-green/10 p-2.5 sm:p-3 transition-all relative overflow-hidden'
+          : 'hud-subbox p-2.5 sm:p-3 transition-all relative overflow-hidden';
 
         const btnLabel = isOn ? dict.btnTurnOff : dict.btnTurnOn;
 
         card.innerHTML = `
+          <div class="absolute top-0 left-0 right-0 h-0.5 ${isOn ? 'bg-hud-green' : 'bg-transparent'}"></div>
           <div class="flex items-center justify-between gap-1 mb-1">
             <span class="text-[9px] sm:text-[10px] font-bold truncate" style="color: var(--text-muted)">CH${ch} • IO${RELAY_PINS[i]}</span>
-            <span class="font-pixel text-[7.5px] sm:text-[8px] px-1.5 py-0.5 border shrink-0 ${
+            <span class="font-hud font-bold text-[8px] sm:text-[9px] px-1.5 py-0.5 border shrink-0 tracking-wider ${
               isOn 
                 ? 'border-hud-green text-hud-green bg-hud-green/15 glow-green' 
                 : 'hud-subbox'
@@ -835,15 +1027,15 @@
             </span>
           </div>
 
-          <div class="w-full font-bold text-[11px] sm:text-xs mb-2.5 sm:mb-3 uppercase tracking-wide" style="color: var(--text-primary)">
+          <div class="w-full font-hud font-bold text-[11px] sm:text-xs mb-2.5 sm:mb-3 uppercase tracking-wider" style="color: var(--text-primary)">
             RELAY 0${ch}
           </div>
 
           <button onclick="toggleRelay(${i})"
-            class="arcade-switch w-full py-2.5 px-2 font-pixel text-[8px] sm:text-[9px] border flex items-center justify-center gap-1.5 cursor-pointer ${
+            class="arcade-switch w-full py-2.5 px-2 font-hud font-bold text-[8.5px] sm:text-[9.5px] tracking-wider border flex items-center justify-center gap-1.5 cursor-pointer ${
               isOn
                 ? 'border-hud-red bg-hud-red/15 text-hud-red hover:bg-hud-red hover:text-white'
-                : 'border-hud-green bg-hud-green/15 text-hud-green hover:bg-hud-green hover:text-white'
+                : 'border-hud-green bg-hud-green/15 text-hud-green hover:bg-hud-green hover:text-black'
             }">
             <span>&#9211;</span>
             <span>${btnLabel}</span>
@@ -868,6 +1060,14 @@
       const statusEl = document.getElementById('lastCmdLog');
 
       playRetroBeep(state ? 880 : 440, 0.06);
+
+      if (isSimMode) {
+        relayStates[index] = state;
+        renderRelayMatrix();
+        logPacket(`SIM [LOCAL] -> ${payload}`, 'tx');
+        statusEl.textContent = `SIM: ${payload}`;
+        return;
+      }
 
       if (isCloudMode) {
         if (!client || !client.connected) {
@@ -916,12 +1116,13 @@
       }
     }
 
-    // ================= UPDATE 4 SENSOR TEGANGAN & LED BAR =================
+    // ================= UPDATE 4 SENSOR TEGANGAN, ANALYTICS & TOPOLOGI =================
     function updateSensorsUI(v1, v2, v3, v4, pushChart = true) {
       latestVoltages = [v1, v2, v3, v4];
       const vals = [v1, v2, v3, v4];
       const baseColors = ['hud-cyan', 'hud-green', 'hud-pink', 'hud-yellow'];
       const dict = I18N[currentLang];
+      let anyAbnormal = false;
 
       vals.forEach((rawVal, idx) => {
         const num = parseFloat(rawVal) || 0;
@@ -930,15 +1131,29 @@
         const barEl = document.getElementById(`sensorBar-${ch}`);
         const statEl = document.getElementById(`sensorStatus-${ch}`);
         const cardEl = document.getElementById(`sensorCard-${ch}`);
+        const flowEl = document.getElementById(`flowVal-${ch}`);
 
         valEl.textContent = num.toFixed(2).padStart(5, '0');
+        if (flowEl) flowEl.textContent = `${num.toFixed(1)}V`;
+
         const pct = Math.min(100, Math.max(0, (num / 25.0) * 100));
         barEl.style.width = `${pct}%`;
 
+        // Update Min & Max Session Tracker
+        if (pushChart && num > 0.2) {
+          if (minVoltages[idx] === null || num < minVoltages[idx]) minVoltages[idx] = num;
+          if (maxVoltages[idx] === null || num > maxVoltages[idx]) maxVoltages[idx] = num;
+        }
+        document.getElementById(`sensorMin-${ch}`).textContent =
+          minVoltages[idx] !== null ? `MIN:${minVoltages[idx].toFixed(1)}V` : 'MIN: --';
+        document.getElementById(`sensorPeak-${ch}`).textContent =
+          maxVoltages[idx] !== null ? `MAX:${maxVoltages[idx].toFixed(1)}V` : 'MAX: --';
+
         const isDanger = num > 0.5 && (num < 10.5 || num > 15.0);
         if (isDanger) {
+          anyAbnormal = true;
           statEl.textContent = num < 10.5 ? dict.lowStatus : dict.highStatus;
-          statEl.className = 'text-[8px] sm:text-[10px] font-pixel text-hud-red animate-pulse shrink-0';
+          statEl.className = 'text-[8px] sm:text-[10px] font-hud font-bold text-hud-red animate-pulse shrink-0';
           valEl.className = 'font-digital text-3xl sm:text-4xl xl:text-5xl text-hud-red glow-red tracking-wider';
           valEl.style.color = '';
           barEl.className = 'h-full bg-hud-red transition-all duration-300';
@@ -946,7 +1161,7 @@
         } else {
           const c = baseColors[idx];
           statEl.textContent = num <= 0.5 ? 'IDLE' : dict.safeStatus;
-          statEl.className = `text-[8px] sm:text-[10px] font-pixel text-${c} shrink-0`;
+          statEl.className = `text-[8px] sm:text-[10px] font-hud font-bold text-${c} shrink-0`;
           valEl.className = `font-digital text-3xl sm:text-4xl xl:text-5xl glow-${c.replace('hud-', '')} tracking-wider`;
           valEl.style.color = 'var(--text-primary)';
           barEl.className = `h-full bg-${c} transition-all duration-300`;
@@ -954,45 +1169,103 @@
         }
       });
 
+      // Update KPI Cards & Animated Energy Topology
+      const n1 = parseFloat(v1) || 0;
+      const n2 = parseFloat(v2) || 0;
+      const n3 = parseFloat(v3) || 0;
+      const n4 = parseFloat(v4) || 0;
+
+      // 1. Battery SoC % (10.5V = 0% -> 12.8V = 100%)
+      const socPct = n2 <= 0.5 ? 0 : Math.min(100, Math.max(0, Math.round(((n2 - 10.5) / (12.8 - 10.5)) * 100)));
+      document.getElementById('socValue').textContent = `${socPct}%`;
+      document.getElementById('socBar').style.width = `${socPct}%`;
+
+      // 2. Solar Charging Status (V1 > V2 + 0.3V)
+      const deltaV = n1 - n2;
+      const chargeEl = document.getElementById('chargeStateBadge');
+      if (n1 > 1.0 && deltaV > 0.3) {
+        chargeEl.textContent = dict.solarCharging;
+        chargeEl.className = 'font-hud font-bold text-[10px] sm:text-xs text-hud-green glow-green tracking-wider';
+      } else {
+        chargeEl.textContent = dict.solarStandby;
+        chargeEl.className = 'font-hud font-bold text-[10px] sm:text-xs text-hud-cyan glow-cyan tracking-wider';
+      }
+      document.getElementById('solarDeltaText').textContent =
+        `ΔV: ${deltaV >= 0 ? '+' : ''}${deltaV.toFixed(2)}V`;
+
+      // 3. Protection Guard Status
+      const guardEl = document.getElementById('guardStatusBadge');
+      if (anyAbnormal) {
+        guardEl.textContent = dict.guardAlert;
+        guardEl.className = 'font-hud font-bold text-[10px] sm:text-xs text-hud-red glow-red animate-pulse tracking-wider';
+      } else {
+        guardEl.textContent = dict.guardNominal;
+        guardEl.className = 'font-hud font-bold text-[10px] sm:text-xs text-hud-green glow-green tracking-wider';
+      }
+
+      // 4. Animasi Aliran SVG Topology
+      document.getElementById('flowLine-1').classList.toggle('flow-active', n1 > 1.0);
+      document.getElementById('flowLine-2').classList.toggle('flow-active', n2 > 1.0 || n3 > 1.0);
+      document.getElementById('flowLine-3').classList.toggle('flow-active', n3 > 1.0 || n4 > 1.0);
+
       if (pushChart) {
-        document.getElementById('rxTimestamp').textContent =
-          `RX: ${new Date().toLocaleTimeString('id-ID', { hour12: false })}`;
-        pushChartSample(v1, v2, v3, v4);
+        rxPacketCount++;
+        document.getElementById('rxCountBadge').textContent = `PKT: ${rxPacketCount}`;
+        const timeStr = new Date().toLocaleTimeString('id-ID', { hour12: false });
+        document.getElementById('rxTimestamp').textContent = `RX: ${timeStr}`;
+        csvHistory.push({
+          timestamp: new Date().toISOString(),
+          v1: n1.toFixed(2),
+          v2: n2.toFixed(2),
+          v3: n3.toFixed(2),
+          v4: n4.toFixed(2),
+          relays: relayStates.map(r => (r ? 1 : 0)).join('')
+        });
+        pushChartSample(n1, n2, n3, n4);
       }
     }
 
-    // ================= CHART.JS OSCILLOSCOPE =================
+    // ================= CHART.JS OSCILLOSCOPE DENGAN GRADIENT =================
     const chartCtx = document.getElementById('telemetryChart').getContext('2d');
+    const gradCyan = chartCtx.createLinearGradient(0, 0, 0, 220);
+    gradCyan.addColorStop(0, 'rgba(0, 243, 255, 0.22)');
+    gradCyan.addColorStop(1, 'rgba(0, 243, 255, 0.0)');
+
+    const gradGreen = chartCtx.createLinearGradient(0, 0, 0, 220);
+    gradGreen.addColorStop(0, 'rgba(0, 255, 136, 0.18)');
+    gradGreen.addColorStop(1, 'rgba(0, 255, 136, 0.0)');
+
     const telemetryChart = new Chart(chartCtx, {
       type: 'line',
       data: {
         labels: [],
         datasets: [
-          { label: 'V1', data: [], borderColor: '#00f3ff', borderWidth: 2, tension: 0.3, pointRadius: 1.5 },
-          { label: 'V2', data: [], borderColor: '#00ff66', borderWidth: 2, tension: 0.3, pointRadius: 1.5 },
-          { label: 'V3', data: [], borderColor: '#ff007f', borderWidth: 2, tension: 0.3, pointRadius: 1.5 },
-          { label: 'V4', data: [], borderColor: '#ffe600', borderWidth: 2, tension: 0.3, pointRadius: 1.5 }
+          { label: 'V1 Solar', data: [], borderColor: '#00f3ff', backgroundColor: gradCyan, fill: true, borderWidth: 2, tension: 0.35, pointRadius: 2 },
+          { label: 'V2 Batt', data: [], borderColor: '#00ff88', backgroundColor: gradGreen, fill: true, borderWidth: 2, tension: 0.35, pointRadius: 2 },
+          { label: 'V3 StepDn', data: [], borderColor: '#ff2a85', borderWidth: 2, tension: 0.35, pointRadius: 1.5 },
+          { label: 'V4 Load', data: [], borderColor: '#ffbe0b', borderWidth: 2, tension: 0.35, pointRadius: 1.5 }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         animation: false,
+        interaction: { mode: 'index', intersect: false },
         scales: {
           x: {
-            ticks: { color: '#64748b', font: { family: 'Share Tech Mono', size: 9 }, maxRotation: 0, autoSkipPadding: 14 },
+            ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 9 }, maxRotation: 0, autoSkipPadding: 14 },
             grid: { color: 'rgba(255,255,255,0.05)' }
           },
           y: {
             min: 0,
             max: 25,
-            ticks: { color: '#00f3ff', font: { family: 'Share Tech Mono', size: 9 } },
+            ticks: { color: '#00f3ff', font: { family: 'JetBrains Mono', size: 9 } },
             grid: { color: 'rgba(0, 243, 255, 0.1)' }
           }
         },
         plugins: {
           legend: {
-            labels: { color: '#cbd5e1', font: { family: 'Share Tech Mono', size: 10 }, boxWidth: 10, padding: 8 }
+            labels: { color: '#cbd5e1', font: { family: 'JetBrains Mono', size: 10 }, boxWidth: 10, padding: 8 }
           }
         }
       }
@@ -1017,7 +1290,30 @@
       telemetryChart.data.labels = [];
       telemetryChart.data.datasets.forEach(d => d.data = []);
       telemetryChart.update();
+      minVoltages = [null, null, null, null];
+      maxVoltages = [null, null, null, null];
+      updateSensorsUI(...latestVoltages, false);
       logPacket(I18N[currentLang].msgChartCleared, 'info');
+    }
+
+    function exportTelemetryCSV() {
+      if (csvHistory.length === 0) {
+        logPacket(I18N[currentLang].msgCsvEmpty, 'err');
+        return;
+      }
+      const header = 'Timestamp,V1_Solar(V),V2_Battery(V),V3_StepDown(V),V4_LoadBus(V),Relay_State_R1_R8\n';
+      const rows = csvHistory.map(r => `${r.timestamp},${r.v1},${r.v2},${r.v3},${r.v4},"${r.relays}"`).join('\n');
+      const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `galtech_telemetry_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      playRetroBeep(1120, 0.08);
+      logPacket(I18N[currentLang].msgCsvExported(csvHistory.length), 'ok');
     }
 
     // ================= KONEKSI EMQX CLOUD WSS =================
@@ -1044,7 +1340,6 @@
       client.on('message', (topic, msg) => {
         const raw = msg.toString();
 
-        // 1. Ping Latency
         if (topic === MQTT_CFG.pingTopic) {
           try {
             const p = JSON.parse(raw);
@@ -1055,7 +1350,6 @@
           return;
         }
 
-        // 2. Sinkronisasi Real-Time Status 8 Relay dari ESP32-S3
         if (topic === MQTT_CFG.statusTopic) {
           try {
             const st = JSON.parse(raw);
@@ -1064,7 +1358,8 @@
           return;
         }
 
-        // 3. Telemetry 4 Sensor Tegangan + Backup Sinkronisasi Relay
+        if (isSimMode) return;
+
         logPacket(`RX [${topic}] -> ${raw}`, 'rx');
         try {
           const obj = JSON.parse(raw);
@@ -1103,7 +1398,7 @@
           text: document.getElementById('connTextMobile'),
           baseBadge: 'xl:hidden hud-subbox flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-2 sm:py-2.5 border',
           baseDot: 'w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full',
-          baseText: 'font-pixel text-[8px] sm:text-[9px]'
+          baseText: 'font-hud font-bold text-[8px] sm:text-[9px] tracking-wider'
         },
         {
           badge: document.getElementById('connBadgeDesktop'),
@@ -1111,7 +1406,7 @@
           text: document.getElementById('connTextDesktop'),
           baseBadge: 'hidden xl:flex hud-subbox items-center gap-2 px-3.5 py-2.5 border',
           baseDot: 'w-2.5 h-2.5 rounded-full',
-          baseText: 'font-pixel text-[9px]'
+          baseText: 'font-hud font-bold text-[9px] tracking-wider'
         }
       ];
 
@@ -1137,13 +1432,13 @@
       const drawer = document.getElementById('localDrawer');
 
       if (isCloudMode) {
-        btn.textContent = 'NET: CLOUD WSS';
-        btn.className = 'col-span-2 sm:col-span-1 font-pixel text-[8px] sm:text-[9px] px-3 py-2.5 border border-hud-cyan bg-hud-cyan/15 text-hud-cyan hover:bg-hud-cyan hover:text-white transition cursor-pointer text-center';
+        btn.textContent = 'NET: CLOUD';
+        btn.className = 'font-hud font-bold text-[8px] sm:text-[9px] px-2.5 sm:px-3 py-2.5 border border-hud-cyan bg-hud-cyan/15 text-hud-cyan hover:bg-hud-cyan hover:text-white transition cursor-pointer text-center tracking-wider';
         drawer.classList.add('hidden');
         drawer.classList.remove('flex');
       } else {
-        btn.textContent = 'NET: LOCAL HTTP';
-        btn.className = 'col-span-2 sm:col-span-1 font-pixel text-[8px] sm:text-[9px] px-3 py-2.5 border border-hud-yellow bg-hud-yellow/15 text-hud-yellow hover:bg-hud-yellow hover:text-black transition cursor-pointer text-center';
+        btn.textContent = 'NET: LOCAL';
+        btn.className = 'font-hud font-bold text-[8px] sm:text-[9px] px-2.5 sm:px-3 py-2.5 border border-hud-yellow bg-hud-yellow/15 text-hud-yellow hover:bg-hud-yellow hover:text-black transition cursor-pointer text-center tracking-wider';
         drawer.classList.remove('hidden');
         drawer.classList.add('flex');
       }
