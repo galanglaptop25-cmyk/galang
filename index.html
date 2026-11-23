@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
-  <title>GALTECH IoT // SCADA TELEMETRY HUD v4.3</title>
+  <title>GALTECH IoT // SCADA TELEMETRY HUD v4.7</title>
 
   <!-- Google Fonts: Aerospace Orbitron, Digital LED & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -254,13 +254,11 @@
           
           <!-- Grid 2 Kolom di HP untuk Jam Real-Time & Ping Sinyal -->
           <div class="grid grid-cols-2 sm:flex items-center gap-2">
-            <!-- Widget Jam Real-Time -->
             <div class="hud-subbox px-2.5 sm:px-3 py-1.5 flex flex-col justify-center min-w-0 sm:min-w-[138px]">
               <span id="liveDate" class="text-[9px] sm:text-[10px] text-hud-cyan font-bold tracking-wider uppercase truncate">-- --- ----</span>
               <span id="liveClock" class="font-digital text-xl sm:text-2xl leading-none glow-cyan tracking-widest mt-0.5" style="color: var(--text-primary)">00:00:00</span>
             </div>
 
-            <!-- Widget Ping Sinyal + 4 Bar Meter -->
             <div id="pingBox" class="hud-subbox px-2.5 sm:px-3 py-1.5 flex items-center gap-2 sm:gap-3 min-w-0 sm:min-w-[130px]">
               <div class="flex items-end gap-0.5 sm:gap-1 h-5 sm:h-6 shrink-0">
                 <span id="sigBar-1" class="w-1 sm:w-1.5 h-2 transition-colors" style="background-color: var(--bar-empty)"></span>
@@ -574,7 +572,7 @@
         </div>
       </section>
 
-      <!-- KANAN: 8-CHANNEL LAMP MATRIX CONTROL (1 TOMBOL TOGGLE PER LAMPU) -->
+      <!-- KANAN: 8-CHANNEL LAMP MATRIX CONTROL -->
       <section class="lg:col-span-7 hud-panel p-3 sm:p-4 md:p-5 flex flex-col justify-between">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3 sm:mb-4">
           <div class="flex items-center gap-2">
@@ -610,22 +608,28 @@
 
     </div>
 
-    <!-- ================= SECTION 3: VOICE CONTROL & LAMP SCHEDULER / TIMER ================= -->
+    <!-- ================= SECTION 3: VOICE CONTROL + TTS & LAMP SCHEDULER / TIMER ================= -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
       
-      <!-- KIRI: WEB SPEECH VOICE CONTROL (5 Kolom) -->
+      <!-- KIRI: WEB SPEECH VOICE CONTROL + TEXT-TO-SPEECH AI (5 Kolom) -->
       <section class="lg:col-span-5 hud-panel p-3 sm:p-4 md:p-5 flex flex-col justify-between">
         <div>
           <div class="flex items-center justify-between gap-2 mb-3">
             <div class="flex items-center gap-2 min-w-0">
               <span class="w-2 h-2 bg-hud-cyan inline-block shrink-0"></span>
-              <h2 data-i18n="voiceHeader" class="font-hud font-bold text-[11px] sm:text-xs tracking-wider truncate" style="color: var(--text-primary)">KONTROL SUARA (VOICE AI)</h2>
+              <h2 data-i18n="voiceHeader" class="font-hud font-bold text-[11px] sm:text-xs tracking-wider truncate" style="color: var(--text-primary)">KONTROL SUARA &amp; BALASAN AI</h2>
             </div>
-            <span id="voiceLangBadge" class="hud-subbox text-[9px] font-bold px-2 py-0.5 text-hud-cyan">ID-ID</span>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button id="ttsToggleBtn" onclick="toggleTTS()"
+                class="hud-subbox text-[9px] font-hud font-bold px-2 py-0.5 border border-hud-green text-hud-green hover:bg-hud-green hover:text-black transition cursor-pointer tracking-wider">
+                TTS: ON
+              </button>
+              <span id="voiceLangBadge" class="hud-subbox text-[9px] font-bold px-2 py-0.5 text-hud-cyan">ID-ID</span>
+            </div>
           </div>
 
           <!-- Tombol Aktivasi Mikrofon Utama + Equalizer -->
-          <div class="hud-subbox p-3 flex items-center justify-between gap-3 mb-3">
+          <div class="hud-subbox p-3 flex items-center justify-between gap-3 mb-2.5">
             <button id="mainVoiceBtn" onclick="toggleVoiceControl()"
               class="arcade-switch px-3.5 py-2.5 font-hud font-bold text-[9px] sm:text-[10px] tracking-wider border border-hud-cyan bg-hud-cyan/15 text-hud-cyan hover:bg-hud-cyan hover:text-black transition cursor-pointer flex items-center gap-2 shrink-0">
               <span id="voiceMicIcon">&#127908;</span>
@@ -642,16 +646,30 @@
             </div>
           </div>
 
-          <!-- Kotak Transkrip Ucapan Real-Time -->
-          <div class="hud-subbox p-2.5 mb-3">
-            <div class="flex items-center justify-between text-[9px] font-bold mb-1" style="color: var(--text-muted)">
-              <span data-i18n="voiceTranscriptLabel">TRANSKRIP SUARA:</span>
+          <!-- Kotak Transkrip Ucapan & Balasan AI Real-Time -->
+          <div class="hud-subbox p-2.5 mb-2.5 space-y-1.5">
+            <div class="flex items-center justify-between text-[9px] font-bold" style="color: var(--text-muted)">
+              <span data-i18n="voiceTranscriptLabel">TRANSKRIP &amp; RESPON AI:</span>
               <span id="voiceExecBadge" class="text-hud-cyan">STANDBY</span>
             </div>
-            <div id="voiceTranscriptText" class="text-xs sm:text-sm font-bold min-h-[22px] truncate" style="color: var(--text-primary)">
+            <div id="voiceTranscriptText" class="text-xs sm:text-sm font-bold min-h-[20px] truncate" style="color: var(--text-primary)">
               "..."
             </div>
+            <div id="aiReplyText" class="text-[10px] sm:text-[11px] font-semibold text-hud-green leading-snug break-words">
+              AI: Siap menerima perintah suara.
+            </div>
           </div>
+
+          <!-- Input Ketik Perintah Cadangan -->
+          <form onsubmit="submitManualVoiceText(event)" class="flex items-center gap-1.5 mb-2.5">
+            <input type="text" id="manualCmdInput" placeholder="Ketik perintah (mis. Nyalakan lampu 1)..."
+              class="hud-subbox px-2.5 py-1.5 text-[11px] flex-1 font-semibold focus:outline-none focus:border-hud-cyan"
+              style="color: var(--text-primary)" />
+            <button type="submit"
+              class="font-hud font-bold text-[8.5px] px-2.5 py-2 border border-hud-cyan text-hud-cyan hover:bg-hud-cyan hover:text-black transition cursor-pointer shrink-0 tracking-wider">
+              KIRIM
+            </button>
+          </form>
         </div>
 
         <!-- Contoh Perintah Suara (Bisa diklik untuk uji coba langsung) -->
@@ -842,12 +860,13 @@
         btnTurnOn: 'NYALAKAN',
         btnTurnOff: 'MATIKAN',
         activeCountLabel: 'AKTIF:',
-        voiceHeader: 'KONTROL SUARA (VOICE AI)',
+        voiceHeader: 'KONTROL SUARA & BALASAN AI',
         voiceStartBtn: 'AKTIFKAN MIC',
         voiceStopBtn: 'MENDENGARKAN...',
-        voiceTranscriptLabel: 'TRANSKRIP SUARA:',
+        voiceTranscriptLabel: 'TRANSKRIP & RESPON AI:',
         voiceHintsLabel: 'CONTOH PERINTAH (KLIK UNTUK UJI):',
-        voicePresets: ['Nyalakan Lampu 1', 'Matikan Lampu 1', 'Nyalakan Semua Lampu', 'Matikan Semua Lampu', 'Tes Gelombang'],
+        voicePresets: ['Nyalakan Lampu 1', 'Matikan Lampu 1', 'Nyalakan Semua Lampu', 'Matikan Semua Lampu', 'Cek Status Tegangan', 'Tes Gelombang'],
+        aiIdleHint: 'AI: Siap menerima perintah suara.',
         schedHeader: 'PENJADWALAN & TIMER MUNDUR',
         tabTimer: 'TIMER MUNDUR',
         tabDaily: 'JADWAL JAM',
@@ -875,6 +894,18 @@
         solarStandby: 'STANDBY',
         locale: 'id-ID',
         speechLocale: 'id-ID',
+        // Kalimat Balasan Suara AI (TTS)
+        ttsMicReady: 'Mikrofon aktif, silakan ucapkan perintah.',
+        ttsLampSingle: (ch, on) => `Siap, Lampu ${ch} ${on ? 'dinyalakan' : 'dimatikan'}.`,
+        ttsLampAll: (on) => `Siap, semua lampu ${on ? 'dinyalakan' : 'dimatikan'}.`,
+        ttsWaveTest: 'Menjalankan tes gelombang lampu satu sampai delapan.',
+        ttsUnknown: 'Maaf, perintah tidak dikenali.',
+        ttsTimerFired: (ch, on) => `Timer selesai, Lampu ${ch} ${on ? 'dinyalakan' : 'dimatikan'}.`,
+        ttsSchedFired: (ch, on) => `Jadwal aktif, Lampu ${ch} ${on ? 'dinyalakan' : 'dimatikan'}.`,
+        ttsVoltageAlert: 'Peringatan proteksi! Tegangan terdeteksi di luar batas aman.',
+        ttsStatusReport: (v1, v2, active, total) =>
+          `Status sistem saat ini: Tegangan solar ${v1.toFixed(1).replace('.', ' koma ')} volt, baterai ${v2.toFixed(1).replace('.', ' koma ')} volt, dan ${active} dari ${total} lampu sedang menyala.`,
+        // Pesan Log Terminal
         msgBrokerConnecting: (url) => `Menghubungkan ke ${url}...`,
         msgBrokerConnected: 'TERHUBUNG ke EMQX Cloud Broker (Sinkronisasi Real-Time Aktif)!',
         msgBrokerDisconnected: 'Koneksi broker terputus. Menghubungkan ulang...',
@@ -889,7 +920,7 @@
         msgCsvEmpty: 'Belum ada data telemetri untuk diekspor.',
         msgSimOn: 'MODE SIMULASI DIAKTIFKAN (Data demo real-time berjalan).',
         msgSimOff: 'MODE SIMULASI DIMATIKAN (Kembali ke data perangkat keras).',
-        msgVoiceUnsupported: 'Browser Anda tidak mendukung Web Speech API.',
+        msgVoiceUnsupported: 'Browser tidak mendukung Web Speech API. Gunakan Google Chrome atau Microsoft Edge.',
         msgVoiceListening: 'Mikrofon aktif. Silakan ucapkan perintah...',
         msgVoiceStopped: 'Kontrol suara dimatikan.',
         msgVoiceMatched: (cmd) => `VOICE CMD -> Eksekusi: ${cmd}`,
@@ -922,12 +953,13 @@
         btnTurnOn: 'TURN ON',
         btnTurnOff: 'TURN OFF',
         activeCountLabel: 'ACTIVE:',
-        voiceHeader: 'VOICE COMMAND (WEB SPEECH)',
+        voiceHeader: 'VOICE COMMAND & AI FEEDBACK',
         voiceStartBtn: 'ENABLE MIC',
         voiceStopBtn: 'LISTENING...',
-        voiceTranscriptLabel: 'SPEECH TRANSCRIPT:',
+        voiceTranscriptLabel: 'TRANSCRIPT & AI RESPONSE:',
         voiceHintsLabel: 'SAMPLE COMMANDS (CLICK TO TEST):',
-        voicePresets: ['Turn on Lamp 1', 'Turn off Lamp 1', 'Turn on all lamps', 'Turn off all lamps', 'Wave test'],
+        voicePresets: ['Turn on Lamp 1', 'Turn off Lamp 1', 'Turn on all lamps', 'Turn off all lamps', 'Check voltage status', 'Wave test'],
+        aiIdleHint: 'AI: Ready for voice commands.',
         schedHeader: 'SCHEDULER & COUNTDOWN TIMER',
         tabTimer: 'COUNTDOWN',
         tabDaily: 'DAILY TIME',
@@ -955,6 +987,18 @@
         solarStandby: 'STANDBY',
         locale: 'en-US',
         speechLocale: 'en-US',
+        // AI Voice Replies (TTS)
+        ttsMicReady: 'Microphone active, ready for your command.',
+        ttsLampSingle: (ch, on) => `Affirmative, Lamp ${ch} turned ${on ? 'on' : 'off'}.`,
+        ttsLampAll: (on) => `Affirmative, all lamps turned ${on ? 'on' : 'off'}.`,
+        ttsWaveTest: 'Running wave sequence test for lamps one through eight.',
+        ttsUnknown: 'Sorry, command not recognized.',
+        ttsTimerFired: (ch, on) => `Timer expired, Lamp ${ch} turned ${on ? 'on' : 'off'}.`,
+        ttsSchedFired: (ch, on) => `Schedule triggered, Lamp ${ch} turned ${on ? 'on' : 'off'}.`,
+        ttsVoltageAlert: 'Protection alert! Voltage detected outside safe range.',
+        ttsStatusReport: (v1, v2, active, total) =>
+          `System status report: Solar input is ${v1.toFixed(1)} volts, battery bank is ${v2.toFixed(1)} volts, and ${active} of ${total} lamps are active.`,
+        // Terminal Logs
         msgBrokerConnecting: (url) => `Connecting to ${url}...`,
         msgBrokerConnected: 'CONNECTED to EMQX Cloud Broker (Live Sync Active)!',
         msgBrokerDisconnected: 'Broker disconnected. Reconnecting...',
@@ -969,7 +1013,7 @@
         msgCsvEmpty: 'No telemetry samples available to export.',
         msgSimOn: 'SIMULATION MODE ENABLED (Running live demo telemetry).',
         msgSimOff: 'SIMULATION MODE DISABLED (Switched back to live hardware).',
-        msgVoiceUnsupported: 'Your browser does not support Web Speech API.',
+        msgVoiceUnsupported: 'Browser does not support Web Speech API. Use Google Chrome or Microsoft Edge.',
         msgVoiceListening: 'Microphone active. Speak a command...',
         msgVoiceStopped: 'Voice control disabled.',
         msgVoiceMatched: (cmd) => `VOICE CMD -> Executed: ${cmd}`,
@@ -1000,6 +1044,7 @@
     let isCloudMode = true;
     let isSimMode = false;
     let sfxEnabled = true;
+    let ttsEnabled = localStorage.getItem('galtech_tts') !== 'false';
     let client = null;
 
     let latestVoltages = [0, 0, 0, 0];
@@ -1009,12 +1054,81 @@
     let csvHistory = [];
     const browserPingId = 'web_' + Math.random().toString(16).substring(2, 8);
 
-    // State Voice Control & Scheduler
+    // State Voice Control, TTS & Scheduler
     let recognition = null;
     let isVoiceListening = false;
+    let ignoreSpeechUntil = 0;
+    let lastVoltageAlertTs = 0;
     let activeTimers = []; // { id, ch, state, remainingSec }
     let dailySchedules = JSON.parse(localStorage.getItem('galtech_schedules') || '[]');
     let lastFiredKey = {};
+
+    function setAIDiagnostic(msg, isError = false) {
+      const replyEl = document.getElementById('aiReplyText');
+      if (!replyEl) return;
+      replyEl.textContent = msg;
+      replyEl.className = isError
+        ? 'text-[10px] sm:text-[11px] font-bold text-hud-red leading-snug break-words'
+        : 'text-[10px] sm:text-[11px] font-semibold text-hud-green leading-snug break-words';
+    }
+
+    // ================= TEXT-TO-SPEECH (TERISOLASI PENUH DARI MIC) =================
+    function speakAI(text) {
+      setAIDiagnostic(`AI: ${text}`, false);
+      if (!ttsEnabled || !('speechSynthesis' in window)) return;
+
+      try {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = I18N[currentLang].speechLocale;
+        utter.rate = 1.05;
+
+        // Abaikan gema speaker AI tanpa mematikan/restart recognition
+        const holdMs = Math.min(4000, Math.max(1200, text.length * 75));
+        ignoreSpeechUntil = Date.now() + holdMs;
+
+        utter.onend = () => {
+          ignoreSpeechUntil = Date.now() + 200;
+        };
+        utter.onerror = () => {
+          ignoreSpeechUntil = 0;
+        };
+
+        window.speechSynthesis.speak(utter);
+      } catch (e) {}
+    }
+
+    function toggleTTS() {
+      ttsEnabled = !ttsEnabled;
+      localStorage.setItem('galtech_tts', ttsEnabled ? 'true' : 'false');
+      updateTTSButtonUI();
+
+      if (ttsEnabled) {
+        const msg = currentLang === 'id' ? 'Balasan suara AI diaktifkan.' : 'AI voice feedback enabled.';
+        speakAI(msg);
+      } else {
+        ignoreSpeechUntil = 0;
+        if ('speechSynthesis' in window) {
+          try { window.speechSynthesis.cancel(); } catch (e) {}
+        }
+      }
+    }
+
+    function updateTTSButtonUI() {
+      const btn = document.getElementById('ttsToggleBtn');
+      if (!btn) return;
+      if (ttsEnabled) {
+        btn.textContent = 'TTS: ON';
+        btn.className = 'hud-subbox text-[9px] font-hud font-bold px-2 py-0.5 border border-hud-green text-hud-green hover:bg-hud-green hover:text-black transition cursor-pointer tracking-wider';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      } else {
+        btn.textContent = 'TTS: OFF';
+        btn.className = 'hud-subbox text-[9px] font-hud font-bold px-2 py-0.5 border transition cursor-pointer tracking-wider';
+        btn.style.color = 'var(--text-muted)';
+        btn.style.borderColor = 'var(--sub-border)';
+      }
+    }
 
     // ================= PENERAPAN TEMA (DARK MODE / WHITE MODE) =================
     function applyTheme(theme) {
@@ -1057,13 +1171,13 @@
       document.getElementById('voiceLangBadge').textContent = dict.speechLocale.toUpperCase();
       document.getElementById('tabTimerBtn').textContent = dict.tabTimer;
       document.getElementById('tabDailyBtn').textContent = dict.tabDaily;
+      setAIDiagnostic(dict.aiIdleHint, false);
 
       document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         if (dict[key]) el.textContent = dict[key];
       });
 
-      // Perbarui opsi dropdown LAMPU 01 - 08 sesuai bahasa
       ['timerLampSelect', 'schedLampSelect'].forEach(selId => {
         const sel = document.getElementById(selId);
         if (!sel) return;
@@ -1076,6 +1190,7 @@
         recognition.lang = dict.speechLocale;
       }
 
+      updateTTSButtonUI();
       renderVoicePresets();
       updateVoiceUI();
       updateRealTimeClock();
@@ -1111,7 +1226,6 @@
       document.getElementById('liveClock').textContent = timeStr;
       document.getElementById('liveDate').textContent = dateStr;
 
-      // 1. Proses Countdown Timers setiap 1 detik
       if (activeTimers.length > 0) {
         const remaining = [];
         activeTimers.forEach(t => {
@@ -1120,6 +1234,7 @@
             sendLampCommand(t.ch, t.state);
             playRetroBeep(1180, 0.12);
             logPacket(dict.msgTimerFired(t.ch + 1, t.state ? 'ON' : 'OFF'), 'ok');
+            speakAI(dict.ttsTimerFired(t.ch + 1, t.state));
           } else {
             remaining.push(t);
           }
@@ -1129,7 +1244,6 @@
         updateLampTimerBadges();
       }
 
-      // 2. Proses Jadwal Harian (HH:MM)
       const hh = String(now.getHours()).padStart(2, '0');
       const mm = String(now.getMinutes()).padStart(2, '0');
       const currentHHMM = `${hh}:${mm}`;
@@ -1143,6 +1257,7 @@
           sendLampCommand(s.ch, s.state);
           playRetroBeep(1080, 0.1);
           logPacket(dict.msgSchedFired(s.ch + 1, s.state ? 'ON' : 'OFF', s.time), 'ok');
+          speakAI(dict.ttsSchedFired(s.ch + 1, s.state));
           if (s.repeat === 'once') {
             s.enabled = false;
             schedChanged = true;
@@ -1157,7 +1272,7 @@
     }
     setInterval(updateRealTimeClock, 1000);
 
-    // ================= WEB SPEECH VOICE CONTROL =================
+    // ================= WEB SPEECH VOICE CONTROL (MURNI & STABIL) =================
     function initVoiceRecognition() {
       const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRec) return null;
@@ -1168,10 +1283,38 @@
       rec.interimResults = true;
       rec.maxAlternatives = 1;
 
+      rec.onstart = () => {
+        const badge = document.getElementById('voiceExecBadge');
+        if (badge && isVoiceListening) {
+          badge.textContent = 'LISTENING';
+          badge.className = 'text-hud-green font-bold';
+        }
+      };
+
+      rec.onaudiostart = () => {
+        const badge = document.getElementById('voiceExecBadge');
+        if (badge && isVoiceListening) {
+          badge.textContent = 'MIC AUDIO OK';
+          badge.className = 'text-hud-green font-bold';
+        }
+      };
+
+      rec.onspeechstart = () => {
+        const badge = document.getElementById('voiceExecBadge');
+        if (badge && isVoiceListening) {
+          badge.textContent = 'HEARING...';
+          badge.className = 'text-hud-yellow font-bold animate-pulse';
+        }
+      };
+
       rec.onresult = (event) => {
+        if (Date.now() < ignoreSpeechUntil) return;
+
         let interim = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const transcript = event.results[i][0].transcript.trim();
+          if (!transcript) continue;
+
           if (event.results[i].isFinal) {
             document.getElementById('voiceTranscriptText').textContent = `"${transcript}"`;
             processVoiceCommand(transcript);
@@ -1185,16 +1328,34 @@
       };
 
       rec.onerror = (event) => {
-        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        if (event.error === 'no-speech' || event.error === 'aborted') {
+          return;
+        }
+
+        let humanError = `Error mikrofon: ${event.error}`;
+        if (event.error === 'network') {
+          humanError = 'ERROR NETWORK: Browser memblokir server suara (gunakan Google Chrome/Edge & pastikan online).';
+        } else if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          humanError = 'BLOKIR IZIN: Buka lewat http://localhost atau HTTPS dan izinkan mikrofon di pengaturan browser.';
+        } else if (event.error === 'audio-capture') {
+          humanError = 'HARDWARE MIC TIDAK TERDETEKSI: Periksa mikrofon sistem Anda.';
+        }
+
+        logPacket(`VOICE ERR [${event.error}]: ${humanError}`, 'err');
+        setAIDiagnostic(humanError, true);
+
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed' || event.error === 'audio-capture' || event.error === 'network') {
           isVoiceListening = false;
           updateVoiceUI();
-          logPacket(`VOICE ERR: ${event.error}`, 'err');
         }
       };
 
       rec.onend = () => {
         if (isVoiceListening) {
-          try { rec.start(); } catch (e) {}
+          try {
+            rec.lang = I18N[currentLang].speechLocale;
+            rec.start();
+          } catch (e) {}
         }
       };
 
@@ -1203,29 +1364,53 @@
 
     function toggleVoiceControl() {
       const dict = I18N[currentLang];
+
       if (!recognition) {
         recognition = initVoiceRecognition();
       }
       if (!recognition) {
         logPacket(dict.msgVoiceUnsupported, 'err');
-        alert(dict.msgVoiceUnsupported);
+        setAIDiagnostic(dict.msgVoiceUnsupported, true);
         return;
       }
 
-      isVoiceListening = !isVoiceListening;
       if (isVoiceListening) {
+        isVoiceListening = false;
+        try { recognition.stop(); } catch (e) {}
+        logPacket(dict.msgVoiceStopped, 'info');
+        setAIDiagnostic(dict.aiIdleHint, false);
+        updateVoiceUI();
+      } else {
+        const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        if (location.protocol === 'file:' || (!window.isSecureContext && !isLocalhost)) {
+          const warnMsg = 'PERINGATAN URL: Browser memblokir mic di file:// atau IP HTTP. Gunakan http://localhost (Live Server) atau HTTPS.';
+          logPacket(warnMsg, 'err');
+          setAIDiagnostic(warnMsg, true);
+        } else {
+          setAIDiagnostic(`AI: ${dict.ttsMicReady}`, false);
+        }
+
+        ignoreSpeechUntil = 0;
+        isVoiceListening = true;
         recognition.lang = dict.speechLocale;
         try {
           recognition.start();
-          playRetroBeep(960, 0.07);
           logPacket(dict.msgVoiceListening, 'ok');
-        } catch (e) {}
-      } else {
-        try { recognition.stop(); } catch (e) {}
-        playRetroBeep(460, 0.07);
-        logPacket(dict.msgVoiceStopped, 'info');
+        } catch (err) {
+          logPacket(`VOICE START ERR: ${err.message}`, 'err');
+        }
+        updateVoiceUI();
       }
-      updateVoiceUI();
+    }
+
+    function submitManualVoiceText(event) {
+      event.preventDefault();
+      const input = document.getElementById('manualCmdInput');
+      const cmd = input.value.trim();
+      if (!cmd) return;
+      document.getElementById('voiceTranscriptText').textContent = `"${cmd}"`;
+      processVoiceCommand(cmd);
+      input.value = '';
     }
 
     function updateVoiceUI() {
@@ -1241,7 +1426,7 @@
         headerBtn.textContent = 'MIC: ON';
         headerBtn.className = 'font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border border-hud-pink bg-hud-pink/20 text-hud-pink transition cursor-pointer text-center tracking-wider';
         btnText.textContent = dict.voiceStopBtn;
-        execBadge.textContent = 'ACTIVE';
+        execBadge.textContent = 'LISTENING';
         execBadge.className = 'text-hud-green font-bold';
         eqBars.forEach(b => {
           b.classList.add('voice-bar-active', 'bg-hud-pink');
@@ -1268,6 +1453,7 @@
       box.innerHTML = '';
       presets.forEach(phrase => {
         const chip = document.createElement('button');
+        chip.type = 'button';
         chip.className = 'text-[9px] sm:text-[10px] font-semibold px-2 py-1 hud-subbox hover:border-hud-cyan hover:text-hud-cyan transition cursor-pointer';
         chip.style.color = 'var(--text-body)';
         chip.textContent = `"${phrase}"`;
@@ -1284,16 +1470,27 @@
       const text = rawText.toLowerCase().trim();
       const badge = document.getElementById('voiceExecBadge');
 
-      // 1. Cek Perintah Tes Gelombang
+      if (/(status|tegangan|baterai|solar|laporan|cek|check|voltage|battery|report)/.test(text)) {
+        const v1 = parseFloat(latestVoltages[0]) || 0;
+        const v2 = parseFloat(latestVoltages[1]) || 0;
+        const activeCount = lampStates.filter(Boolean).length;
+        const report = dict.ttsStatusReport(v1, v2, activeCount, 8);
+        badge.textContent = 'STATUS REPORT';
+        badge.className = 'text-hud-cyan font-bold';
+        logPacket(dict.msgVoiceMatched('STATUS REPORT'), 'ok');
+        speakAI(report);
+        return;
+      }
+
       if (text.includes('gelombang') || text.includes('wave')) {
         runWaveTest();
         badge.textContent = 'WAVE TEST';
         badge.className = 'text-hud-yellow font-bold';
         logPacket(dict.msgVoiceMatched('WAVE TEST'), 'ok');
+        speakAI(dict.ttsWaveTest);
         return;
       }
 
-      // 2. Deteksi Aksi ON atau OFF
       const isTurnOn = /\b(nyalakan|nyala|hidupkan|hidup|aktifkan|buka|turn on|switch on|enable|on)\b/.test(text);
       const isTurnOff = /\b(matikan|mati|padamkan|nonaktifkan|tutup|turn off|switch off|disable|off)\b/.test(text);
 
@@ -1301,21 +1498,21 @@
         badge.textContent = 'NO ACTION';
         badge.className = 'text-hud-red font-bold';
         logPacket(dict.msgVoiceUnknown(rawText), 'err');
+        speakAI(dict.ttsUnknown);
         return;
       }
       const targetState = isTurnOn && !isTurnOff;
 
-      // 3. Cek Perintah Semua Lampu (mendukung "semua", "semuanya", "seluruh", "all", "everything")
       if (/(semua|seluruh|\ball\b|\beverything\b)/.test(text)) {
         setAllLamps(targetState);
         const label = `ALL LAMPS ${targetState ? 'ON' : 'OFF'}`;
         badge.textContent = label;
         badge.className = 'text-hud-green font-bold';
         logPacket(dict.msgVoiceMatched(label), 'ok');
+        speakAI(dict.ttsLampAll(targetState));
         return;
       }
 
-      // 4. Deteksi Nomor Lampu (1 - 8 atau kata angka ID/EN)
       const numPatterns = [
         { idx: 0, re: /\b(1|01|satu|pertama|one)\b/ },
         { idx: 1, re: /\b(2|02|dua|kedua|two|to)\b/ },
@@ -1341,10 +1538,12 @@
         badge.textContent = label;
         badge.className = 'text-hud-green font-bold';
         logPacket(dict.msgVoiceMatched(label), 'ok');
+        speakAI(dict.ttsLampSingle(matchedIndex + 1, targetState));
       } else {
         badge.textContent = 'NO LAMP ID';
         badge.className = 'text-hud-red font-bold';
         logPacket(dict.msgVoiceUnknown(rawText), 'err');
+        speakAI(dict.ttsUnknown);
       }
     }
 
@@ -1613,10 +1812,15 @@
     const savedIp = localStorage.getItem('galtech_esp_ip');
     if (savedIp) document.getElementById('espIpInput').value = savedIp;
 
-    // ================= RETRO SYNTH SOUND EFFECT =================
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // ================= RETRO SYNTH SOUND EFFECT (LAZY INIT) =================
+    let audioCtx = null;
     function playRetroBeep(freq = 680, duration = 0.06, type = 'square') {
       if (!sfxEnabled) return;
+      if (!audioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (Ctx) audioCtx = new Ctx();
+      }
+      if (!audioCtx) return;
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
@@ -1670,7 +1874,7 @@
       }
     }
 
-    // ================= RENDER 8-CHANNEL LAMP MATRIX (1 TOMBOL TOGGLE) =================
+    // ================= RENDER 8-CHANNEL LAMP MATRIX =================
     function renderLampMatrix() {
       const grid = document.getElementById('lampGrid');
       const dict = I18N[currentLang];
@@ -1873,6 +2077,11 @@
       if (anyAbnormal) {
         guardEl.textContent = dict.guardAlert;
         guardEl.className = 'font-hud font-bold text-[10px] sm:text-xs text-hud-red glow-red animate-pulse tracking-wider';
+        const nowTs = Date.now();
+        if (pushChart && nowTs - lastVoltageAlertTs > 20000) {
+          lastVoltageAlertTs = nowTs;
+          speakAI(dict.ttsVoltageAlert);
+        }
       } else {
         guardEl.textContent = dict.guardNominal;
         guardEl.className = 'font-hud font-bold text-[10px] sm:text-xs text-hud-green glow-green tracking-wider';
@@ -2005,7 +2214,6 @@
 
       client.on('connect', () => {
         updateConnBadge(true);
-        playRetroBeep(1040, 0.08);
         logPacket(I18N[currentLang].msgBrokerConnected, 'ok');
         client.subscribe([MQTT_CFG.subTopic, MQTT_CFG.statusTopic, MQTT_CFG.pingTopic]);
         client.publish(MQTT_CFG.pingTopic, JSON.stringify({ id: browserPingId, ts: performance.now() }));
