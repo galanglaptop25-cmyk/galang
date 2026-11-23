@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
-  <title>GALTECH IoT // SCADA TELEMETRY HUD v4.0</title>
+  <title>GALTECH IoT // SCADA TELEMETRY HUD v4.3</title>
 
   <!-- Google Fonts: Aerospace Orbitron, Digital LED & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -191,7 +191,6 @@
       );
     }
 
-    /* Animasi Aliran Arus Energi pada Diagram Topologi */
     @keyframes energyFlow {
       from { stroke-dashoffset: 24; }
       to { stroke-dashoffset: 0; }
@@ -199,6 +198,14 @@
     .flow-active {
       stroke-dasharray: 6 6;
       animation: energyFlow 0.75s linear infinite;
+    }
+
+    @keyframes voiceWave {
+      0%, 100% { transform: scaleY(0.3); }
+      50% { transform: scaleY(1); }
+    }
+    .voice-bar-active {
+      animation: voiceWave 0.55s ease-in-out infinite;
     }
 
     ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -219,7 +226,6 @@
         <!-- Baris 1 HP/Tablet: Brand Sistem + Status Koneksi -->
         <div class="flex items-center justify-between gap-2">
           <div class="flex items-center gap-3 sm:gap-4 min-w-0">
-            <!-- Emblem Hex/Tech -->
             <div class="hidden sm:flex w-12 h-12 border border-hud-cyan/60 bg-hud-cyan/10 items-center justify-center shrink-0 relative">
               <span class="font-hud font-extrabold text-hud-cyan text-base glow-cyan">GT</span>
               <span class="absolute -bottom-1 -right-1 w-2 h-2 bg-hud-green"></span>
@@ -271,6 +277,12 @@
 
           <!-- Grid Tombol Pengaturan -->
           <div class="grid grid-cols-3 sm:flex sm:flex-wrap items-center gap-1.5 sm:gap-2">
+            <button id="headerMicBtn" onclick="toggleVoiceControl()"
+              class="font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border border-hud-cyan/70 text-hud-cyan hover:bg-hud-cyan hover:text-black transition cursor-pointer text-center tracking-wider"
+              style="background-color: var(--btn-bg)">
+              MIC: OFF
+            </button>
+
             <button id="langBtn" onclick="toggleLanguage()"
               class="font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border border-hud-pink/70 text-hud-pink hover:bg-hud-pink hover:text-white transition cursor-pointer text-center tracking-wider"
               style="background-color: var(--btn-bg)">
@@ -293,12 +305,6 @@
               class="font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border transition cursor-pointer hover:border-hud-cyan hover:text-hud-cyan text-center tracking-wider"
               style="background-color: var(--btn-bg); border-color: var(--sub-border); color: var(--text-muted)">
               SFX: ON
-            </button>
-
-            <button id="crtBtn" onclick="toggleCRT()"
-              class="font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border transition cursor-pointer hover:border-hud-cyan hover:text-hud-cyan text-center tracking-wider"
-              style="background-color: var(--btn-bg); border-color: var(--sub-border); color: var(--text-muted)">
-              CRT: ON
             </button>
 
             <button id="modeBtn" onclick="toggleHybridMode()"
@@ -340,7 +346,6 @@
       
       <!-- Kiri: 3 Kartu Analitik Cepat (5 Kolom) -->
       <div class="lg:col-span-5 grid grid-cols-3 gap-2 sm:gap-3">
-        <!-- Estimasi SoC Baterai (dari V2) -->
         <div class="hud-panel p-2.5 sm:p-3.5 flex flex-col justify-between">
           <span data-i18n="kpiBattLabel" class="text-[9px] sm:text-[10px] font-bold tracking-wider uppercase truncate" style="color: var(--text-muted)">BATERAI SoC</span>
           <div class="my-1 flex items-baseline gap-1">
@@ -351,7 +356,6 @@
           </div>
         </div>
 
-        <!-- Status Charging Solar (V1 vs V2) -->
         <div class="hud-panel p-2.5 sm:p-3.5 flex flex-col justify-between">
           <span data-i18n="kpiSolarLabel" class="text-[9px] sm:text-[10px] font-bold tracking-wider uppercase truncate" style="color: var(--text-muted)">SOLAR INPUT</span>
           <div class="my-1">
@@ -360,7 +364,6 @@
           <span id="solarDeltaText" class="text-[9px] sm:text-[10px] font-semibold truncate" style="color: var(--text-muted)">&Delta;V: +0.00V</span>
         </div>
 
-        <!-- Proteksi Sistem & Paket RX -->
         <div class="hud-panel p-2.5 sm:p-3.5 flex flex-col justify-between">
           <span data-i18n="kpiGuardLabel" class="text-[9px] sm:text-[10px] font-bold tracking-wider uppercase truncate" style="color: var(--text-muted)">PROTEKSI DC</span>
           <div class="my-1">
@@ -379,15 +382,12 @@
           <span class="text-[9px] sm:text-[10px] font-bold" style="color: var(--text-muted)">DC BUS 12V–25V</span>
         </div>
 
-        <!-- 4 Node Aliran Daya dengan Garis Animasi SVG -->
         <div class="grid grid-cols-7 items-center gap-1 text-center my-auto py-1">
-          <!-- Node 1: Solar -->
           <div class="col-span-1 hud-subbox p-1.5 sm:p-2 border-hud-cyan/50">
             <div class="text-[8px] sm:text-[9px] font-bold text-hud-cyan truncate">PV SOLAR</div>
             <div id="flowVal-1" class="font-digital text-base sm:text-xl leading-tight" style="color: var(--text-primary)">0.0V</div>
           </div>
 
-          <!-- Connector 1 -> 2 -->
           <div class="col-span-1 flex items-center justify-center">
             <svg class="w-full h-4" viewBox="0 0 40 12" preserveAspectRatio="none">
               <line x1="0" y1="6" x2="40" y2="6" stroke="var(--bar-empty)" stroke-width="2" />
@@ -395,13 +395,11 @@
             </svg>
           </div>
 
-          <!-- Node 2: Battery -->
           <div class="col-span-1 hud-subbox p-1.5 sm:p-2 border-hud-green/50">
             <div class="text-[8px] sm:text-[9px] font-bold text-hud-green truncate">BATTERY</div>
             <div id="flowVal-2" class="font-digital text-base sm:text-xl leading-tight" style="color: var(--text-primary)">0.0V</div>
           </div>
 
-          <!-- Connector 2 -> 3 -->
           <div class="col-span-1 flex items-center justify-center">
             <svg class="w-full h-4" viewBox="0 0 40 12" preserveAspectRatio="none">
               <line x1="0" y1="6" x2="40" y2="6" stroke="var(--bar-empty)" stroke-width="2" />
@@ -409,13 +407,11 @@
             </svg>
           </div>
 
-          <!-- Node 3: Buck Converter -->
           <div class="col-span-1 hud-subbox p-1.5 sm:p-2 border-hud-pink/50">
             <div class="text-[8px] sm:text-[9px] font-bold text-hud-pink truncate">STEP-DN</div>
             <div id="flowVal-3" class="font-digital text-base sm:text-xl leading-tight" style="color: var(--text-primary)">0.0V</div>
           </div>
 
-          <!-- Connector 3 -> 4 -->
           <div class="col-span-1 flex items-center justify-center">
             <svg class="w-full h-4" viewBox="0 0 40 12" preserveAspectRatio="none">
               <line x1="0" y1="6" x2="40" y2="6" stroke="var(--bar-empty)" stroke-width="2" />
@@ -423,7 +419,6 @@
             </svg>
           </div>
 
-          <!-- Node 4: Load Bus -->
           <div class="col-span-1 hud-subbox p-1.5 sm:p-2 border-hud-yellow/50">
             <div class="text-[8px] sm:text-[9px] font-bold text-hud-yellow truncate">LOAD BUS</div>
             <div id="flowVal-4" class="font-digital text-base sm:text-xl leading-tight" style="color: var(--text-primary)">0.0V</div>
@@ -547,7 +542,7 @@
       </div>
     </section>
 
-    <!-- ================= SECTION 2: OSCILLOSCOPE & 8-CH RELAY MATRIX ================= -->
+    <!-- ================= SECTION 2: OSCILLOSCOPE & 8-CH LAMP MATRIX ================= -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
       
       <!-- KIRI: REAL-TIME VOLTAGE OSCILLOSCOPE -->
@@ -579,12 +574,12 @@
         </div>
       </section>
 
-      <!-- KANAN: 8-CHANNEL RELAY MATRIX CONTROL (1 TOMBOL TOGGLE PER RELAY) -->
+      <!-- KANAN: 8-CHANNEL LAMP MATRIX CONTROL (1 TOMBOL TOGGLE PER LAMPU) -->
       <section class="lg:col-span-7 hud-panel p-3 sm:p-4 md:p-5 flex flex-col justify-between">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3 sm:mb-4">
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 bg-hud-pink inline-block shrink-0"></span>
-            <h2 data-i18n="relayHeader" class="font-hud font-bold text-[11px] sm:text-xs tracking-wider" style="color: var(--text-primary)">KONTROL MATRIKS RELAY (8-CH)</h2>
+            <h2 data-i18n="lampHeader" class="font-hud font-bold text-[11px] sm:text-xs tracking-wider" style="color: var(--text-primary)">KONTROL MATRIKS LAMPU (8-CH)</h2>
           </div>
 
           <!-- Master Action Buttons -->
@@ -593,29 +588,221 @@
               class="font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2 sm:py-1.5 border border-hud-yellow text-hud-yellow hover:bg-hud-yellow hover:text-black transition cursor-pointer text-center tracking-wider leading-tight">
               TES GELOMBANG
             </button>
-            <button onclick="setAllRelays(true)" data-i18n="allOnBtn"
+            <button onclick="setAllLamps(true)" data-i18n="allOnBtn"
               class="font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2 sm:py-1.5 border border-hud-green bg-hud-green/10 text-hud-green hover:bg-hud-green hover:text-black transition cursor-pointer text-center tracking-wider leading-tight">
               NYALAKAN SEMUA
             </button>
-            <button onclick="setAllRelays(false)" data-i18n="allOffBtn"
+            <button onclick="setAllLamps(false)" data-i18n="allOffBtn"
               class="font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2 sm:py-1.5 border border-hud-red bg-hud-red/10 text-hud-red hover:bg-hud-red hover:text-white transition cursor-pointer text-center tracking-wider leading-tight">
               MATIKAN SEMUA
             </button>
           </div>
         </div>
 
-        <!-- 8 Relay Cards Grid -->
-        <div id="relayGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 my-auto"></div>
+        <!-- 8 Lamp Cards Grid -->
+        <div id="lampGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 my-auto"></div>
 
         <div class="mt-3 sm:mt-4 pt-2 border-t border-hud-cyan/25 flex justify-between gap-2 text-[10px] sm:text-[11px] font-bold" style="color: var(--text-muted)">
-          <span class="shrink-0"><span data-i18n="activeCountLabel">AKTIF:</span> <strong id="activeRelayCount" class="text-hud-green">0 / 8</strong></span>
+          <span class="shrink-0"><span data-i18n="activeCountLabel">AKTIF:</span> <strong id="activeLampCount" class="text-hud-green">0 / 8</strong></span>
           <span id="lastCmdLog" class="text-hud-cyan truncate text-right">SISTEM SIAP</span>
         </div>
       </section>
 
     </div>
 
-    <!-- ================= SECTION 3: LIVE PACKET TERMINAL ================= -->
+    <!-- ================= SECTION 3: VOICE CONTROL & LAMP SCHEDULER / TIMER ================= -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
+      
+      <!-- KIRI: WEB SPEECH VOICE CONTROL (5 Kolom) -->
+      <section class="lg:col-span-5 hud-panel p-3 sm:p-4 md:p-5 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-2 h-2 bg-hud-cyan inline-block shrink-0"></span>
+              <h2 data-i18n="voiceHeader" class="font-hud font-bold text-[11px] sm:text-xs tracking-wider truncate" style="color: var(--text-primary)">KONTROL SUARA (VOICE AI)</h2>
+            </div>
+            <span id="voiceLangBadge" class="hud-subbox text-[9px] font-bold px-2 py-0.5 text-hud-cyan">ID-ID</span>
+          </div>
+
+          <!-- Tombol Aktivasi Mikrofon Utama + Equalizer -->
+          <div class="hud-subbox p-3 flex items-center justify-between gap-3 mb-3">
+            <button id="mainVoiceBtn" onclick="toggleVoiceControl()"
+              class="arcade-switch px-3.5 py-2.5 font-hud font-bold text-[9px] sm:text-[10px] tracking-wider border border-hud-cyan bg-hud-cyan/15 text-hud-cyan hover:bg-hud-cyan hover:text-black transition cursor-pointer flex items-center gap-2 shrink-0">
+              <span id="voiceMicIcon">&#127908;</span>
+              <span id="voiceBtnText" data-i18n="voiceStartBtn">AKTIFKAN MIC</span>
+            </button>
+
+            <!-- Equalizer Bars -->
+            <div class="flex items-center gap-1 h-7 px-2">
+              <span class="voice-eq w-1 h-3 bg-hud-cyan/40 transition-all" style="animation-delay: 0.0s"></span>
+              <span class="voice-eq w-1 h-6 bg-hud-cyan/40 transition-all" style="animation-delay: 0.15s"></span>
+              <span class="voice-eq w-1 h-4 bg-hud-cyan/40 transition-all" style="animation-delay: 0.3s"></span>
+              <span class="voice-eq w-1 h-7 bg-hud-cyan/40 transition-all" style="animation-delay: 0.1s"></span>
+              <span class="voice-eq w-1 h-3 bg-hud-cyan/40 transition-all" style="animation-delay: 0.25s"></span>
+            </div>
+          </div>
+
+          <!-- Kotak Transkrip Ucapan Real-Time -->
+          <div class="hud-subbox p-2.5 mb-3">
+            <div class="flex items-center justify-between text-[9px] font-bold mb-1" style="color: var(--text-muted)">
+              <span data-i18n="voiceTranscriptLabel">TRANSKRIP SUARA:</span>
+              <span id="voiceExecBadge" class="text-hud-cyan">STANDBY</span>
+            </div>
+            <div id="voiceTranscriptText" class="text-xs sm:text-sm font-bold min-h-[22px] truncate" style="color: var(--text-primary)">
+              "..."
+            </div>
+          </div>
+        </div>
+
+        <!-- Contoh Perintah Suara (Bisa diklik untuk uji coba langsung) -->
+        <div>
+          <div data-i18n="voiceHintsLabel" class="text-[9px] sm:text-[10px] font-bold mb-1.5" style="color: var(--text-muted)">
+            CONTOH PERINTAH (KLIK UNTUK UJI):
+          </div>
+          <div id="voicePresets" class="flex flex-wrap gap-1.5"></div>
+        </div>
+      </section>
+
+      <!-- KANAN: PENJADWALAN & TIMER MUNDUR (7 Kolom) -->
+      <section class="lg:col-span-7 hud-panel p-3 sm:p-4 md:p-5 flex flex-col justify-between">
+        <div>
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 bg-hud-yellow inline-block shrink-0"></span>
+              <h2 data-i18n="schedHeader" class="font-hud font-bold text-[11px] sm:text-xs tracking-wider" style="color: var(--text-primary)">PENJADWALAN &amp; TIMER MUNDUR</h2>
+            </div>
+
+            <!-- Switch Tab: Timer Mundur vs Jadwal Harian -->
+            <div class="grid grid-cols-2 gap-1 hud-subbox p-1">
+              <button id="tabTimerBtn" onclick="switchSchedTab('timer')"
+                class="font-hud font-bold text-[8px] sm:text-[9px] px-2.5 py-1 bg-hud-yellow text-black transition cursor-pointer tracking-wider">
+                TIMER MUNDUR
+              </button>
+              <button id="tabDailyBtn" onclick="switchSchedTab('daily')"
+                class="font-hud font-bold text-[8px] sm:text-[9px] px-2.5 py-1 transition cursor-pointer tracking-wider"
+                style="color: var(--text-muted)">
+                JADWAL JAM
+              </button>
+            </div>
+          </div>
+
+          <!-- FORM 1: TIMER MUNDUR (COUNTDOWN) -->
+          <div id="timerFormBox" class="hud-subbox p-2.5 sm:p-3 mb-3 space-y-2">
+            <div class="grid grid-cols-2 sm:grid-cols-12 gap-2 items-end">
+              <div class="sm:col-span-3">
+                <label data-i18n="lblChannel" class="block text-[9px] font-bold mb-1" style="color: var(--text-muted)">LAMPU</label>
+                <select id="timerLampSelect" class="w-full hud-subbox px-2 py-1.5 text-xs font-bold focus:outline-none" style="color: var(--text-primary)">
+                  <option value="0">LAMPU 01</option>
+                  <option value="1">LAMPU 02</option>
+                  <option value="2">LAMPU 03</option>
+                  <option value="3">LAMPU 04</option>
+                  <option value="4">LAMPU 05</option>
+                  <option value="5">LAMPU 06</option>
+                  <option value="6">LAMPU 07</option>
+                  <option value="7">LAMPU 08</option>
+                </select>
+              </div>
+
+              <div class="sm:col-span-3">
+                <label data-i18n="lblAction" class="block text-[9px] font-bold mb-1" style="color: var(--text-muted)">AKSI</label>
+                <select id="timerActionSelect" class="w-full hud-subbox px-2 py-1.5 text-xs font-bold focus:outline-none" style="color: var(--text-primary)">
+                  <option value="1">ON (NYALA)</option>
+                  <option value="0">OFF (MATI)</option>
+                </select>
+              </div>
+
+              <div class="sm:col-span-2">
+                <label data-i18n="lblMin" class="block text-[9px] font-bold mb-1" style="color: var(--text-muted)">MENIT</label>
+                <input type="number" id="timerMinInput" min="0" max="999" value="0"
+                  class="w-full hud-subbox px-2 py-1.5 text-xs font-bold focus:outline-none" style="color: var(--text-primary)" />
+              </div>
+
+              <div class="sm:col-span-2">
+                <label data-i18n="lblSec" class="block text-[9px] font-bold mb-1" style="color: var(--text-muted)">DETIK</label>
+                <input type="number" id="timerSecInput" min="0" max="59" value="15"
+                  class="w-full hud-subbox px-2 py-1.5 text-xs font-bold focus:outline-none" style="color: var(--text-primary)" />
+              </div>
+
+              <div class="col-span-2 sm:col-span-2">
+                <button onclick="addCountdownTimer()" data-i18n="btnStartTimer"
+                  class="w-full py-2 px-2 font-hud font-bold text-[8.5px] bg-hud-yellow text-black hover:brightness-110 transition cursor-pointer tracking-wider">
+                  MULAI
+                </button>
+              </div>
+            </div>
+
+            <!-- Preset Durasi Cepat untuk Demo Lomba -->
+            <div class="flex flex-wrap items-center gap-1.5 pt-1 border-t border-hud-cyan/15">
+              <span data-i18n="lblQuickPreset" class="text-[9px] font-bold" style="color: var(--text-muted)">PRESET CEPAT:</span>
+              <button onclick="setTimerPreset(0, 10)" class="text-[9px] font-bold px-2 py-0.5 border border-hud-cyan/40 text-hud-cyan hover:bg-hud-cyan hover:text-black cursor-pointer">10s</button>
+              <button onclick="setTimerPreset(0, 30)" class="text-[9px] font-bold px-2 py-0.5 border border-hud-cyan/40 text-hud-cyan hover:bg-hud-cyan hover:text-black cursor-pointer">30s</button>
+              <button onclick="setTimerPreset(1, 0)" class="text-[9px] font-bold px-2 py-0.5 border border-hud-cyan/40 text-hud-cyan hover:bg-hud-cyan hover:text-black cursor-pointer">1m</button>
+              <button onclick="setTimerPreset(5, 0)" class="text-[9px] font-bold px-2 py-0.5 border border-hud-cyan/40 text-hud-cyan hover:bg-hud-cyan hover:text-black cursor-pointer">5m</button>
+            </div>
+          </div>
+
+          <!-- FORM 2: JADWAL OTOMATIS HARIAN (HH:MM) -->
+          <div id="dailyFormBox" class="hidden hud-subbox p-2.5 sm:p-3 mb-3">
+            <div class="grid grid-cols-2 sm:grid-cols-12 gap-2 items-end">
+              <div class="sm:col-span-3">
+                <label data-i18n="lblChannel" class="block text-[9px] font-bold mb-1" style="color: var(--text-muted)">LAMPU</label>
+                <select id="schedLampSelect" class="w-full hud-subbox px-2 py-1.5 text-xs font-bold focus:outline-none" style="color: var(--text-primary)">
+                  <option value="0">LAMPU 01</option>
+                  <option value="1">LAMPU 02</option>
+                  <option value="2">LAMPU 03</option>
+                  <option value="3">LAMPU 04</option>
+                  <option value="4">LAMPU 05</option>
+                  <option value="5">LAMPU 06</option>
+                  <option value="6">LAMPU 07</option>
+                  <option value="7">LAMPU 08</option>
+                </select>
+              </div>
+
+              <div class="sm:col-span-3">
+                <label data-i18n="lblAction" class="block text-[9px] font-bold mb-1" style="color: var(--text-muted)">AKSI</label>
+                <select id="schedActionSelect" class="w-full hud-subbox px-2 py-1.5 text-xs font-bold focus:outline-none" style="color: var(--text-primary)">
+                  <option value="1">ON (NYALA)</option>
+                  <option value="0">OFF (MATI)</option>
+                </select>
+              </div>
+
+              <div class="sm:col-span-2">
+                <label data-i18n="lblTime" class="block text-[9px] font-bold mb-1" style="color: var(--text-muted)">PUKUL</label>
+                <input type="time" id="schedTimeInput" value="17:30"
+                  class="w-full hud-subbox px-2 py-1 text-xs font-bold focus:outline-none" style="color: var(--text-primary)" />
+              </div>
+
+              <div class="sm:col-span-2">
+                <label data-i18n="lblRepeat" class="block text-[9px] font-bold mb-1" style="color: var(--text-muted)">ULANGI</label>
+                <select id="schedRepeatSelect" class="w-full hud-subbox px-2 py-1.5 text-xs font-bold focus:outline-none" style="color: var(--text-primary)">
+                  <option value="daily">HARIAN</option>
+                  <option value="once">SEKALI</option>
+                </select>
+              </div>
+
+              <div class="col-span-2 sm:col-span-2">
+                <button onclick="addDailySchedule()" data-i18n="btnAddSched"
+                  class="w-full py-2 px-2 font-hud font-bold text-[8.5px] bg-hud-cyan text-black hover:brightness-110 transition cursor-pointer tracking-wider">
+                  TAMBAH
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Daftar Antrean Timer Mundur & Jadwal Aktif -->
+        <div>
+          <div class="flex items-center justify-between text-[9px] sm:text-[10px] font-bold mb-1.5" style="color: var(--text-muted)">
+            <span data-i18n="activeTasksLabel">ANTREAN TIMER &amp; JADWAL AKTIF:</span>
+            <span id="taskCountBadge" class="text-hud-yellow">0 TASK</span>
+          </div>
+          <div id="automationList" class="hud-subbox h-24 overflow-y-auto p-2 space-y-1.5 text-xs"></div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ================= SECTION 4: LIVE PACKET TERMINAL ================= -->
     <section class="hud-panel p-3 sm:p-3.5">
       <div class="flex items-center justify-between gap-2 border-b border-hud-cyan/25 pb-2 mb-2">
         <span data-i18n="terminalHeader" class="font-hud font-bold text-[9px] sm:text-[10px] text-hud-green tracking-wider truncate">&gt;_ MONITOR PAKET SERIAL / MQTT LANGSUNG</span>
@@ -647,13 +834,34 @@
         exportCsvBtn: 'EXPORT CSV',
         clearWaveBtn: 'RESET',
         bufferText: 'BUFFER: 25 SAMPEL',
-        relayHeader: 'KONTROL MATRIKS RELAY (8-CH)',
+        lampHeader: 'KONTROL MATRIKS LAMPU (8-CH)',
+        lampItemPrefix: 'LAMPU 0',
         waveTestBtn: 'TES GELOMBANG',
         allOnBtn: 'NYALAKAN SEMUA',
         allOffBtn: 'MATIKAN SEMUA',
         btnTurnOn: 'NYALAKAN',
         btnTurnOff: 'MATIKAN',
         activeCountLabel: 'AKTIF:',
+        voiceHeader: 'KONTROL SUARA (VOICE AI)',
+        voiceStartBtn: 'AKTIFKAN MIC',
+        voiceStopBtn: 'MENDENGARKAN...',
+        voiceTranscriptLabel: 'TRANSKRIP SUARA:',
+        voiceHintsLabel: 'CONTOH PERINTAH (KLIK UNTUK UJI):',
+        voicePresets: ['Nyalakan Lampu 1', 'Matikan Lampu 1', 'Nyalakan Semua Lampu', 'Matikan Semua Lampu', 'Tes Gelombang'],
+        schedHeader: 'PENJADWALAN & TIMER MUNDUR',
+        tabTimer: 'TIMER MUNDUR',
+        tabDaily: 'JADWAL JAM',
+        lblChannel: 'LAMPU',
+        lblAction: 'AKSI',
+        lblMin: 'MENIT',
+        lblSec: 'DETIK',
+        lblTime: 'PUKUL',
+        lblRepeat: 'ULANGI',
+        lblQuickPreset: 'PRESET CEPAT:',
+        btnStartTimer: 'MULAI',
+        btnAddSched: 'TAMBAH',
+        activeTasksLabel: 'ANTREAN TIMER & JADWAL AKTIF:',
+        emptyTasksText: 'Belum ada timer mundur atau jadwal otomatis.',
         terminalHeader: '>_ MONITOR PAKET SERIAL / MQTT LANGSUNG',
         clearLogBtn: '[ BERSIHKAN ]',
         sysReady: 'SISTEM SIAP',
@@ -666,20 +874,30 @@
         solarCharging: 'CHARGING',
         solarStandby: 'STANDBY',
         locale: 'id-ID',
+        speechLocale: 'id-ID',
         msgBrokerConnecting: (url) => `Menghubungkan ke ${url}...`,
         msgBrokerConnected: 'TERHUBUNG ke EMQX Cloud Broker (Sinkronisasi Real-Time Aktif)!',
         msgBrokerDisconnected: 'Koneksi broker terputus. Menghubungkan ulang...',
-        msgAllAlready: (s) => `Semua relay sudah dalam kondisi ${s}.`,
-        msgMasterExec: (s, n) => `Eksekusi MASTER ${s} (${n} channel)...`,
-        msgWaveExec: 'Menjalankan TES GELOMBANG R1 -> R8...',
+        msgAllAlready: (s) => `Semua lampu sudah dalam kondisi ${s}.`,
+        msgMasterExec: (s, n) => `Eksekusi MASTER ${s} (${n} lampu)...`,
+        msgWaveExec: 'Menjalankan TES GELOMBANG LAMPU 01 -> LAMPU 08...',
         msgFailOffline: (p) => `GAGAL kirim ${p}: MQTT belum terhubung!`,
         msgSavedIp: (ip) => `IP Lokal disimpan: ${ip}`,
         msgChartCleared: 'Buffer osiloskop dan statistik Min/Max direset.',
-        msgRelaySynced: (detail) => `SYNC [ESP32-S3] -> Status relay diperbarui (${detail})`,
+        msgLampSynced: (detail) => `SYNC [ESP32-S3] -> Status lampu diperbarui (${detail})`,
         msgCsvExported: (rows) => `Berhasil mengekspor ${rows} baris data telemetri ke CSV.`,
         msgCsvEmpty: 'Belum ada data telemetri untuk diekspor.',
         msgSimOn: 'MODE SIMULASI DIAKTIFKAN (Data demo real-time berjalan).',
-        msgSimOff: 'MODE SIMULASI DIMATIKAN (Kembali ke data perangkat keras).'
+        msgSimOff: 'MODE SIMULASI DIMATIKAN (Kembali ke data perangkat keras).',
+        msgVoiceUnsupported: 'Browser Anda tidak mendukung Web Speech API.',
+        msgVoiceListening: 'Mikrofon aktif. Silakan ucapkan perintah...',
+        msgVoiceStopped: 'Kontrol suara dimatikan.',
+        msgVoiceMatched: (cmd) => `VOICE CMD -> Eksekusi: ${cmd}`,
+        msgVoiceUnknown: (txt) => `Perintah tidak dikenali: "${txt}"`,
+        msgTimerAdded: (ch, st, sec) => `TIMER -> Lampu 0${ch} akan ${st} dalam ${sec} detik.`,
+        msgTimerFired: (ch, st) => `TIMER SELESAI -> Menjalankan Lampu 0${ch} ${st}!`,
+        msgSchedAdded: (ch, st, tm) => `JADWAL -> Lampu 0${ch} ${st} pada pukul ${tm}.`,
+        msgSchedFired: (ch, st, tm) => `JADWAL TERPICU (${tm}) -> Lampu 0${ch} ${st}!`
       },
       en: {
         pingLabel: 'PING LATENCY',
@@ -696,13 +914,34 @@
         exportCsvBtn: 'EXPORT CSV',
         clearWaveBtn: 'RESET',
         bufferText: 'BUFFER: 25 SAMPLES',
-        relayHeader: 'RELAY MATRIX CONTROL (8-CH)',
+        lampHeader: 'LAMP MATRIX CONTROL (8-CH)',
+        lampItemPrefix: 'LAMP 0',
         waveTestBtn: 'WAVE TEST',
         allOnBtn: 'ALL ON',
         allOffBtn: 'ALL OFF',
         btnTurnOn: 'TURN ON',
         btnTurnOff: 'TURN OFF',
         activeCountLabel: 'ACTIVE:',
+        voiceHeader: 'VOICE COMMAND (WEB SPEECH)',
+        voiceStartBtn: 'ENABLE MIC',
+        voiceStopBtn: 'LISTENING...',
+        voiceTranscriptLabel: 'SPEECH TRANSCRIPT:',
+        voiceHintsLabel: 'SAMPLE COMMANDS (CLICK TO TEST):',
+        voicePresets: ['Turn on Lamp 1', 'Turn off Lamp 1', 'Turn on all lamps', 'Turn off all lamps', 'Wave test'],
+        schedHeader: 'SCHEDULER & COUNTDOWN TIMER',
+        tabTimer: 'COUNTDOWN',
+        tabDaily: 'DAILY TIME',
+        lblChannel: 'LAMP',
+        lblAction: 'ACTION',
+        lblMin: 'MIN',
+        lblSec: 'SEC',
+        lblTime: 'TIME',
+        lblRepeat: 'REPEAT',
+        lblQuickPreset: 'QUICK PRESET:',
+        btnStartTimer: 'START',
+        btnAddSched: 'ADD',
+        activeTasksLabel: 'ACTIVE TIMERS & SCHEDULES:',
+        emptyTasksText: 'No active countdown timers or daily schedules.',
         terminalHeader: '>_ LIVE SERIAL / MQTT PACKET MONITOR',
         clearLogBtn: '[ CLEAR ]',
         sysReady: 'SYSTEM READY',
@@ -715,20 +954,30 @@
         solarCharging: 'CHARGING',
         solarStandby: 'STANDBY',
         locale: 'en-US',
+        speechLocale: 'en-US',
         msgBrokerConnecting: (url) => `Connecting to ${url}...`,
         msgBrokerConnected: 'CONNECTED to EMQX Cloud Broker (Live Sync Active)!',
         msgBrokerDisconnected: 'Broker disconnected. Reconnecting...',
-        msgAllAlready: (s) => `All relays are already turned ${s}.`,
-        msgMasterExec: (s, n) => `Executing MASTER ALL ${s} (${n} channels)...`,
-        msgWaveExec: 'Running WAVE SEQUENCE TEST R1 -> R8...',
+        msgAllAlready: (s) => `All lamps are already turned ${s}.`,
+        msgMasterExec: (s, n) => `Executing MASTER ALL ${s} (${n} lamps)...`,
+        msgWaveExec: 'Running WAVE SEQUENCE TEST LAMP 01 -> LAMP 08...',
         msgFailOffline: (p) => `FAILED sending ${p}: MQTT broker offline!`,
         msgSavedIp: (ip) => `Local IP saved: ${ip}`,
         msgChartCleared: 'Oscilloscope buffer and Min/Max stats cleared.',
-        msgRelaySynced: (detail) => `SYNC [ESP32-S3] -> Relay state updated (${detail})`,
+        msgLampSynced: (detail) => `SYNC [ESP32-S3] -> Lamp state updated (${detail})`,
         msgCsvExported: (rows) => `Exported ${rows} telemetry records to CSV.`,
         msgCsvEmpty: 'No telemetry samples available to export.',
         msgSimOn: 'SIMULATION MODE ENABLED (Running live demo telemetry).',
-        msgSimOff: 'SIMULATION MODE DISABLED (Switched back to live hardware).'
+        msgSimOff: 'SIMULATION MODE DISABLED (Switched back to live hardware).',
+        msgVoiceUnsupported: 'Your browser does not support Web Speech API.',
+        msgVoiceListening: 'Microphone active. Speak a command...',
+        msgVoiceStopped: 'Voice control disabled.',
+        msgVoiceMatched: (cmd) => `VOICE CMD -> Executed: ${cmd}`,
+        msgVoiceUnknown: (txt) => `Unrecognized command: "${txt}"`,
+        msgTimerAdded: (ch, st, sec) => `TIMER -> Lamp 0${ch} will turn ${st} in ${sec}s.`,
+        msgTimerFired: (ch, st) => `TIMER EXPIRED -> Turning Lamp 0${ch} ${st}!`,
+        msgSchedAdded: (ch, st, tm) => `SCHEDULE -> Lamp 0${ch} ${st} at ${tm}.`,
+        msgSchedFired: (ch, st, tm) => `SCHEDULE TRIGGERED (${tm}) -> Lamp 0${ch} ${st}!`
       }
     };
 
@@ -743,15 +992,14 @@
       pingTopic: 'galtech/ping'
     };
 
-    const RELAY_PINS = [6, 7, 15, 16, 17, 18, 8, 3];
-    let relayStates = Array(8).fill(false);
+    const LAMP_PINS = [6, 7, 15, 16, 17, 18, 8, 3];
+    let lampStates = Array(8).fill(false);
 
     let currentLang = localStorage.getItem('galtech_lang') || 'id';
     let currentTheme = localStorage.getItem('galtech_theme') || 'dark';
     let isCloudMode = true;
     let isSimMode = false;
     let sfxEnabled = true;
-    let crtEnabled = true;
     let client = null;
 
     let latestVoltages = [0, 0, 0, 0];
@@ -760,6 +1008,13 @@
     let rxPacketCount = 0;
     let csvHistory = [];
     const browserPingId = 'web_' + Math.random().toString(16).substring(2, 8);
+
+    // State Voice Control & Scheduler
+    let recognition = null;
+    let isVoiceListening = false;
+    let activeTimers = []; // { id, ch, state, remainingSec }
+    let dailySchedules = JSON.parse(localStorage.getItem('galtech_schedules') || '[]');
+    let lastFiredKey = {};
 
     // ================= PENERAPAN TEMA (DARK MODE / WHITE MODE) =================
     function applyTheme(theme) {
@@ -799,15 +1054,34 @@
 
       document.getElementById('langBtn').textContent = `LANG: ${lang.toUpperCase()}`;
       document.getElementById('lastCmdLog').textContent = dict.sysReady;
+      document.getElementById('voiceLangBadge').textContent = dict.speechLocale.toUpperCase();
+      document.getElementById('tabTimerBtn').textContent = dict.tabTimer;
+      document.getElementById('tabDailyBtn').textContent = dict.tabDaily;
 
       document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         if (dict[key]) el.textContent = dict[key];
       });
 
+      // Perbarui opsi dropdown LAMPU 01 - 08 sesuai bahasa
+      ['timerLampSelect', 'schedLampSelect'].forEach(selId => {
+        const sel = document.getElementById(selId);
+        if (!sel) return;
+        Array.from(sel.options).forEach((opt, idx) => {
+          opt.textContent = `${dict.lampItemPrefix}${idx + 1}`;
+        });
+      });
+
+      if (recognition) {
+        recognition.lang = dict.speechLocale;
+      }
+
+      renderVoicePresets();
+      updateVoiceUI();
       updateRealTimeClock();
       updateSensorsUI(...latestVoltages, false);
-      renderRelayMatrix();
+      renderLampMatrix();
+      renderAutomationList();
     }
 
     function toggleLanguage() {
@@ -815,19 +1089,19 @@
       playRetroBeep(760, 0.05);
     }
 
-    // ================= JAM REAL-TIME =================
+    // ================= JAM REAL-TIME & ENGINE PENJADWALAN / TIMER =================
     function updateRealTimeClock() {
       const now = new Date();
-      const locale = I18N[currentLang].locale;
+      const dict = I18N[currentLang];
 
-      const timeStr = now.toLocaleTimeString(locale, {
+      const timeStr = now.toLocaleTimeString(dict.locale, {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
         hour12: false
       }).replace(/\./g, ':');
 
-      const dateStr = now.toLocaleDateString(locale, {
+      const dateStr = now.toLocaleDateString(dict.locale, {
         weekday: 'short',
         day: '2-digit',
         month: 'short',
@@ -836,8 +1110,410 @@
 
       document.getElementById('liveClock').textContent = timeStr;
       document.getElementById('liveDate').textContent = dateStr;
+
+      // 1. Proses Countdown Timers setiap 1 detik
+      if (activeTimers.length > 0) {
+        const remaining = [];
+        activeTimers.forEach(t => {
+          t.remainingSec -= 1;
+          if (t.remainingSec <= 0) {
+            sendLampCommand(t.ch, t.state);
+            playRetroBeep(1180, 0.12);
+            logPacket(dict.msgTimerFired(t.ch + 1, t.state ? 'ON' : 'OFF'), 'ok');
+          } else {
+            remaining.push(t);
+          }
+        });
+        activeTimers = remaining;
+        renderAutomationList();
+        updateLampTimerBadges();
+      }
+
+      // 2. Proses Jadwal Harian (HH:MM)
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const currentHHMM = `${hh}:${mm}`;
+      const minuteStamp = `${now.toDateString()}_${currentHHMM}`;
+      let schedChanged = false;
+
+      dailySchedules.forEach(s => {
+        if (!s.enabled) return;
+        if (s.time === currentHHMM && lastFiredKey[s.id] !== minuteStamp) {
+          lastFiredKey[s.id] = minuteStamp;
+          sendLampCommand(s.ch, s.state);
+          playRetroBeep(1080, 0.1);
+          logPacket(dict.msgSchedFired(s.ch + 1, s.state ? 'ON' : 'OFF', s.time), 'ok');
+          if (s.repeat === 'once') {
+            s.enabled = false;
+            schedChanged = true;
+          }
+        }
+      });
+
+      if (schedChanged) {
+        saveSchedules();
+        renderAutomationList();
+      }
     }
     setInterval(updateRealTimeClock, 1000);
+
+    // ================= WEB SPEECH VOICE CONTROL =================
+    function initVoiceRecognition() {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) return null;
+
+      const rec = new SpeechRec();
+      rec.lang = I18N[currentLang].speechLocale;
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.maxAlternatives = 1;
+
+      rec.onresult = (event) => {
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript.trim();
+          if (event.results[i].isFinal) {
+            document.getElementById('voiceTranscriptText').textContent = `"${transcript}"`;
+            processVoiceCommand(transcript);
+          } else {
+            interim += transcript;
+          }
+        }
+        if (interim) {
+          document.getElementById('voiceTranscriptText').textContent = `"${interim}..."`;
+        }
+      };
+
+      rec.onerror = (event) => {
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          isVoiceListening = false;
+          updateVoiceUI();
+          logPacket(`VOICE ERR: ${event.error}`, 'err');
+        }
+      };
+
+      rec.onend = () => {
+        if (isVoiceListening) {
+          try { rec.start(); } catch (e) {}
+        }
+      };
+
+      return rec;
+    }
+
+    function toggleVoiceControl() {
+      const dict = I18N[currentLang];
+      if (!recognition) {
+        recognition = initVoiceRecognition();
+      }
+      if (!recognition) {
+        logPacket(dict.msgVoiceUnsupported, 'err');
+        alert(dict.msgVoiceUnsupported);
+        return;
+      }
+
+      isVoiceListening = !isVoiceListening;
+      if (isVoiceListening) {
+        recognition.lang = dict.speechLocale;
+        try {
+          recognition.start();
+          playRetroBeep(960, 0.07);
+          logPacket(dict.msgVoiceListening, 'ok');
+        } catch (e) {}
+      } else {
+        try { recognition.stop(); } catch (e) {}
+        playRetroBeep(460, 0.07);
+        logPacket(dict.msgVoiceStopped, 'info');
+      }
+      updateVoiceUI();
+    }
+
+    function updateVoiceUI() {
+      const dict = I18N[currentLang];
+      const mainBtn = document.getElementById('mainVoiceBtn');
+      const headerBtn = document.getElementById('headerMicBtn');
+      const btnText = document.getElementById('voiceBtnText');
+      const execBadge = document.getElementById('voiceExecBadge');
+      const eqBars = document.querySelectorAll('.voice-eq');
+
+      if (isVoiceListening) {
+        mainBtn.className = 'arcade-switch px-3.5 py-2.5 font-hud font-bold text-[9px] sm:text-[10px] tracking-wider border border-hud-pink bg-hud-pink/20 text-hud-pink transition cursor-pointer flex items-center gap-2 shrink-0 animate-pulse';
+        headerBtn.textContent = 'MIC: ON';
+        headerBtn.className = 'font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border border-hud-pink bg-hud-pink/20 text-hud-pink transition cursor-pointer text-center tracking-wider';
+        btnText.textContent = dict.voiceStopBtn;
+        execBadge.textContent = 'ACTIVE';
+        execBadge.className = 'text-hud-green font-bold';
+        eqBars.forEach(b => {
+          b.classList.add('voice-bar-active', 'bg-hud-pink');
+          b.classList.remove('bg-hud-cyan/40');
+        });
+      } else {
+        mainBtn.className = 'arcade-switch px-3.5 py-2.5 font-hud font-bold text-[9px] sm:text-[10px] tracking-wider border border-hud-cyan bg-hud-cyan/15 text-hud-cyan hover:bg-hud-cyan hover:text-black transition cursor-pointer flex items-center gap-2 shrink-0';
+        headerBtn.textContent = 'MIC: OFF';
+        headerBtn.className = 'font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border border-hud-cyan/70 text-hud-cyan hover:bg-hud-cyan hover:text-black transition cursor-pointer text-center tracking-wider';
+        headerBtn.style.backgroundColor = 'var(--btn-bg)';
+        btnText.textContent = dict.voiceStartBtn;
+        execBadge.textContent = 'STANDBY';
+        execBadge.className = 'text-hud-cyan';
+        eqBars.forEach(b => {
+          b.classList.remove('voice-bar-active', 'bg-hud-pink');
+          b.classList.add('bg-hud-cyan/40');
+        });
+      }
+    }
+
+    function renderVoicePresets() {
+      const box = document.getElementById('voicePresets');
+      const presets = I18N[currentLang].voicePresets;
+      box.innerHTML = '';
+      presets.forEach(phrase => {
+        const chip = document.createElement('button');
+        chip.className = 'text-[9px] sm:text-[10px] font-semibold px-2 py-1 hud-subbox hover:border-hud-cyan hover:text-hud-cyan transition cursor-pointer';
+        chip.style.color = 'var(--text-body)';
+        chip.textContent = `"${phrase}"`;
+        chip.onclick = () => {
+          document.getElementById('voiceTranscriptText').textContent = `"${phrase}"`;
+          processVoiceCommand(phrase);
+        };
+        box.appendChild(chip);
+      });
+    }
+
+    function processVoiceCommand(rawText) {
+      const dict = I18N[currentLang];
+      const text = rawText.toLowerCase().trim();
+      const badge = document.getElementById('voiceExecBadge');
+
+      // 1. Cek Perintah Tes Gelombang
+      if (text.includes('gelombang') || text.includes('wave')) {
+        runWaveTest();
+        badge.textContent = 'WAVE TEST';
+        badge.className = 'text-hud-yellow font-bold';
+        logPacket(dict.msgVoiceMatched('WAVE TEST'), 'ok');
+        return;
+      }
+
+      // 2. Deteksi Aksi ON atau OFF
+      const isTurnOn = /\b(nyalakan|nyala|hidupkan|hidup|aktifkan|buka|turn on|switch on|enable|on)\b/.test(text);
+      const isTurnOff = /\b(matikan|mati|padamkan|nonaktifkan|tutup|turn off|switch off|disable|off)\b/.test(text);
+
+      if (!isTurnOn && !isTurnOff) {
+        badge.textContent = 'NO ACTION';
+        badge.className = 'text-hud-red font-bold';
+        logPacket(dict.msgVoiceUnknown(rawText), 'err');
+        return;
+      }
+      const targetState = isTurnOn && !isTurnOff;
+
+      // 3. Cek Perintah Semua Lampu (mendukung "semua", "semuanya", "seluruh", "all", "everything")
+      if (/(semua|seluruh|\ball\b|\beverything\b)/.test(text)) {
+        setAllLamps(targetState);
+        const label = `ALL LAMPS ${targetState ? 'ON' : 'OFF'}`;
+        badge.textContent = label;
+        badge.className = 'text-hud-green font-bold';
+        logPacket(dict.msgVoiceMatched(label), 'ok');
+        return;
+      }
+
+      // 4. Deteksi Nomor Lampu (1 - 8 atau kata angka ID/EN)
+      const numPatterns = [
+        { idx: 0, re: /\b(1|01|satu|pertama|one)\b/ },
+        { idx: 1, re: /\b(2|02|dua|kedua|two|to)\b/ },
+        { idx: 2, re: /\b(3|03|tiga|ketiga|three)\b/ },
+        { idx: 3, re: /\b(4|04|empat|keempat|four|for)\b/ },
+        { idx: 4, re: /\b(5|05|lima|kelima|five)\b/ },
+        { idx: 5, re: /\b(6|06|enam|keenam|six)\b/ },
+        { idx: 6, re: /\b(7|07|tujuh|ketujuh|seven)\b/ },
+        { idx: 7, re: /\b(8|08|delapan|kedelapan|eight)\b/ }
+      ];
+
+      let matchedIndex = -1;
+      for (const item of numPatterns) {
+        if (item.re.test(text)) {
+          matchedIndex = item.idx;
+          break;
+        }
+      }
+
+      if (matchedIndex !== -1) {
+        sendLampCommand(matchedIndex, targetState);
+        const label = `LAMPU 0${matchedIndex + 1} -> ${targetState ? 'ON' : 'OFF'}`;
+        badge.textContent = label;
+        badge.className = 'text-hud-green font-bold';
+        logPacket(dict.msgVoiceMatched(label), 'ok');
+      } else {
+        badge.textContent = 'NO LAMP ID';
+        badge.className = 'text-hud-red font-bold';
+        logPacket(dict.msgVoiceUnknown(rawText), 'err');
+      }
+    }
+
+    // ================= PENJADWALAN & TIMER MUNDUR =================
+    function switchSchedTab(tab) {
+      const timerBtn = document.getElementById('tabTimerBtn');
+      const dailyBtn = document.getElementById('tabDailyBtn');
+      const timerBox = document.getElementById('timerFormBox');
+      const dailyBox = document.getElementById('dailyFormBox');
+
+      if (tab === 'timer') {
+        timerBtn.className = 'font-hud font-bold text-[8px] sm:text-[9px] px-2.5 py-1 bg-hud-yellow text-black transition cursor-pointer tracking-wider';
+        dailyBtn.className = 'font-hud font-bold text-[8px] sm:text-[9px] px-2.5 py-1 transition cursor-pointer tracking-wider';
+        dailyBtn.style.color = 'var(--text-muted)';
+        timerBox.classList.remove('hidden');
+        dailyBox.classList.add('hidden');
+      } else {
+        dailyBtn.className = 'font-hud font-bold text-[8px] sm:text-[9px] px-2.5 py-1 bg-hud-cyan text-black transition cursor-pointer tracking-wider';
+        timerBtn.className = 'font-hud font-bold text-[8px] sm:text-[9px] px-2.5 py-1 transition cursor-pointer tracking-wider';
+        timerBtn.style.color = 'var(--text-muted)';
+        dailyBox.classList.remove('hidden');
+        timerBox.classList.add('hidden');
+      }
+    }
+
+    function setTimerPreset(min, sec) {
+      document.getElementById('timerMinInput').value = min;
+      document.getElementById('timerSecInput').value = sec;
+      playRetroBeep(820, 0.04);
+    }
+
+    function addCountdownTimer() {
+      const ch = parseInt(document.getElementById('timerLampSelect').value, 10);
+      const state = document.getElementById('timerActionSelect').value === '1';
+      const min = Math.max(0, parseInt(document.getElementById('timerMinInput').value, 10) || 0);
+      const sec = Math.max(0, parseInt(document.getElementById('timerSecInput').value, 10) || 0);
+      const totalSec = min * 60 + sec;
+
+      if (totalSec <= 0) return;
+
+      activeTimers = activeTimers.filter(t => t.ch !== ch);
+      activeTimers.push({
+        id: 'tmr_' + Date.now(),
+        ch,
+        state,
+        remainingSec: totalSec
+      });
+
+      playRetroBeep(920, 0.06);
+      logPacket(I18N[currentLang].msgTimerAdded(ch + 1, state ? 'ON' : 'OFF', totalSec), 'tx');
+      renderAutomationList();
+      updateLampTimerBadges();
+    }
+
+    function removeCountdownTimer(id) {
+      activeTimers = activeTimers.filter(t => t.id !== id);
+      renderAutomationList();
+      updateLampTimerBadges();
+    }
+
+    function addDailySchedule() {
+      const ch = parseInt(document.getElementById('schedLampSelect').value, 10);
+      const state = document.getElementById('schedActionSelect').value === '1';
+      const time = document.getElementById('schedTimeInput').value;
+      const repeat = document.getElementById('schedRepeatSelect').value;
+
+      if (!time) return;
+
+      dailySchedules.push({
+        id: 'sch_' + Date.now(),
+        ch,
+        state,
+        time,
+        repeat,
+        enabled: true
+      });
+
+      saveSchedules();
+      playRetroBeep(920, 0.06);
+      logPacket(I18N[currentLang].msgSchedAdded(ch + 1, state ? 'ON' : 'OFF', time), 'tx');
+      renderAutomationList();
+    }
+
+    function toggleScheduleEnabled(id) {
+      const item = dailySchedules.find(s => s.id === id);
+      if (item) {
+        item.enabled = !item.enabled;
+        saveSchedules();
+        renderAutomationList();
+      }
+    }
+
+    function removeDailySchedule(id) {
+      dailySchedules = dailySchedules.filter(s => s.id !== id);
+      saveSchedules();
+      renderAutomationList();
+    }
+
+    function saveSchedules() {
+      localStorage.setItem('galtech_schedules', JSON.stringify(dailySchedules));
+    }
+
+    function formatSecondsMMSS(sec) {
+      const m = String(Math.floor(sec / 60)).padStart(2, '0');
+      const s = String(sec % 60).padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function updateLampTimerBadges() {
+      for (let i = 0; i < 8; i++) {
+        const badge = document.getElementById(`lampTimerBadge-${i}`);
+        if (!badge) continue;
+        const found = activeTimers.find(t => t.ch === i);
+        if (found) {
+          badge.textContent = `${found.state ? 'ON' : 'OFF'} ${formatSecondsMMSS(found.remainingSec)}`;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      }
+    }
+
+    function renderAutomationList() {
+      const container = document.getElementById('automationList');
+      const dict = I18N[currentLang];
+      const totalCount = activeTimers.length + dailySchedules.length;
+      document.getElementById('taskCountBadge').textContent = `${totalCount} TASK`;
+
+      if (totalCount === 0) {
+        container.innerHTML = `<div class="text-[11px] py-6 text-center" style="color: var(--text-muted)">${dict.emptyTasksText}</div>`;
+        return;
+      }
+
+      container.innerHTML = '';
+
+      activeTimers.forEach(t => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between gap-2 px-2.5 py-1.5 border border-hud-yellow/50 bg-hud-yellow/10 rounded';
+        row.innerHTML = `
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="font-hud font-bold text-[8px] px-1.5 py-0.5 bg-hud-yellow text-black shrink-0">TIMER</span>
+            <span class="font-bold truncate" style="color: var(--text-primary)">${dict.lampItemPrefix}${t.ch + 1} &rarr; <strong class="${t.state ? 'text-hud-green' : 'text-hud-red'}">${t.state ? 'ON' : 'OFF'}</strong></span>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="font-digital text-lg text-hud-yellow leading-none">${formatSecondsMMSS(t.remainingSec)}</span>
+            <button onclick="removeCountdownTimer('${t.id}')" class="text-hud-red hover:brightness-125 font-bold px-1 cursor-pointer">&times;</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+
+      dailySchedules.forEach(s => {
+        const row = document.createElement('div');
+        row.className = `flex items-center justify-between gap-2 px-2.5 py-1.5 border rounded ${s.enabled ? 'border-hud-cyan/40 bg-hud-cyan/5' : 'border-gray-700/50 opacity-55'}`;
+        row.innerHTML = `
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="font-hud font-bold text-[8px] px-1.5 py-0.5 bg-hud-cyan text-black shrink-0">${s.time}</span>
+            <span class="font-bold truncate" style="color: var(--text-primary)">${dict.lampItemPrefix}${s.ch + 1} &rarr; <strong class="${s.state ? 'text-hud-green' : 'text-hud-red'}">${s.state ? 'ON' : 'OFF'}</strong> <span class="text-[9px]" style="color: var(--text-muted)">(${s.repeat.toUpperCase()})</span></span>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="toggleScheduleEnabled('${s.id}')" class="text-[9px] font-bold px-1.5 py-0.5 border ${s.enabled ? 'border-hud-green text-hud-green' : 'border-gray-500 text-gray-400'} cursor-pointer">
+              ${s.enabled ? 'AKTIF' : 'OFF'}
+            </button>
+            <button onclick="removeDailySchedule('${s.id}')" class="text-hud-red hover:brightness-125 font-bold px-1 cursor-pointer">&times;</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
 
     // ================= PING SINYAL & SIGNAL BAR METER =================
     function updateSignalUI(ms) {
@@ -898,7 +1574,7 @@
             return res.json();
           })
           .then(data => {
-            if (data.relays) syncRelayStates(data.relays);
+            if (data.relays) syncLampStates(data.relays);
           })
           .catch(() => updateSignalUI(null));
       }
@@ -910,7 +1586,7 @@
       const v1 = +(13.8 + (Math.random() - 0.5) * 0.6).toFixed(2);
       const v2 = +(12.65 + (Math.random() - 0.5) * 0.15).toFixed(2);
       const v3 = +(12.02 + (Math.random() - 0.5) * 0.08).toFixed(2);
-      const activeCount = relayStates.filter(Boolean).length;
+      const activeCount = lampStates.filter(Boolean).length;
       const v4 = activeCount > 0 ? +(11.95 - activeCount * 0.04 + (Math.random() - 0.5) * 0.06).toFixed(2) : 0.0;
       updateSensorsUI(v1, v2, v3, v4, true);
     }, 2000);
@@ -934,7 +1610,6 @@
       }
     }
 
-    // Load Saved Local IP
     const savedIp = localStorage.getItem('galtech_esp_ip');
     if (savedIp) document.getElementById('espIpInput').value = savedIp;
 
@@ -974,37 +1649,37 @@
       box.scrollTop = box.scrollHeight;
     }
 
-    // ================= SINKRONISASI STATUS RELAY ANTAR PERANGKAT (REAL-TIME) =================
-    function syncRelayStates(incomingRelays) {
+    // ================= SINKRONISASI STATUS LAMPU ANTAR PERANGKAT (REAL-TIME) =================
+    function syncLampStates(incomingRelays) {
       if (!Array.isArray(incomingRelays) || incomingRelays.length !== 8) return;
 
       const changedChannels = [];
       for (let i = 0; i < 8; i++) {
         const nextState = Boolean(incomingRelays[i]);
-        if (relayStates[i] !== nextState) {
-          relayStates[i] = nextState;
-          changedChannels.push(`R${i + 1}:${nextState ? 'ON' : 'OFF'}`);
+        if (lampStates[i] !== nextState) {
+          lampStates[i] = nextState;
+          changedChannels.push(`L${i + 1}:${nextState ? 'ON' : 'OFF'}`);
         }
       }
 
       if (changedChannels.length > 0) {
-        renderRelayMatrix();
+        renderLampMatrix();
         document.getElementById('lastCmdLog').textContent = I18N[currentLang].syncLive;
         playRetroBeep(640, 0.04, 'sine');
-        logPacket(I18N[currentLang].msgRelaySynced(changedChannels.join(', ')), 'ok');
+        logPacket(I18N[currentLang].msgLampSynced(changedChannels.join(', ')), 'ok');
       }
     }
 
-    // ================= RENDER 8-CHANNEL RELAY MATRIX (1 TOMBOL TOGGLE) =================
-    function renderRelayMatrix() {
-      const grid = document.getElementById('relayGrid');
+    // ================= RENDER 8-CHANNEL LAMP MATRIX (1 TOMBOL TOGGLE) =================
+    function renderLampMatrix() {
+      const grid = document.getElementById('lampGrid');
       const dict = I18N[currentLang];
       grid.innerHTML = '';
       let activeCount = 0;
 
       for (let i = 0; i < 8; i++) {
         const ch = i + 1;
-        const isOn = relayStates[i];
+        const isOn = lampStates[i];
         if (isOn) activeCount++;
 
         const card = document.createElement('div');
@@ -1017,7 +1692,7 @@
         card.innerHTML = `
           <div class="absolute top-0 left-0 right-0 h-0.5 ${isOn ? 'bg-hud-green' : 'bg-transparent'}"></div>
           <div class="flex items-center justify-between gap-1 mb-1">
-            <span class="text-[9px] sm:text-[10px] font-bold truncate" style="color: var(--text-muted)">CH${ch} • IO${RELAY_PINS[i]}</span>
+            <span class="text-[9px] sm:text-[10px] font-bold truncate" style="color: var(--text-muted)">CH${ch} • IO${LAMP_PINS[i]}</span>
             <span class="font-hud font-bold text-[8px] sm:text-[9px] px-1.5 py-0.5 border shrink-0 tracking-wider ${
               isOn 
                 ? 'border-hud-green text-hud-green bg-hud-green/15 glow-green' 
@@ -1027,11 +1702,14 @@
             </span>
           </div>
 
-          <div class="w-full font-hud font-bold text-[11px] sm:text-xs mb-2.5 sm:mb-3 uppercase tracking-wider" style="color: var(--text-primary)">
-            RELAY 0${ch}
+          <div class="flex items-center justify-between gap-1 mb-2.5 sm:mb-3">
+            <span class="font-hud font-bold text-[11px] sm:text-xs uppercase tracking-wider truncate" style="color: var(--text-primary)">
+              ${dict.lampItemPrefix}${ch}
+            </span>
+            <span id="lampTimerBadge-${i}" class="hidden text-[8px] font-bold px-1 py-0.5 bg-hud-yellow text-black rounded shrink-0"></span>
           </div>
 
-          <button onclick="toggleRelay(${i})"
+          <button onclick="toggleLamp(${i})"
             class="arcade-switch w-full py-2.5 px-2 font-hud font-bold text-[8.5px] sm:text-[9.5px] tracking-wider border flex items-center justify-center gap-1.5 cursor-pointer ${
               isOn
                 ? 'border-hud-red bg-hud-red/15 text-hud-red hover:bg-hud-red hover:text-white'
@@ -1044,56 +1722,58 @@
         grid.appendChild(card);
       }
 
-      document.getElementById('activeRelayCount').textContent = `${activeCount} / 8`;
+      document.getElementById('activeLampCount').textContent = `${activeCount} / 8`;
+      updateLampTimerBadges();
     }
 
-    // ================= TOGGLE & KIRIM PERINTAH RELAY =================
-    function toggleRelay(index) {
-      sendRelayCommand(index, !relayStates[index]);
+    // ================= TOGGLE & KIRIM PERINTAH LAMPU =================
+    function toggleLamp(index) {
+      sendLampCommand(index, !lampStates[index]);
     }
 
-    function sendRelayCommand(index, state) {
-      if (relayStates[index] === state) return;
+    function sendLampCommand(index, state) {
+      if (lampStates[index] === state) return;
 
       const ch = index + 1;
       const payload = `R${ch}_${state ? 'ON' : 'OFF'}`;
+      const displayCmd = `LAMPU 0${ch} -> ${state ? 'ON' : 'OFF'}`;
       const statusEl = document.getElementById('lastCmdLog');
 
       playRetroBeep(state ? 880 : 440, 0.06);
 
       if (isSimMode) {
-        relayStates[index] = state;
-        renderRelayMatrix();
-        logPacket(`SIM [LOCAL] -> ${payload}`, 'tx');
-        statusEl.textContent = `SIM: ${payload}`;
+        lampStates[index] = state;
+        renderLampMatrix();
+        logPacket(`SIM [LOCAL] -> ${displayCmd}`, 'tx');
+        statusEl.textContent = `SIM: ${displayCmd}`;
         return;
       }
 
       if (isCloudMode) {
         if (!client || !client.connected) {
-          logPacket(I18N[currentLang].msgFailOffline(payload), 'err');
+          logPacket(I18N[currentLang].msgFailOffline(displayCmd), 'err');
           statusEl.textContent = 'ERR: OFFLINE';
           return;
         }
         client.publish(MQTT_CFG.pubTopic, payload);
-        logPacket(`TX [MQTT] -> ${payload}`, 'tx');
-        statusEl.textContent = `TX: ${payload}`;
+        logPacket(`TX [MQTT] -> ${displayCmd}`, 'tx');
+        statusEl.textContent = `TX: ${displayCmd}`;
       } else {
         const ip = document.getElementById('espIpInput').value.trim();
         const url = `http://${ip}/toggle?ch=${index}&state=${state ? 1 : 0}`;
         fetch(url, { mode: 'no-cors' }).catch(() => {});
-        logPacket(`TX [HTTP] -> ${url}`, 'tx');
-        statusEl.textContent = `TX: CH${ch}=${state ? 1 : 0}`;
+        logPacket(`TX [HTTP] -> ${displayCmd}`, 'tx');
+        statusEl.textContent = `TX: LAMPU 0${ch}=${state ? 1 : 0}`;
       }
 
-      relayStates[index] = state;
-      renderRelayMatrix();
+      lampStates[index] = state;
+      renderLampMatrix();
     }
 
-    function setAllRelays(state) {
+    function setAllLamps(state) {
       const targets = [];
       for (let i = 0; i < 8; i++) {
-        if (relayStates[i] !== state) targets.push(i);
+        if (lampStates[i] !== state) targets.push(i);
       }
 
       const labelState = state ? 'ON' : 'OFF';
@@ -1103,16 +1783,16 @@
       }
 
       logPacket(I18N[currentLang].msgMasterExec(labelState, targets.length), 'tx');
-      targets.forEach((relayIdx, step) => {
-        setTimeout(() => sendRelayCommand(relayIdx, state), step * 110);
+      targets.forEach((lampIdx, step) => {
+        setTimeout(() => sendLampCommand(lampIdx, state), step * 110);
       });
     }
 
     function runWaveTest() {
       logPacket(I18N[currentLang].msgWaveExec, 'tx');
       for (let i = 0; i < 8; i++) {
-        setTimeout(() => sendRelayCommand(i, true), i * 180);
-        setTimeout(() => sendRelayCommand(i, false), (i * 180) + 650);
+        setTimeout(() => sendLampCommand(i, true), i * 180);
+        setTimeout(() => sendLampCommand(i, false), (i * 180) + 650);
       }
     }
 
@@ -1139,7 +1819,6 @@
         const pct = Math.min(100, Math.max(0, (num / 25.0) * 100));
         barEl.style.width = `${pct}%`;
 
-        // Update Min & Max Session Tracker
         if (pushChart && num > 0.2) {
           if (minVoltages[idx] === null || num < minVoltages[idx]) minVoltages[idx] = num;
           if (maxVoltages[idx] === null || num > maxVoltages[idx]) maxVoltages[idx] = num;
@@ -1169,18 +1848,15 @@
         }
       });
 
-      // Update KPI Cards & Animated Energy Topology
       const n1 = parseFloat(v1) || 0;
       const n2 = parseFloat(v2) || 0;
       const n3 = parseFloat(v3) || 0;
       const n4 = parseFloat(v4) || 0;
 
-      // 1. Battery SoC % (10.5V = 0% -> 12.8V = 100%)
       const socPct = n2 <= 0.5 ? 0 : Math.min(100, Math.max(0, Math.round(((n2 - 10.5) / (12.8 - 10.5)) * 100)));
       document.getElementById('socValue').textContent = `${socPct}%`;
       document.getElementById('socBar').style.width = `${socPct}%`;
 
-      // 2. Solar Charging Status (V1 > V2 + 0.3V)
       const deltaV = n1 - n2;
       const chargeEl = document.getElementById('chargeStateBadge');
       if (n1 > 1.0 && deltaV > 0.3) {
@@ -1193,7 +1869,6 @@
       document.getElementById('solarDeltaText').textContent =
         `ΔV: ${deltaV >= 0 ? '+' : ''}${deltaV.toFixed(2)}V`;
 
-      // 3. Protection Guard Status
       const guardEl = document.getElementById('guardStatusBadge');
       if (anyAbnormal) {
         guardEl.textContent = dict.guardAlert;
@@ -1203,7 +1878,6 @@
         guardEl.className = 'font-hud font-bold text-[10px] sm:text-xs text-hud-green glow-green tracking-wider';
       }
 
-      // 4. Animasi Aliran SVG Topology
       document.getElementById('flowLine-1').classList.toggle('flow-active', n1 > 1.0);
       document.getElementById('flowLine-2').classList.toggle('flow-active', n2 > 1.0 || n3 > 1.0);
       document.getElementById('flowLine-3').classList.toggle('flow-active', n3 > 1.0 || n4 > 1.0);
@@ -1219,7 +1893,7 @@
           v2: n2.toFixed(2),
           v3: n3.toFixed(2),
           v4: n4.toFixed(2),
-          relays: relayStates.map(r => (r ? 1 : 0)).join('')
+          lamps: lampStates.map(r => (r ? 1 : 0)).join('')
         });
         pushChartSample(n1, n2, n3, n4);
       }
@@ -1301,8 +1975,8 @@
         logPacket(I18N[currentLang].msgCsvEmpty, 'err');
         return;
       }
-      const header = 'Timestamp,V1_Solar(V),V2_Battery(V),V3_StepDown(V),V4_LoadBus(V),Relay_State_R1_R8\n';
-      const rows = csvHistory.map(r => `${r.timestamp},${r.v1},${r.v2},${r.v3},${r.v4},"${r.relays}"`).join('\n');
+      const header = 'Timestamp,V1_Solar(V),V2_Battery(V),V3_StepDown(V),V4_LoadBus(V),Lamp_State_L1_L8\n';
+      const rows = csvHistory.map(r => `${r.timestamp},${r.v1},${r.v2},${r.v3},${r.v4},"${r.lamps}"`).join('\n');
       const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -1353,7 +2027,7 @@
         if (topic === MQTT_CFG.statusTopic) {
           try {
             const st = JSON.parse(raw);
-            if (st.relays) syncRelayStates(st.relays);
+            if (st.relays) syncLampStates(st.relays);
           } catch (e) {}
           return;
         }
@@ -1370,7 +2044,7 @@
           updateSensorsUI(v1, v2, v3, v4, true);
 
           if (obj.relays) {
-            syncRelayStates(obj.relays);
+            syncLampStates(obj.relays);
           }
         } catch (e) {
           logPacket(`JSON Parse Error: ${raw}`, 'err');
@@ -1456,16 +2130,11 @@
       if (sfxEnabled) playRetroBeep(780, 0.05);
     }
 
-    function toggleCRT() {
-      crtEnabled = !crtEnabled;
-      document.getElementById('crtOverlay').style.display = crtEnabled ? 'block' : 'none';
-      document.getElementById('crtBtn').textContent = `CRT: ${crtEnabled ? 'ON' : 'OFF'}`;
-    }
-
     // Inisialisasi awal
     applyTheme(currentTheme);
     applyLanguage(currentLang);
-    renderRelayMatrix();
+    renderLampMatrix();
+    renderAutomationList();
     initBroker();
   </script>
 </body>
