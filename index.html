@@ -820,6 +820,54 @@
 
     </div>
 
+    <!-- ================= SECTION 3B: AI ASISTEN (OBROLAN) ================= -->
+    <section class="hud-panel p-3 sm:p-4 md:p-5">
+      <div class="flex items-center justify-between gap-2 mb-3">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="w-2 h-2 bg-hud-pink inline-block shrink-0"></span>
+          <h2 class="font-hud font-bold text-[11px] sm:text-xs tracking-wider truncate" style="color: var(--text-primary)">AI ASISTEN // OBROLAN</h2>
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <span id="aiKeyBadge" class="hud-subbox text-[9px] font-bold px-2 py-0.5 text-hud-green">AI: GRATIS</span>
+          <button type="button" onclick="toggleAISettings()"
+            class="hud-subbox text-[9px] font-hud font-bold px-2 py-0.5 border border-hud-cyan text-hud-cyan hover:bg-hud-cyan hover:text-black transition cursor-pointer tracking-wider">SETELAN</button>
+          <button type="button" onclick="clearAIChat()"
+            class="hud-subbox text-[9px] font-hud font-bold px-2 py-0.5 border transition cursor-pointer tracking-wider" style="color: var(--text-muted)">HAPUS</button>
+        </div>
+      </div>
+
+      <div id="aiSettingsBox" class="hud-subbox p-2.5 mb-2.5 hidden space-y-2">
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+          <input type="password" id="aiGroqInput" autocomplete="off" placeholder="Groq API key GRATIS (gsk_...) - cooldown hanya ~2 detik"
+            class="hud-subbox sm:col-span-7 px-2.5 py-1.5 text-[11px] font-semibold focus:outline-none focus:border-hud-cyan" style="color: var(--text-primary)" />
+          <input type="text" id="aiGroqModelInput" placeholder="Model Groq"
+            class="hud-subbox sm:col-span-5 px-2.5 py-1.5 text-[11px] font-semibold focus:outline-none focus:border-hud-cyan" style="color: var(--text-primary)" />
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+          <input type="password" id="aiKeyInput" autocomplete="off" placeholder="(Opsional) Anthropic API key - kosongkan untuk AI gratis"
+            class="hud-subbox sm:col-span-7 px-2.5 py-1.5 text-[11px] font-semibold focus:outline-none focus:border-hud-cyan" style="color: var(--text-primary)" />
+          <input type="text" id="aiModelInput" placeholder="Model"
+            class="hud-subbox sm:col-span-3 px-2.5 py-1.5 text-[11px] font-semibold focus:outline-none focus:border-hud-cyan" style="color: var(--text-primary)" />
+          <button type="button" onclick="saveAISettings()"
+            class="sm:col-span-2 font-hud font-bold text-[9px] px-2.5 py-2 border border-hud-green text-hud-green hover:bg-hud-green hover:text-black transition cursor-pointer tracking-wider">SIMPAN</button>
+        </div>
+        <p class="text-[9px] sm:text-[10px] leading-snug" style="color: var(--text-muted)">
+          Cepat &amp; gratis: daftar di console.groq.com (tanpa kartu kredit), buat API key, tempel di kolom atas. Prioritas: Groq, lalu Claude (berbayar), lalu AI gratis tanpa kunci (Pollinations, 1 pesan per 30 detik). Semua kunci hanya disimpan di browser ini.
+        </p>
+      </div>
+
+      <div id="aiChatLog" class="hud-subbox h-44 sm:h-56 overflow-y-auto p-2 sm:p-2.5 mb-2.5 space-y-1.5 text-[11px] sm:text-xs"></div>
+
+      <form onsubmit="submitAIChat(event)" class="flex items-center gap-1.5">
+        <button type="button" onclick="toggleVoiceControl()" title="Mikrofon"
+          class="font-hud font-bold text-[10px] px-2.5 py-2 border border-hud-pink text-hud-pink hover:bg-hud-pink hover:text-white transition cursor-pointer shrink-0">&#127908;</button>
+        <input type="text" id="aiChatInput" placeholder="Ngobrol dengan AI atau beri perintah (mis. nyalakan lampu 1)..."
+          class="hud-subbox px-2.5 py-1.5 text-[11px] flex-1 font-semibold focus:outline-none focus:border-hud-cyan" style="color: var(--text-primary)" />
+        <button type="submit" id="aiSendBtn"
+          class="font-hud font-bold text-[8.5px] px-3 py-2 border border-hud-cyan text-hud-cyan hover:bg-hud-cyan hover:text-black transition cursor-pointer shrink-0 tracking-wider">KIRIM</button>
+      </form>
+    </section>
+
     <!-- ================= SECTION 4: LIVE PACKET TERMINAL ================= -->
     <section class="hud-panel p-3 sm:p-3.5">
       <div class="flex items-center justify-between gap-2 border-b border-hud-cyan/25 pb-2 mb-2">
@@ -896,13 +944,17 @@
         speechLocale: 'id-ID',
         // Kalimat Balasan Suara AI (TTS)
         ttsMicReady: 'Mikrofon aktif, silakan ucapkan perintah.',
-        ttsLampSingle: (ch, on) => `Siap, Lampu ${ch} ${on ? 'dinyalakan' : 'dimatikan'}.`,
-        ttsLampAll: (on) => `Siap, semua lampu ${on ? 'dinyalakan' : 'dimatikan'}.`,
+        ttsLampSingle: (ch, on) => `Lampu ${ch} ${on ? 'nyala' : 'mati'}.`,
+        ttsLampAll: (on) => `Semua lampu ${on ? 'nyala' : 'mati'}.`,
         ttsWaveTest: 'Menjalankan tes gelombang lampu satu sampai delapan.',
         ttsUnknown: 'Maaf, perintah tidak dikenali.',
+        ttsOffline: 'Maaf, koneksi broker terputus. Perintah tidak terkirim.',
+        ttsAskLamp: 'Lampu nomor berapa?',
+        ttsAskState: 'Mau dinyalakan atau dimatikan?',
+        ttsLampSame: (ch, on) => `Lampu ${ch} sudah ${on ? 'menyala' : 'mati'}.`,
+        ttsAllSame: (on) => `Semua lampu sudah ${on ? 'menyala' : 'mati'}.`,
         ttsTimerFired: (ch, on) => `Timer selesai, Lampu ${ch} ${on ? 'dinyalakan' : 'dimatikan'}.`,
         ttsSchedFired: (ch, on) => `Jadwal aktif, Lampu ${ch} ${on ? 'dinyalakan' : 'dimatikan'}.`,
-        ttsVoltageAlert: 'Peringatan proteksi! Tegangan terdeteksi di luar batas aman.',
         ttsStatusReport: (v1, v2, active, total) =>
           `Status sistem saat ini: Tegangan solar ${v1.toFixed(1).replace('.', ' koma ')} volt, baterai ${v2.toFixed(1).replace('.', ' koma ')} volt, dan ${active} dari ${total} lampu sedang menyala.`,
         // Pesan Log Terminal
@@ -989,13 +1041,17 @@
         speechLocale: 'en-US',
         // AI Voice Replies (TTS)
         ttsMicReady: 'Microphone active, ready for your command.',
-        ttsLampSingle: (ch, on) => `Affirmative, Lamp ${ch} turned ${on ? 'on' : 'off'}.`,
-        ttsLampAll: (on) => `Affirmative, all lamps turned ${on ? 'on' : 'off'}.`,
+        ttsLampSingle: (ch, on) => `Lamp ${ch} ${on ? 'on' : 'off'}.`,
+        ttsLampAll: (on) => `All lamps ${on ? 'on' : 'off'}.`,
         ttsWaveTest: 'Running wave sequence test for lamps one through eight.',
         ttsUnknown: 'Sorry, command not recognized.',
+        ttsOffline: 'Sorry, the broker is offline. Command was not sent.',
+        ttsAskLamp: 'Which lamp number?',
+        ttsAskState: 'Turn it on or off?',
+        ttsLampSame: (ch, on) => `Lamp ${ch} is already ${on ? 'on' : 'off'}.`,
+        ttsAllSame: (on) => `All lamps are already ${on ? 'on' : 'off'}.`,
         ttsTimerFired: (ch, on) => `Timer expired, Lamp ${ch} turned ${on ? 'on' : 'off'}.`,
         ttsSchedFired: (ch, on) => `Schedule triggered, Lamp ${ch} turned ${on ? 'on' : 'off'}.`,
-        ttsVoltageAlert: 'Protection alert! Voltage detected outside safe range.',
         ttsStatusReport: (v1, v2, active, total) =>
           `System status report: Solar input is ${v1.toFixed(1)} volts, battery bank is ${v2.toFixed(1)} volts, and ${active} of ${total} lamps are active.`,
         // Terminal Logs
@@ -1058,7 +1114,14 @@
     let recognition = null;
     let isVoiceListening = false;
     let ignoreSpeechUntil = 0;
-    let lastVoltageAlertTs = 0;
+    let voiceRestartTimer = null;
+    let ttsEpoch = 0;
+    let ttsPending = 0;
+    let voicePausedForTTS = false;
+    let recentSpoken = []; // { tokens:Set, ts } -> untuk mendeteksi gema suara AI
+    let voiceRestartAttempts = 0;
+    let voiceGotAudio = false;
+    let lastVoiceFinal = { text: '', ts: 0 };
     let activeTimers = []; // { id, ch, state, remainingSec }
     let dailySchedules = JSON.parse(localStorage.getItem('galtech_schedules') || '[]');
     let lastFiredKey = {};
@@ -1073,28 +1136,133 @@
     }
 
     // ================= TEXT-TO-SPEECH (TERISOLASI PENUH DARI MIC) =================
+// ----- Anti-gema: mic dijeda saat AI bicara + filter teks yang mirip ucapan AI -----
+    function tokenizeText(t) {
+      return String(t).toLowerCase().replace(/[^a-z0-9\u00c0-\u024f]+/g, ' ').split(' ').filter(Boolean);
+    }
+
+    function rememberSpoken(text) {
+      const now = Date.now();
+      recentSpoken = recentSpoken.filter(r => now - r.ts < 30000);
+      recentSpoken.push({ tokens: new Set(tokenizeText(text)), ts: now });
+    }
+
+    // True jika transkrip hampir seluruhnya terdiri dari kata-kata yang baru saja diucapkan AI
+    function isEchoOfAI(transcript) {
+      const toks = tokenizeText(transcript);
+      if (toks.length < 4) return false; // perintah pendek ("nyalakan lampu 1") tidak disaring
+      const now = Date.now();
+      const pool = new Set();
+      recentSpoken.forEach(r => { if (now - r.ts < 30000) r.tokens.forEach(t => pool.add(t)); });
+      if (pool.size === 0) return false;
+      const hit = toks.filter(t => pool.has(t)).length;
+      return hit / toks.length >= 0.7;
+    }
+
+    function pauseVoiceForTTS() {
+      if (!isVoiceListening || voicePausedForTTS) return;
+      voicePausedForTTS = true;
+      clearTimeout(voiceRestartTimer);
+      try { if (recognition) recognition.abort(); } catch (e) {}
+    }
+
+    function resumeVoiceAfterTTS() {
+      if (!voicePausedForTTS) return;
+      setTimeout(() => {
+        if (ttsPending > 0 || !voicePausedForTTS) return;
+        voicePausedForTTS = false;
+        ignoreSpeechUntil = Date.now() + 300;
+        if (isVoiceListening) {
+          voiceRestartAttempts = 0;
+          scheduleVoiceRestart();
+        }
+      }, 500);
+    }
+
+    function cancelTTS() {
+      try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch (e) {}
+      ttsEpoch++;
+      ttsPending = 0;
+      resumeVoiceAfterTTS();
+    }
+
+    // Pasang pelacak pada utterance: jeda mic saat bicara, lanjutkan setelah selesai
+    function ttsTrack(utter, text, holdMs) {
+      const ep = ttsEpoch;
+      ttsPending++;
+      rememberSpoken(text);
+      pauseVoiceForTTS();
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        if (ep !== ttsEpoch) return; // utterance ini sudah dibatalkan
+        ttsPending = Math.max(0, ttsPending - 1);
+        ignoreSpeechUntil = Date.now() + 250;
+        if (ttsPending === 0) resumeVoiceAfterTTS();
+      };
+      utter.onstart = () => { ignoreSpeechUntil = Date.now() + holdMs; };
+      utter.onend = finish;
+      utter.onerror = finish;
+      // Pengaman: kalau browser tidak pernah memicu onend, mic tetap dilanjutkan
+      setTimeout(finish, Math.min(25000, Math.max(4000, text.length * 150)));
+    }
+
     function speakAI(text) {
       setAIDiagnostic(`AI: ${text}`, false);
+      addChatMsg('ai', text);
       if (!ttsEnabled || !('speechSynthesis' in window)) return;
 
       try {
-        window.speechSynthesis.cancel();
+        const synth = window.speechSynthesis;
+        const locale = I18N[currentLang].speechLocale;
+        cancelTTS();
+
         const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = I18N[currentLang].speechLocale;
+        utter.lang = locale;
         utter.rate = 1.05;
 
+        // Pilih suara yang cocok dengan bahasa aktif (kalau tersedia)
+        const voices = synth.getVoices() || [];
+        const want = locale.toLowerCase();
+        const voice = voices.find(v => v.lang.replace('_', '-').toLowerCase() === want)
+                   || voices.find(v => v.lang.toLowerCase().startsWith(want.slice(0, 2)));
+        if (voice) utter.voice = voice;
+
         // Abaikan gema speaker AI tanpa mematikan/restart recognition
-        const holdMs = Math.min(4000, Math.max(1200, text.length * 75));
+        const holdMs = Math.min(6000, Math.max(600, text.length * 60));
         ignoreSpeechUntil = Date.now() + holdMs;
 
-        utter.onend = () => {
-          ignoreSpeechUntil = Date.now() + 200;
-        };
-        utter.onerror = () => {
-          ignoreSpeechUntil = 0;
-        };
+        ttsTrack(utter, text, holdMs);
 
-        window.speechSynthesis.speak(utter);
+        // Chrome sering gagal bicara kalau speak() dipanggil tepat setelah cancel()
+        setTimeout(() => {
+          try {
+            if (synth.paused) synth.resume();
+            synth.speak(utter);
+          } catch (e) {}
+        }, 60);
+      } catch (e) {}
+    }
+
+function speakQueue(text) {
+      if (!ttsEnabled || !('speechSynthesis' in window) || !text.trim()) return;
+      try {
+        const synth = window.speechSynthesis;
+        const locale = I18N[currentLang].speechLocale;
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = locale;
+        utter.rate = 1.08;
+        const want = locale.toLowerCase();
+        const voices = synth.getVoices() || [];
+        const voice = voices.find(v => v.lang.replace('_', '-').toLowerCase() === want)
+                   || voices.find(v => v.lang.toLowerCase().startsWith(want.slice(0, 2)));
+        if (voice) utter.voice = voice;
+        const holdMs = Math.min(6000, Math.max(1000, text.length * 80));
+        ignoreSpeechUntil = Date.now() + holdMs + 2000;
+        ttsTrack(utter, text, holdMs);
+        if (synth.paused) synth.resume();
+        synth.speak(utter);
       } catch (e) {}
     }
 
@@ -1109,7 +1277,7 @@
       } else {
         ignoreSpeechUntil = 0;
         if ('speechSynthesis' in window) {
-          try { window.speechSynthesis.cancel(); } catch (e) {}
+          cancelTTS();
         }
       }
     }
@@ -1273,17 +1441,50 @@
     setInterval(updateRealTimeClock, 1000);
 
     // ================= WEB SPEECH VOICE CONTROL (MURNI & STABIL) =================
+    function failVoice(msg) {
+      logPacket(msg, 'err');
+      setAIDiagnostic(msg, true);
+      isVoiceListening = false;
+      clearTimeout(voiceRestartTimer);
+      try { if (recognition) recognition.abort(); } catch (e) {}
+      recognition = null; // paksa dibuat ulang saat tombol mic ditekan lagi
+      updateVoiceUI();
+    }
+
+    function scheduleVoiceRestart() {
+      clearTimeout(voiceRestartTimer);
+      const delay = Math.min(1500, 200 + voiceRestartAttempts * 300);
+      voiceRestartTimer = setTimeout(() => {
+        if (!isVoiceListening || !recognition || voicePausedForTTS) return;
+        try {
+          recognition.lang = I18N[currentLang].speechLocale;
+          recognition.start();
+        } catch (e) {
+          voiceRestartAttempts++;
+          if (voiceRestartAttempts >= 6) {
+            failVoice('MIC GAGAL RESTART: ' + (e && e.message ? e.message : 'unknown') + '. Tekan tombol MIC lagi.');
+          } else {
+            scheduleVoiceRestart();
+          }
+        }
+      }, delay);
+    }
+
     function initVoiceRecognition() {
       const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRec) return null;
 
       const rec = new SpeechRec();
+      // Mode continuous sering bermasalah di HP (hasil dobel / berhenti sendiri),
+      // jadi di mobile pakai mode per-kalimat + auto-restart.
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
       rec.lang = I18N[currentLang].speechLocale;
-      rec.continuous = true;
+      rec.continuous = !isMobile;
       rec.interimResults = true;
       rec.maxAlternatives = 1;
 
       rec.onstart = () => {
+        voiceGotAudio = false;
         const badge = document.getElementById('voiceExecBadge');
         if (badge && isVoiceListening) {
           badge.textContent = 'LISTENING';
@@ -1292,6 +1493,8 @@
       };
 
       rec.onaudiostart = () => {
+        voiceGotAudio = true;
+        voiceRestartAttempts = 0;
         const badge = document.getElementById('voiceExecBadge');
         if (badge && isVoiceListening) {
           badge.textContent = 'MIC AUDIO OK';
@@ -1308,6 +1511,8 @@
       };
 
       rec.onresult = (event) => {
+        voiceGotAudio = true;
+        voiceRestartAttempts = 0;
         if (Date.now() < ignoreSpeechUntil) return;
 
         let interim = '';
@@ -1316,14 +1521,21 @@
           if (!transcript) continue;
 
           if (event.results[i].isFinal) {
+            // Cegah perintah yang sama terproses dua kali (sering terjadi di Android)
+            if (isEchoOfAI(transcript)) continue; // abaikan gema suara AI sendiri
+            const key = transcript.toLowerCase();
+            const now = Date.now();
+            if (key === lastVoiceFinal.text && now - lastVoiceFinal.ts < 1500) continue;
+            lastVoiceFinal = { text: key, ts: now };
+
             document.getElementById('voiceTranscriptText').textContent = `"${transcript}"`;
             processVoiceCommand(transcript);
           } else {
-            interim += transcript;
+            interim += transcript + ' ';
           }
         }
         if (interim) {
-          document.getElementById('voiceTranscriptText').textContent = `"${interim}..."`;
+          document.getElementById('voiceTranscriptText').textContent = `"${interim.trim()}..."`;
         }
       };
 
@@ -1334,29 +1546,33 @@
 
         let humanError = `Error mikrofon: ${event.error}`;
         if (event.error === 'network') {
-          humanError = 'ERROR NETWORK: Browser memblokir server suara (gunakan Google Chrome/Edge & pastikan online).';
+          humanError = 'ERROR NETWORK: Browser tidak bisa menjangkau server suara (gunakan Google Chrome/Edge & pastikan online).';
         } else if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
           humanError = 'BLOKIR IZIN: Buka lewat http://localhost atau HTTPS dan izinkan mikrofon di pengaturan browser.';
         } else if (event.error === 'audio-capture') {
           humanError = 'HARDWARE MIC TIDAK TERDETEKSI: Periksa mikrofon sistem Anda.';
+        } else if (event.error === 'language-not-supported') {
+          humanError = 'BAHASA TIDAK DIDUKUNG: coba ganti LANG ke EN.';
         }
 
         logPacket(`VOICE ERR [${event.error}]: ${humanError}`, 'err');
         setAIDiagnostic(humanError, true);
 
-        if (event.error === 'not-allowed' || event.error === 'service-not-allowed' || event.error === 'audio-capture' || event.error === 'network') {
-          isVoiceListening = false;
-          updateVoiceUI();
+        if (['not-allowed', 'service-not-allowed', 'audio-capture', 'network', 'language-not-supported'].includes(event.error)) {
+          failVoice(humanError);
         }
       };
 
       rec.onend = () => {
-        if (isVoiceListening) {
-          try {
-            rec.lang = I18N[currentLang].speechLocale;
-            rec.start();
-          } catch (e) {}
+        if (!isVoiceListening) return;
+        if (voicePausedForTTS) return; // sengaja dijeda saat AI bicara; dilanjutkan otomatis
+        // Kalau sesi berakhir tanpa pernah menerima audio, hitung sebagai kegagalan
+        if (!voiceGotAudio) voiceRestartAttempts++;
+        if (voiceRestartAttempts >= 6) {
+          failVoice('MIC TIDAK MERESPONS: pastikan mikrofon tidak dipakai aplikasi lain, lalu tekan MIC lagi.');
+          return;
         }
+        scheduleVoiceRestart();
       };
 
       return rec;
@@ -1376,6 +1592,7 @@
 
       if (isVoiceListening) {
         isVoiceListening = false;
+        clearTimeout(voiceRestartTimer);
         try { recognition.stop(); } catch (e) {}
         logPacket(dict.msgVoiceStopped, 'info');
         setAIDiagnostic(dict.aiIdleHint, false);
@@ -1391,14 +1608,25 @@
         }
 
         ignoreSpeechUntil = 0;
+        voicePausedForTTS = false;
+        voiceRestartAttempts = 0;
+        voiceGotAudio = false;
         isVoiceListening = true;
         recognition.lang = dict.speechLocale;
         try {
           recognition.start();
-          logPacket(dict.msgVoiceListening, 'ok');
         } catch (err) {
-          logPacket(`VOICE START ERR: ${err.message}`, 'err');
+          // Instance lama mungkin masih "menggantung": buat ulang lalu coba sekali lagi
+          try { recognition.abort(); } catch (e) {}
+          recognition = initVoiceRecognition();
+          try {
+            recognition.start();
+          } catch (err2) {
+            failVoice(`VOICE START ERR: ${err2.message}`);
+            return;
+          }
         }
+        logPacket(dict.msgVoiceListening, 'ok');
         updateVoiceUI();
       }
     }
@@ -1465,85 +1693,545 @@
       });
     }
 
+function deviceAgeSec() {
+      return lastTelemetryTs ? Math.round((Date.now() - lastTelemetryTs) / 1000) : null;
+    }
+
+    function localConnectionAnswer() {
+      const id = currentLang === 'id';
+      const mqttOk = !!(client && client.connected);
+      const age = deviceAgeSec();
+      let part1, part2;
+      if (!isCloudMode) {
+        return id ? 'Dasbor sedang dalam mode lokal HTTP, jadi status MQTT tidak dipakai.' : 'The dashboard is in local HTTP mode, so MQTT status is not used.';
+      }
+      part1 = id ? `MQTT ${mqttOk ? 'terhubung' : 'terputus'}.` : `MQTT is ${mqttOk ? 'connected' : 'disconnected'}.`;
+      if (isSimMode) {
+        part2 = id ? 'Mode simulasi aktif, jadi datanya bukan dari ESP32 asli.' : 'Simulation mode is on, so the data is not from the real ESP32.';
+      } else if (age === null) {
+        part2 = id ? 'Belum ada data masuk dari ESP32.' : 'No data received from the ESP32 yet.';
+      } else if (age <= 20) {
+        part2 = id ? `ESP32 aktif, data terakhir ${age} detik lalu, jadi WiFi-nya terhubung.` : `The ESP32 is active, last data ${age} seconds ago, so its WiFi is connected.`;
+      } else {
+        part2 = id ? `ESP32 sepertinya offline, data terakhir ${age} detik lalu.` : `The ESP32 looks offline, last data ${age} seconds ago.`;
+      }
+      return `${part1} ${part2}`;
+    }
+
     function processVoiceCommand(rawText) {
       const dict = I18N[currentLang];
       const text = rawText.toLowerCase().trim();
       const badge = document.getElementById('voiceExecBadge');
+      const setBadge = (label, cls) => { badge.textContent = label; badge.className = cls; };
+      addChatMsg('user', rawText);
+      const lampWord = /(lampu|lamp|light|relay|saklar)/.test(text);
+      const offline = () => {
+        setBadge('MQTT OFFLINE', 'text-hud-red font-bold');
+        speakAI(dict.ttsOffline);
+      };
 
-      if (/(status|tegangan|baterai|solar|laporan|cek|check|voltage|battery|report)/.test(text)) {
+      if (/\b(status|tegangan|baterai|solar|laporan|cek|check|voltage|battery|report)\b/.test(text)) {
         const v1 = parseFloat(latestVoltages[0]) || 0;
         const v2 = parseFloat(latestVoltages[1]) || 0;
         const activeCount = lampStates.filter(Boolean).length;
         const report = dict.ttsStatusReport(v1, v2, activeCount, 8);
-        badge.textContent = 'STATUS REPORT';
-        badge.className = 'text-hud-cyan font-bold';
+        setBadge('STATUS REPORT', 'text-hud-cyan font-bold');
         logPacket(dict.msgVoiceMatched('STATUS REPORT'), 'ok');
         speakAI(report);
         return;
       }
 
       if (text.includes('gelombang') || text.includes('wave')) {
-        runWaveTest();
-        badge.textContent = 'WAVE TEST';
-        badge.className = 'text-hud-yellow font-bold';
+        if (!runWaveTest()) { offline(); return; }
+        setBadge('WAVE TEST', 'text-hud-yellow font-bold');
         logPacket(dict.msgVoiceMatched('WAVE TEST'), 'ok');
         speakAI(dict.ttsWaveTest);
         return;
       }
 
-      const isTurnOn = /\b(nyalakan|nyala|hidupkan|hidup|aktifkan|buka|turn on|switch on|enable|on)\b/.test(text);
-      const isTurnOff = /\b(matikan|mati|padamkan|nonaktifkan|tutup|turn off|switch off|disable|off)\b/.test(text);
+      // Pertanyaan soal koneksi dijawab lokal dengan data nyata (tanpa AI, tanpa cooldown)
+      if (/(wi-?fi|internet|mqtt|broker|esp|perangkat|device|koneksi|terhubung|tersambung|connect|online|offline)/.test(text)
+          && !/(nyala|hidup|mati|padam|aktifkan|nonaktif|turn|switch|enable|disable)/.test(text)) {
+        setBadge('LOCAL INFO', 'text-hud-cyan font-bold');
+        speakAI(localConnectionAnswer());
+        return;
+      }
+
+      const isTurnOn = /\b(nyalakan|nyalain|nyala|hidupkan|hidupin|idupin|hidup|aktifkan|buka|turn on|switch on|enable|on)\b/.test(text);
+      const isTurnOff = /\b(matikan|matiin|mati|padamkan|padamin|nonaktifkan|tutup|turn off|switch off|disable|off)\b/.test(text);
 
       if (!isTurnOn && !isTurnOff) {
-        badge.textContent = 'NO ACTION';
-        badge.className = 'text-hud-red font-bold';
-        logPacket(dict.msgVoiceUnknown(rawText), 'err');
-        speakAI(dict.ttsUnknown);
+        if (lampWord) {
+          // Jelas soal lampu: tanya balik secara lokal, jangan buang kuota AI
+          setBadge('NO ACTION', 'text-hud-red font-bold');
+          speakAI(dict.ttsAskState);
+          return;
+        }
+        setBadge('AI CHAT', 'text-hud-pink font-bold');
+        askAI(rawText);
         return;
       }
       const targetState = isTurnOn && !isTurnOff;
 
       if (/(semua|seluruh|\ball\b|\beverything\b)/.test(text)) {
-        setAllLamps(targetState);
+        const res = setAllLamps(targetState);
+        if (res === 'fail') { offline(); return; }
         const label = `ALL LAMPS ${targetState ? 'ON' : 'OFF'}`;
-        badge.textContent = label;
-        badge.className = 'text-hud-green font-bold';
+        setBadge(label, 'text-hud-green font-bold');
         logPacket(dict.msgVoiceMatched(label), 'ok');
-        speakAI(dict.ttsLampAll(targetState));
+        speakAI(res === 'same' ? dict.ttsAllSame(targetState) : dict.ttsLampAll(targetState));
         return;
       }
 
-      const numPatterns = [
-        { idx: 0, re: /\b(1|01|satu|pertama|one)\b/ },
-        { idx: 1, re: /\b(2|02|dua|kedua|two|to)\b/ },
-        { idx: 2, re: /\b(3|03|tiga|ketiga|three)\b/ },
-        { idx: 3, re: /\b(4|04|empat|keempat|four|for)\b/ },
-        { idx: 4, re: /\b(5|05|lima|kelima|five)\b/ },
-        { idx: 5, re: /\b(6|06|enam|keenam|six)\b/ },
-        { idx: 6, re: /\b(7|07|tujuh|ketujuh|seven)\b/ },
-        { idx: 7, re: /\b(8|08|delapan|kedelapan|eight)\b/ }
-      ];
+      // Ambil nomor lampu hanya dari kata SETELAH "lampu/lamp" supaya kata lain tidak salah terbaca
+      const NUM_WORDS = {
+        '1': 0, '01': 0, 'satu': 0, 'pertama': 0, 'one': 0,
+        '2': 1, '02': 1, 'dua': 1, 'kedua': 1, 'two': 1,
+        '3': 2, '03': 2, 'tiga': 2, 'ketiga': 2, 'three': 2,
+        '4': 3, '04': 3, 'empat': 3, 'keempat': 3, 'four': 3,
+        '5': 4, '05': 4, 'lima': 4, 'kelima': 4, 'five': 4,
+        '6': 5, '06': 5, 'enam': 5, 'keenam': 5, 'six': 5,
+        '7': 6, '07': 6, 'tujuh': 6, 'ketujuh': 6, 'seven': 6,
+        '8': 7, '08': 7, 'delapan': 7, 'kedelapan': 7, 'eight': 7
+      };
+      // Salah dengar yang umum di mesin pengenal suara (hanya dipakai tepat setelah kata "lampu")
+      const HOMOPHONES = { 'to': 1, 'too': 1, 'for': 3, 'fore': 3 };
 
-      let matchedIndex = -1;
-      for (const item of numPatterns) {
-        if (item.re.test(text)) {
-          matchedIndex = item.idx;
-          break;
+      const kw = text.match(/(lampu|lamp|light|relay|saklar|channel|kanal)\s*(.*)$/);
+      const segment = kw ? kw[2] : text;
+      const tokens = segment.split(/[^a-z0-9]+/).filter(Boolean);
+
+      const indices = [];
+      tokens.forEach((tok, pos) => {
+        let idx = NUM_WORDS[tok];
+        if (idx === undefined && pos === 0 && kw) idx = HOMOPHONES[tok];
+        if (idx !== undefined && !indices.includes(idx)) indices.push(idx);
+      });
+
+      if (indices.length === 0) {
+        if (lampWord) {
+          setBadge('NO LAMP ID', 'text-hud-red font-bold');
+          speakAI(dict.ttsAskLamp);
+          return;
         }
+        setBadge('AI CHAT', 'text-hud-pink font-bold');
+        askAI(rawText);
+        return;
       }
 
-      if (matchedIndex !== -1) {
-        sendLampCommand(matchedIndex, targetState);
-        const label = `LAMPU 0${matchedIndex + 1} -> ${targetState ? 'ON' : 'OFF'}`;
-        badge.textContent = label;
-        badge.className = 'text-hud-green font-bold';
-        logPacket(dict.msgVoiceMatched(label), 'ok');
-        speakAI(dict.ttsLampSingle(matchedIndex + 1, targetState));
+      const results = indices.map(i => sendLampCommand(i, targetState));
+      const nums = indices.map(i => i + 1).join(', ');
+
+      if (results.includes('fail')) { offline(); return; }
+
+      const label = `LAMPU ${indices.map(i => '0' + (i + 1)).join('+')} -> ${targetState ? 'ON' : 'OFF'}`;
+      setBadge(label, 'text-hud-green font-bold');
+      logPacket(dict.msgVoiceMatched(label), 'ok');
+      if (results.every(r => r === 'same')) {
+        speakAI(dict.ttsLampSame(nums, targetState));
       } else {
-        badge.textContent = 'NO LAMP ID';
-        badge.className = 'text-hud-red font-bold';
-        logPacket(dict.msgVoiceUnknown(rawText), 'err');
-        speakAI(dict.ttsUnknown);
+        speakAI(dict.ttsLampSingle(nums, targetState));
+      }
+    }
+
+    // ================= AI ASISTEN (OBROLAN) =================
+    const AI_DEFAULT_MODEL = 'claude-sonnet-4-6';
+    let aiHistory = [];
+    let aiBusy = false;
+    let aiPendingText = null;
+    let lastTelemetryTs = 0;
+    let aiCooldownUntil = 0;
+    let aiCooldownTimer = null;
+    let aiCooldownRow = null;
+
+    function getAIKey() { try { return localStorage.getItem('galtech_ai_key') || ''; } catch (e) { return ''; } }
+    const GROQ_DEFAULT_MODEL = 'openai/gpt-oss-20b';
+    function getGroqKey() { try { return localStorage.getItem('galtech_groq_key') || ''; } catch (e) { return ''; } }
+    function getGroqModel() { try { return localStorage.getItem('galtech_groq_model') || GROQ_DEFAULT_MODEL; } catch (e) { return GROQ_DEFAULT_MODEL; } }
+    function getAIProvider() { return getGroqKey() ? 'groq' : (getAIKey() ? 'claude' : 'free'); }
+    function getAIModel() { try { return localStorage.getItem('galtech_ai_model') || AI_DEFAULT_MODEL; } catch (e) { return AI_DEFAULT_MODEL; } }
+
+    function initAIChat() {
+      document.getElementById('aiModelInput').value = getAIModel();
+      document.getElementById('aiKeyInput').value = getAIKey();
+      document.getElementById('aiGroqInput').value = getGroqKey();
+      document.getElementById('aiGroqModelInput').value = getGroqModel();
+      updateAIKeyBadge();
+      addChatMsg('sys', currentLang === 'id'
+        ? 'Halo! Saya asisten AI GALTECH. Ketik atau ucapkan perintah lampu, atau ajak saya ngobrol.'
+        : 'Hi! I am the GALTECH AI assistant. Give lamp commands or just chat with me.');
+    }
+
+    function updateAIKeyBadge() {
+      const el = document.getElementById('aiKeyBadge');
+      if (!el) return;
+      const p = getAIProvider();
+      el.textContent = p === 'groq' ? 'AI: GROQ' : (p === 'claude' ? 'AI: CLAUDE' : 'AI: GRATIS');
+      el.className = 'hud-subbox text-[9px] font-bold px-2 py-0.5 text-hud-green';
+    }
+
+    function toggleAISettings() {
+      document.getElementById('aiSettingsBox').classList.toggle('hidden');
+    }
+
+    function saveAISettings() {
+      const groq = document.getElementById('aiGroqInput').value.trim();
+      const groqModel = document.getElementById('aiGroqModelInput').value.trim() || GROQ_DEFAULT_MODEL;
+      const key = document.getElementById('aiKeyInput').value.trim();
+      const model = document.getElementById('aiModelInput').value.trim() || AI_DEFAULT_MODEL;
+      try {
+        if (groq) localStorage.setItem('galtech_groq_key', groq); else localStorage.removeItem('galtech_groq_key');
+        localStorage.setItem('galtech_groq_model', groqModel);
+        if (key) localStorage.setItem('galtech_ai_key', key); else localStorage.removeItem('galtech_ai_key');
+        localStorage.setItem('galtech_ai_model', model);
+      } catch (e) {}
+      updateAIKeyBadge();
+      const p = getAIProvider();
+      logPacket(p === 'groq' ? 'AI: pakai Groq (gratis, cooldown singkat).' : (p === 'claude' ? 'AI: pakai Claude.' : 'AI: pakai AI gratis (cooldown 30 detik).'), 'ok');
+      if (p !== 'free') document.getElementById('aiSettingsBox').classList.add('hidden');
+      cancelAICooldown();
+    }
+
+    function clearAIChat() {
+      aiHistory = [];
+      document.getElementById('aiChatLog').innerHTML = '';
+      initAIChat();
+    }
+
+    function addChatMsg(role, text) {
+      const box = document.getElementById('aiChatLog');
+      if (!box) return null;
+      const row = document.createElement('div');
+      const bubble = document.createElement('div');
+      bubble.textContent = text;
+      bubble.className = 'inline-block max-w-[88%] px-2.5 py-1.5 rounded-sm font-semibold leading-snug whitespace-pre-wrap break-words';
+      if (role === 'user') {
+        row.className = 'text-right';
+        bubble.style.cssText = 'background: color-mix(in srgb, var(--c-cyan) 18%, transparent); border: 1px solid var(--c-cyan); color: var(--text-primary); text-align:left;';
+      } else if (role === 'ai') {
+        row.className = 'text-left';
+        bubble.style.cssText = 'background: color-mix(in srgb, var(--c-green) 14%, transparent); border: 1px solid var(--c-green); color: var(--text-primary);';
+      } else {
+        row.className = 'text-center';
+        bubble.style.cssText = 'color: var(--text-muted); font-size: 10px;';
+        bubble.className = 'inline-block px-2 py-1 font-semibold';
+      }
+      row.appendChild(bubble);
+      box.appendChild(row);
+      box.scrollTop = box.scrollHeight;
+      return row;
+    }
+
+    function submitAIChat(event) {
+      event.preventDefault();
+      const input = document.getElementById('aiChatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      document.getElementById('voiceTranscriptText').textContent = `"${text}"`;
+      processVoiceCommand(text);
+    }
+
+    function buildAISystemPrompt() {
+      const lang = currentLang === 'id' ? 'Bahasa Indonesia' : 'English';
+      const v = latestVoltages.map(x => (parseFloat(x) || 0).toFixed(2));
+      const on = lampStates.map((st, i) => st ? i + 1 : null).filter(Boolean);
+      const link = isSimMode ? 'mode simulasi' : (isCloudMode ? (client && client.connected ? 'MQTT online' : 'MQTT offline') : 'mode lokal HTTP');
+      const age = deviceAgeSec();
+      const dev = isSimMode ? 'ESP32: tidak ada (mode simulasi)' : (age === null ? 'ESP32: belum ada data masuk' : `ESP32: data terakhir ${age} detik lalu (${age <= 20 ? 'aktif' : 'kemungkinan offline'})`);
+      return `Kamu adalah asisten AI di dasbor GALTECH IoT SCADA, sistem lampu tenaga surya berbasis ESP32-S3 dengan panel surya, baterai, step-down, dan 8 lampu (relay). ` +
+        `Balas dalam ${lang}, ramah dan santai, sangat singkat (maksimal 2 kalimat pendek). Jawaban akan dibacakan lewat suara, jadi JANGAN pakai markdown, daftar, simbol, atau emoji. ` +
+        `Kamu boleh ngobrol tentang topik apa saja, tidak hanya soal dasbor. ` +
+        `Data live saat ini: V1 solar ${v[0]} V, V2 baterai ${v[1]} V, V3 step-down ${v[2]} V, V4 beban ${v[3]} V. ` +
+        `Lampu menyala: ${on.length ? on.join(', ') : 'tidak ada'} dari 8. Koneksi dasbor: ${link} (hanya berarti dasbor terhubung ke broker, BUKAN bukti ESP32 aktif). ${dev}. ` +
+        `Kamu tidak bisa mengontrol lampu secara langsung; kalau pengguna ingin menyalakan atau mematikan lampu, arahkan untuk mengucapkan atau mengetik perintah seperti "nyalakan lampu 1". ` +
+        `Jangan mengarang data sensor selain yang diberikan di atas.`;
+    }
+
+    // ----- Cooldown realtime AI gratis -----
+    function aiCooldownLeft() {
+      return Math.max(0, Math.ceil((aiCooldownUntil - Date.now()) / 1000));
+    }
+
+    function renderAICooldown() {
+      const left = aiCooldownLeft();
+      const btn = document.getElementById('aiSendBtn');
+      if (btn) btn.textContent = 'KIRIM';
+
+      if (aiCooldownRow) {
+        const bubble = aiCooldownRow.firstChild;
+        bubble.textContent = left > 0
+          ? (aiPendingText
+              ? (currentLang === 'id' ? `Pesan Anda antre, dijawab otomatis dalam ${left} detik...` : `Message queued, auto-sending in ${left}s...`)
+              : (currentLang === 'id' ? `Cooldown AI: ${left} detik lagi...` : `AI cooldown: ${left}s left...`))
+          : (aiPendingText
+              ? (currentLang === 'id' ? 'Mengirim pesan yang antre...' : 'Sending queued message...')
+              : (currentLang === 'id' ? 'AI siap lagi, silakan kirim pesan.' : 'AI is ready, go ahead.'));
+        const box = document.getElementById('aiChatLog');
+        if (box) box.scrollTop = box.scrollHeight;
+      }
+
+      if (left <= 0) {
+        clearInterval(aiCooldownTimer);
+        aiCooldownTimer = null;
+        if (aiCooldownRow) {
+          const row = aiCooldownRow;
+          aiCooldownRow = null;
+          setTimeout(() => row.remove(), aiPendingText ? 800 : 2500);
+        }
+        if (aiPendingText) {
+          const queued = aiPendingText;
+          aiPendingText = null;
+          setTimeout(() => askAI(queued), 100);
+        }
+      }
+    }
+
+    function startAICooldown(secs) {
+      aiCooldownUntil = Date.now() + secs * 1000;
+      clearInterval(aiCooldownTimer);
+      aiCooldownTimer = setInterval(renderAICooldown, 250);
+      renderAICooldown();
+    }
+
+    function cancelAICooldown() {
+      aiCooldownUntil = 0;
+      renderAICooldown();
+    }
+
+    function showAICooldownBubble() {
+      if (aiCooldownLeft() <= 0) return;
+      if (aiCooldownRow && aiCooldownRow.isConnected) { renderAICooldown(); return; }
+      aiCooldownRow = addChatMsg('sys', '');
+      renderAICooldown();
+    }
+
+    // Baca respons streaming (SSE) gaya OpenAI; panggil onText(teksPenuh) setiap ada potongan baru
+async function pickGroqModel() {
+      try {
+        const r = await fetch('https://api.groq.com/openai/v1/models', {
+          headers: { 'Authorization': 'Bearer ' + getGroqKey() }
+        });
+        if (!r.ok) return null;
+        const d = await r.json();
+        const ids = (d.data || []).map(m => m.id)
+          .filter(id => !/(whisper|orpheus|guard|safeguard|compound|tts|embed)/i.test(id));
+        const pref = ['openai/gpt-oss-20b', 'llama-3.1-8b-instant', 'llama-3.3-70b-versatile', 'openai/gpt-oss-120b'];
+        return pref.find(p => ids.includes(p)) || ids[0] || null;
+      } catch (e) { return null; }
+    }
+
+    async function readOpenAIStream(res, onText) {
+      const ct = res.headers.get('content-type') || '';
+      if (!res.body || !ct.includes('text/event-stream')) {
+        // Server tidak streaming: baca JSON biasa
+        const data = await res.json();
+        const full = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
+        onText(full);
+        return full;
+      }
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      let buf = '', full = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        const lines = buf.split('\n');
+        buf = lines.pop();
+        for (const line of lines) {
+          const l = line.trim();
+          if (!l.startsWith('data:')) continue;
+          const d = l.slice(5).trim();
+          if (d === '[DONE]') return full;
+          try {
+            const j = JSON.parse(d);
+            const t = j.choices && j.choices[0] && j.choices[0].delta && j.choices[0].delta.content;
+            if (t) { full += t; onText(full); }
+          } catch (e) {}
+        }
+      }
+      return full;
+    }
+
+    async function askAI(text) {
+      if (aiBusy) return;
+      const provider = getAIProvider();
+      const key = getAIKey();
+      const useClaude = provider === 'claude';
+
+      // Layanan gratis punya cooldown antar permintaan
+      if (!useClaude) {
+        if (aiCooldownLeft() > 0) {
+          aiPendingText = text; // simpan pesan terbaru, kirim otomatis saat cooldown habis
+          showAICooldownBubble();
+          return;
+        }
+        startAICooldown(provider === 'groq' ? 2 : 30);
+      }
+
+      aiBusy = true;
+      const sendBtn = document.getElementById('aiSendBtn');
+      if (sendBtn) sendBtn.disabled = true;
+
+      const thinking = addChatMsg('sys', '...');
+      aiHistory.push({ role: 'user', content: text });
+      aiHistory = aiHistory.slice(-8);
+      while (aiHistory.length && aiHistory[0].role !== 'user') aiHistory.shift();
+
+      const ctrl = new AbortController();
+      const timeoutId = setTimeout(() => ctrl.abort(), 25000);
+      let liveRow = null;
+      let streamed = false;
+
+      // Tampilkan teks bertahap & bacakan per kalimat supaya terasa instan
+      let spokenIdx = 0;
+      const onStreamText = (raw) => {
+        const clean = raw.replace(/[*_`#>]+/g, '');
+        if (!liveRow) {
+          if (thinking) thinking.remove();
+          liveRow = addChatMsg('ai', '');
+          cancelTTS();
+        }
+        liveRow.firstChild.textContent = clean;
+        const box = document.getElementById('aiChatLog');
+        if (box) box.scrollTop = box.scrollHeight;
+        while (true) {
+          const rest = clean.slice(spokenIdx);
+          // cari akhir kalimat pertama yang cukup panjang (kalimat pendek digabung)
+          const re = /[.!?\n](?=\s|$)/g;
+          let end = -1, mm;
+          while ((mm = re.exec(rest)) !== null) {
+            if (rest.slice(0, mm.index + 1).trim().length >= 12) { end = mm.index + 1; break; }
+          }
+          if (end < 0) break;
+          speakQueue(rest.slice(0, end));
+          spokenIdx += end;
+        }
+      };
+
+      try {
+        let reply = '';
+        if (useClaude) {
+          const res = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            signal: ctrl.signal,
+            headers: {
+              'content-type': 'application/json',
+              'x-api-key': key,
+              'anthropic-version': '2023-06-01',
+              'anthropic-dangerous-direct-browser-access': 'true'
+            },
+            body: JSON.stringify({ model: getAIModel(), max_tokens: 200, system: buildAISystemPrompt(), messages: aiHistory })
+          });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error((err.error && err.error.message) || `HTTP ${res.status}`);
+          }
+          const data = await res.json();
+          reply = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n');
+        } else if (provider === 'groq') {
+          const doGroq = (model) => {
+            const isOss = /gpt-oss/i.test(model);
+            const body = {
+              model,
+              max_tokens: isOss ? 500 : 160, // model gpt-oss "berpikir" dulu, butuh ruang token lebih
+              temperature: 0.8,
+              stream: true,
+              messages: [{ role: 'system', content: buildAISystemPrompt() }, ...aiHistory]
+            };
+            if (isOss) body.reasoning_effort = 'low'; // berpikir singkat agar cepat
+            return fetch('https://api.groq.com/openai/v1/chat/completions', {
+              method: 'POST',
+              signal: ctrl.signal,
+              headers: { 'content-type': 'application/json', 'Authorization': 'Bearer ' + getGroqKey() },
+              body: JSON.stringify(body)
+            });
+          };
+          let res = await doGroq(getGroqModel());
+          if (!res.ok && res.status !== 429 && res.status !== 401) {
+            const eb = await res.clone().json().catch(() => ({}));
+            const em = (eb.error && eb.error.message) || '';
+            if (/model/i.test(em) && /(not exist|not found|decommission|deprecat|access)/i.test(em)) {
+              const alt = await pickGroqModel();
+              if (alt && alt !== getGroqModel()) {
+                try { localStorage.setItem('galtech_groq_model', alt); } catch (e) {}
+                const inp = document.getElementById('aiGroqModelInput');
+                if (inp) inp.value = alt;
+                logPacket(`AI: model Groq lama tidak tersedia, otomatis pindah ke ${alt}`, 'info');
+                res = await doGroq(alt);
+              }
+            }
+          }
+          if (res.status === 429) {
+            const ra = Math.ceil(parseFloat(res.headers.get('retry-after') || '10')) || 10;
+            const limitErr = new Error('batas gratis tercapai');
+            limitErr.isLimit = true;
+            limitErr.retry = ra;
+            throw limitErr;
+          }
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error((err.error && err.error.message) || `HTTP ${res.status}`);
+          }
+          reply = await readOpenAIStream(res, onStreamText);
+          streamed = true;
+        } else {
+          // AI gratis tanpa kunci (Pollinations, kompatibel OpenAI)
+          const res = await fetch('https://text.pollinations.ai/openai', {
+            method: 'POST',
+            signal: ctrl.signal,
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              model: 'openai',
+              max_tokens: 160,
+              stream: true,
+              messages: [{ role: 'system', content: buildAISystemPrompt() }, ...aiHistory]
+            })
+          });
+          if (res.status === 402) {
+            const ra = parseInt(res.headers.get('Retry-After') || '30', 10) || 30;
+            const limitErr = new Error('batas gratis tercapai');
+            limitErr.isLimit = true;
+            limitErr.retry = ra;
+            throw limitErr;
+          }
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          reply = await readOpenAIStream(res, onStreamText);
+          streamed = true;
+        }
+
+        reply = reply.replace(/[*_`#>]+/g, '').trim();
+        if (!reply) throw new Error('Jawaban kosong');
+        aiHistory.push({ role: 'assistant', content: reply });
+        if (thinking) thinking.remove();
+        if (streamed) {
+          // bacakan sisa kalimat terakhir yang belum terucap
+          speakQueue(reply.slice(spokenIdx));
+          setAIDiagnostic(`AI: ${reply}`, false);
+        } else {
+          speakAI(reply);
+        }
+      } catch (e) {
+        aiHistory.pop(); // buang pesan user yang gagal agar riwayat tetap valid
+        if (thinking) thinking.remove();
+        if (liveRow) liveRow.remove();
+        if (e.isLimit) {
+          aiPendingText = text; // kirim ulang otomatis setelah batas gratis lewat
+          startAICooldown(e.retry);
+          showAICooldownBubble();
+          logPacket(`AI: batas gratis tercapai, tunggu ${e.retry} detik.`, 'info');
+        } else {
+          const msg = e.name === 'AbortError' ? 'AI ERROR: server terlalu lama menjawab (timeout 25 detik).' : `AI ERROR: ${e.message}`;
+          addChatMsg('sys', msg);
+          logPacket(msg, 'err');
+          setAIDiagnostic(msg, true);
+          if (!useClaude) cancelAICooldown(); // gagal jaringan: jangan hitung cooldown
+        }
+      } finally {
+        clearTimeout(timeoutId);
+        aiBusy = false;
+        if (sendBtn) sendBtn.disabled = false;
       }
     }
 
@@ -1935,8 +2623,14 @@
       sendLampCommand(index, !lampStates[index]);
     }
 
+    function isLinkReady() {
+      if (isSimMode || !isCloudMode) return true;
+      return !!(client && client.connected);
+    }
+
+    // Mengembalikan: 'sent' (terkirim/berubah), 'same' (sudah di status itu), 'fail' (gagal kirim)
     function sendLampCommand(index, state) {
-      if (lampStates[index] === state) return;
+      if (lampStates[index] === state) return 'same';
 
       const ch = index + 1;
       const payload = `R${ch}_${state ? 'ON' : 'OFF'}`;
@@ -1950,14 +2644,14 @@
         renderLampMatrix();
         logPacket(`SIM [LOCAL] -> ${displayCmd}`, 'tx');
         statusEl.textContent = `SIM: ${displayCmd}`;
-        return;
+        return 'sent';
       }
 
       if (isCloudMode) {
         if (!client || !client.connected) {
           logPacket(I18N[currentLang].msgFailOffline(displayCmd), 'err');
           statusEl.textContent = 'ERR: OFFLINE';
-          return;
+          return 'fail';
         }
         client.publish(MQTT_CFG.pubTopic, payload);
         logPacket(`TX [MQTT] -> ${displayCmd}`, 'tx');
@@ -1972,6 +2666,7 @@
 
       lampStates[index] = state;
       renderLampMatrix();
+      return 'sent';
     }
 
     function setAllLamps(state) {
@@ -1983,21 +2678,31 @@
       const labelState = state ? 'ON' : 'OFF';
       if (targets.length === 0) {
         logPacket(I18N[currentLang].msgAllAlready(labelState), 'info');
-        return;
+        return 'same';
+      }
+      if (!isLinkReady()) {
+        logPacket(I18N[currentLang].msgFailOffline(`ALL ${labelState}`), 'err');
+        return 'fail';
       }
 
       logPacket(I18N[currentLang].msgMasterExec(labelState, targets.length), 'tx');
       targets.forEach((lampIdx, step) => {
         setTimeout(() => sendLampCommand(lampIdx, state), step * 110);
       });
+      return 'sent';
     }
 
     function runWaveTest() {
+      if (!isLinkReady()) {
+        logPacket(I18N[currentLang].msgFailOffline('WAVE TEST'), 'err');
+        return false;
+      }
       logPacket(I18N[currentLang].msgWaveExec, 'tx');
       for (let i = 0; i < 8; i++) {
         setTimeout(() => sendLampCommand(i, true), i * 180);
         setTimeout(() => sendLampCommand(i, false), (i * 180) + 650);
       }
+      return true;
     }
 
     // ================= UPDATE 4 SENSOR TEGANGAN, ANALYTICS & TOPOLOGI =================
@@ -2077,11 +2782,6 @@
       if (anyAbnormal) {
         guardEl.textContent = dict.guardAlert;
         guardEl.className = 'font-hud font-bold text-[10px] sm:text-xs text-hud-red glow-red animate-pulse tracking-wider';
-        const nowTs = Date.now();
-        if (pushChart && nowTs - lastVoltageAlertTs > 20000) {
-          lastVoltageAlertTs = nowTs;
-          speakAI(dict.ttsVoltageAlert);
-        }
       } else {
         guardEl.textContent = dict.guardNominal;
         guardEl.className = 'font-hud font-bold text-[10px] sm:text-xs text-hud-green glow-green tracking-wider';
@@ -2235,6 +2935,7 @@
         if (topic === MQTT_CFG.statusTopic) {
           try {
             const st = JSON.parse(raw);
+            lastTelemetryTs = Date.now();
             if (st.relays) syncLampStates(st.relays);
           } catch (e) {}
           return;
@@ -2249,6 +2950,7 @@
           const v2 = obj.v2 !== undefined ? obj.v2 : 0;
           const v3 = obj.v3 !== undefined ? obj.v3 : 0;
           const v4 = obj.v4 !== undefined ? obj.v4 : 0;
+          lastTelemetryTs = Date.now();
           updateSensorsUI(v1, v2, v3, v4, true);
 
           if (obj.relays) {
@@ -2344,6 +3046,7 @@
     renderLampMatrix();
     renderAutomationList();
     initBroker();
+    initAIChat();
   </script>
 </body>
 </html>
