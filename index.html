@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
-  <title>GALTECH IoT // CYBER-HUD v3.6</title>
+  <title>GALTECH IoT // CYBER-HUD v3.7</title>
 
   <!-- Google Fonts: Retro Pixel, Digital LED & Tech Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -52,8 +52,6 @@
       --sub-bg: rgba(0, 0, 0, 0.78);
       --sub-border: #1f2937;
       --btn-bg: rgba(12, 19, 38, 0.85);
-      --disabled-bg: rgba(0, 0, 0, 0.45);
-      --disabled-text: #4b5563;
       --bar-empty: #374151;
       --led-stripe: rgba(255, 255, 255, 0.06);
       --text-primary: #ffffff;
@@ -80,8 +78,6 @@
       --sub-bg: #f1f5f9;
       --sub-border: #cbd5e1;
       --btn-bg: #ffffff;
-      --disabled-bg: #e2e8f0;
-      --disabled-text: #94a3b8;
       --bar-empty: #cbd5e1;
       --led-stripe: rgba(15, 23, 42, 0.08);
       --text-primary: #0f172a;
@@ -171,10 +167,10 @@
     [data-theme="dark"] .glow-yellow { text-shadow: 0 0 10px rgba(255, 230, 0, 0.85); }
     [data-theme="dark"] .glow-red { text-shadow: 0 0 12px rgba(255, 42, 85, 0.9); }
 
-    .arcade-switch:not(:disabled) {
+    .arcade-switch {
       transition: all 0.14s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .arcade-switch:not(:disabled):active {
+    .arcade-switch:active {
       transform: translateY(2px) scale(0.97);
     }
 
@@ -484,11 +480,11 @@
           </div>
         </div>
 
-        <!-- 8 Relay Cards Grid -->
+        <!-- 8 Relay Cards Grid (1 Tombol Toggle per Relay) -->
         <div id="relayGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 my-auto"></div>
 
         <div class="mt-3 sm:mt-4 pt-2 border-t border-hud-cyan/25 flex justify-between gap-2 text-[10px] sm:text-[11px] font-bold" style="color: var(--text-muted)">
-          <span class="shrink-0"><span data-i18n="activeCountLabel">AKTIF MENYALA:</span> <strong id="activeRelayCount" class="text-hud-green">0 / 8</strong></span>
+          <span class="shrink-0"><span data-i18n="activeCountLabel">AKTIF:</span> <strong id="activeRelayCount" class="text-hud-green">0 / 8</strong></span>
           <span id="lastCmdLog" class="text-hud-cyan truncate text-right">SISTEM SIAP</span>
         </div>
       </section>
@@ -498,10 +494,10 @@
     <!-- ================= SECTION 3: LIVE PACKET TERMINAL ================= -->
     <section class="hud-panel p-3 sm:p-3.5">
       <div class="flex items-center justify-between gap-2 border-b border-hud-cyan/25 pb-2 mb-2">
-        <span data-i18n="terminalHeader" class="font-pixel text-[9px] sm:text-[10px] text-hud-green truncate">&gt;_ MONITOR PAKET SERIAL / MQTT LANGSUNG</span>
+        <span data-i18n="terminalHeader" class="font-pixel text-[9px] sm:text-[10px] text-hud-green truncate">&gt;_ MONITOR PAKET SERIAL / MQTT</span>
         <button onclick="document.getElementById('packetLog').innerHTML=''" data-i18n="clearLogBtn"
           class="text-[10px] sm:text-[11px] font-bold hover:text-hud-cyan cursor-pointer shrink-0" style="color: var(--text-muted)">
-          [ BERSIHKAN LOG ]
+          [ BERSIHKAN ]
         </button>
       </div>
       <div id="packetLog" class="hud-subbox h-24 sm:h-28 overflow-y-auto p-2 sm:p-2.5 text-[11px] sm:text-xs space-y-1 font-mono break-all"></div>
@@ -526,6 +522,8 @@
         waveTestBtn: 'TES GELOMBANG',
         allOnBtn: 'NYALAKAN SEMUA',
         allOffBtn: 'MATIKAN SEMUA',
+        btnTurnOn: 'NYALAKAN',
+        btnTurnOff: 'MATIKAN',
         activeCountLabel: 'AKTIF:',
         terminalHeader: '>_ MONITOR PAKET SERIAL / MQTT',
         clearLogBtn: '[ BERSIHKAN ]',
@@ -560,6 +558,8 @@
         waveTestBtn: 'WAVE TEST',
         allOnBtn: 'ALL ON',
         allOffBtn: 'ALL OFF',
+        btnTurnOn: 'TURN ON',
+        btnTurnOff: 'TURN OFF',
         activeCountLabel: 'ACTIVE:',
         terminalHeader: '>_ LIVE SERIAL / MQTT MONITOR',
         clearLogBtn: '[ CLEAR ]',
@@ -651,6 +651,7 @@
 
       updateRealTimeClock();
       updateSensorsUI(...latestVoltages, false);
+      renderRelayMatrix();
     }
 
     function toggleLanguage() {
@@ -803,9 +804,10 @@
       }
     }
 
-    // ================= RENDER 8-CHANNEL RELAY MATRIX =================
+    // ================= RENDER 8-CHANNEL RELAY MATRIX (1 TOMBOL TOGGLE) =================
     function renderRelayMatrix() {
       const grid = document.getElementById('relayGrid');
+      const dict = I18N[currentLang];
       grid.innerHTML = '';
       let activeCount = 0;
 
@@ -818,6 +820,8 @@
         card.className = isOn
           ? 'border border-hud-green bg-hud-green/10 p-2.5 sm:p-3 transition-all'
           : 'hud-subbox p-2.5 sm:p-3 transition-all';
+
+        const btnLabel = isOn ? dict.btnTurnOff : dict.btnTurnOn;
 
         card.innerHTML = `
           <div class="flex items-center justify-between gap-1 mb-1">
@@ -835,27 +839,15 @@
             RELAY 0${ch}
           </div>
 
-          <div class="grid grid-cols-2 gap-1.5">
-            <button onclick="sendRelayCommand(${i}, true)" ${isOn ? 'disabled' : ''}
-              class="arcade-switch py-2.5 sm:py-2 font-pixel text-[8px] sm:text-[9px] border ${
-                isOn
-                  ? 'opacity-45 cursor-not-allowed'
-                  : 'border-hud-green bg-hud-green/15 text-hud-green hover:bg-hud-green hover:text-white cursor-pointer'
-              }"
-              style="${isOn ? 'background-color: var(--disabled-bg); border-color: var(--sub-border); color: var(--disabled-text);' : ''}">
-              ON
-            </button>
-
-            <button onclick="sendRelayCommand(${i}, false)" ${!isOn ? 'disabled' : ''}
-              class="arcade-switch py-2.5 sm:py-2 font-pixel text-[8px] sm:text-[9px] border ${
-                !isOn
-                  ? 'opacity-45 cursor-not-allowed'
-                  : 'border-hud-red bg-hud-red/15 text-hud-red hover:bg-hud-red hover:text-white cursor-pointer'
-              }"
-              style="${!isOn ? 'background-color: var(--disabled-bg); border-color: var(--sub-border); color: var(--disabled-text);' : ''}">
-              OFF
-            </button>
-          </div>
+          <button onclick="toggleRelay(${i})"
+            class="arcade-switch w-full py-2.5 px-2 font-pixel text-[8px] sm:text-[9px] border flex items-center justify-center gap-1.5 cursor-pointer ${
+              isOn
+                ? 'border-hud-red bg-hud-red/15 text-hud-red hover:bg-hud-red hover:text-white'
+                : 'border-hud-green bg-hud-green/15 text-hud-green hover:bg-hud-green hover:text-white'
+            }">
+            <span>&#9211;</span>
+            <span>${btnLabel}</span>
+          </button>
         `;
         grid.appendChild(card);
       }
@@ -863,7 +855,11 @@
       document.getElementById('activeRelayCount').textContent = `${activeCount} / 8`;
     }
 
-    // ================= KIRIM PERINTAH RELAY =================
+    // ================= TOGGLE & KIRIM PERINTAH RELAY =================
+    function toggleRelay(index) {
+      sendRelayCommand(index, !relayStates[index]);
+    }
+
     function sendRelayCommand(index, state) {
       if (relayStates[index] === state) return;
 
