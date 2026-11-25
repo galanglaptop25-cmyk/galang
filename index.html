@@ -8,7 +8,7 @@
   <!-- Google Fonts: Aerospace Orbitron, Digital LED & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Orbitron:wght@600;700;800&family=VT323&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800&family=VT323&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS, MQTT.js & Chart.js CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -211,11 +211,297 @@
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: var(--bg-body); }
     ::-webkit-scrollbar-thumb { background: var(--c-cyan); border-radius: 2px; }
+
+    /* ================= POLISH LAYER ================= */
+    :root { --ease: cubic-bezier(0.2, 0.7, 0.2, 1); }
+    html { scroll-behavior: smooth; }
+    body {
+      -webkit-font-smoothing: antialiased;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.5;
+      background-attachment: fixed;
+    }
+    ::selection { background: color-mix(in srgb, var(--c-cyan) 35%, transparent); color: var(--text-primary); }
+    * { scrollbar-width: thin; scrollbar-color: var(--c-cyan) transparent; }
+    .font-digital { font-variant-numeric: tabular-nums; letter-spacing: 0.04em; }
+
+    /* Vinyet halus agar fokus ke tengah (hanya tema gelap) */
+    body::before {
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: -1;
+      background: radial-gradient(120% 90% at 50% 0%, transparent 55%, rgba(0, 0, 0, 0.38) 100%);
+    }
+    [data-theme="light"] body::before { display: none; }
+
+    /* Panel: highlight tipis di tepi atas + radius sedikit lebih halus */
+    .hud-panel {
+      border-radius: 6px;
+      box-shadow: var(--panel-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+    .hud-subbox { border-radius: 5px; }
+
+    /* Header: satu momen gerak saat halaman dibuka (garis sinyal menyapu sekali) */
+    header.hud-panel {
+      background-image:
+        linear-gradient(90deg, transparent, var(--c-cyan), transparent),
+        linear-gradient(90deg, color-mix(in srgb, var(--c-cyan) 9%, transparent), transparent 45%),
+        linear-gradient(180deg, var(--panel-grad-1), var(--panel-grad-2));
+      background-size: 35% 2px, 100% 100%, 100% 100%;
+      background-repeat: no-repeat;
+      background-position: -40% 100%, 0 0, 0 0;
+      animation: bootSweep 1.6s var(--ease) 0.3s 1 both;
+    }
+    @keyframes bootSweep {
+      from { background-position: -40% 100%, 0 0, 0 0; }
+      to   { background-position: 140% 100%, 0 0, 0 0; }
+    }
+
+    /* Kartu sensor: warna kanal terbaca sekilas dari tint di sisi kiri */
+    #sensorCard-1, #sensorCard-2, #sensorCard-3, #sensorCard-4 {
+      background-size: 100% 100%, 100% 100%;
+      background-repeat: no-repeat;
+    }
+    #sensorCard-1 { background-image: linear-gradient(90deg, color-mix(in srgb, var(--c-cyan) 13%, transparent), transparent 24%), linear-gradient(180deg, var(--panel-grad-1), var(--panel-grad-2)); }
+    #sensorCard-2 { background-image: linear-gradient(90deg, color-mix(in srgb, var(--c-green) 13%, transparent), transparent 24%), linear-gradient(180deg, var(--panel-grad-1), var(--panel-grad-2)); }
+    #sensorCard-3 { background-image: linear-gradient(90deg, color-mix(in srgb, var(--c-pink) 13%, transparent), transparent 24%), linear-gradient(180deg, var(--panel-grad-1), var(--panel-grad-2)); }
+    #sensorCard-4 { background-image: linear-gradient(90deg, color-mix(in srgb, var(--c-yellow) 13%, transparent), transparent 24%), linear-gradient(180deg, var(--panel-grad-1), var(--panel-grad-2)); }
+
+    /* Lampu menyala: cahaya hijau lembut sebagai informasi status */
+    #lampGrid > div.border-hud-green {
+      background-image: radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--c-green) 16%, transparent), transparent 70%);
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--c-green) 35%, transparent), 0 0 24px -8px var(--c-green);
+    }
+
+    /* Tombol & input: respons sentuhan, fokus jelas, status nonaktif jelas */
+    button, input, select {
+      transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease, filter 0.15s ease;
+    }
+    button:not(:disabled):hover { filter: brightness(1.12); }
+    button:not(:disabled):active { transform: translateY(1px); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    :where(button, a, input, select, textarea):focus-visible { outline: 2px solid var(--c-cyan); outline-offset: 2px; }
+    input:focus, select:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-cyan) 22%, transparent); }
+    input::placeholder { color: var(--text-muted); opacity: 0.7; }
+
+    /* Obrolan AI: gelembung lebih natural */
+    #aiChatLog > div > div { border-radius: 10px 10px 10px 3px; padding: 7px 11px; line-height: 1.45; }
+    #aiChatLog > .text-right > div { border-radius: 10px 10px 3px 10px; }
+    #aiChatLog > .text-center > div { border-radius: 6px; }
+
+
+    /* ----- Ringkasan sistem ----- */
+    .summary-tile { padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .summary-label { font-size: 11px; color: var(--text-muted); letter-spacing: 0.03em; }
+    .summary-value { font-size: clamp(1.15rem, 2.6vw, 1.75rem); font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .summary-value small { font-size: 0.55em; font-weight: 600; color: var(--text-muted); }
+    .summary-sub { font-size: 11px; color: var(--text-muted); }
+    @media (min-width: 640px) { .summary-tile { padding: 14px 18px; } }
+
+    /* Jarak antar bagian lebih lega */
+    @media (min-width: 640px) {
+      .max-w-7xl.z-10 > * + * { margin-top: 1.5rem !important; }
+    }
+
+    /* ================= PREMIUM LAYER ================= */
+    html[data-theme="dark"] {
+      --bg-body: #070b13;
+      --bg-radial: rgba(86, 200, 245, 0.15);
+      --bg-radial-2: rgba(255, 184, 77, 0.13);
+      --grid-line: transparent;
+      --panel-grad-1: rgba(20, 29, 45, 0.78);
+      --panel-grad-2: rgba(12, 18, 30, 0.78);
+      --panel-border: rgba(148, 170, 205, 0.16);
+      --panel-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.25);
+      --corner-color: transparent;
+      --sub-bg: rgba(255, 255, 255, 0.035);
+      --sub-border: rgba(148, 170, 205, 0.14);
+      --btn-bg: rgba(255, 255, 255, 0.05);
+      --bar-empty: rgba(255, 255, 255, 0.07);
+      --led-stripe: transparent;
+      --text-primary: #f2f6fc;
+      --text-body: #d3dce9;
+      --text-muted: #8c9cb4;
+      --c-cyan: #56c8f5;
+      --c-pink: #ff7aa8;
+      --c-green: #34e3a8;
+      --c-yellow: #ffb84d;
+      --c-red: #ff5f70;
+      --scanline-opacity: 0;
+    }
+    html[data-theme="light"] {
+      --bg-body: #f3f6fb;
+      --bg-radial: rgba(56, 160, 230, 0.12);
+      --bg-radial-2: rgba(255, 184, 77, 0.16);
+      --grid-line: transparent;
+      --panel-grad-1: rgba(255, 255, 255, 0.94);
+      --panel-grad-2: rgba(255, 255, 255, 0.9);
+      --panel-border: rgba(15, 23, 42, 0.1);
+      --panel-shadow: 0 14px 34px -18px rgba(15, 23, 42, 0.18), 0 1px 3px rgba(15, 23, 42, 0.06);
+      --corner-color: transparent;
+      --sub-bg: rgba(15, 23, 42, 0.035);
+      --sub-border: rgba(15, 23, 42, 0.1);
+      --btn-bg: #ffffff;
+      --bar-empty: rgba(15, 23, 42, 0.08);
+      --led-stripe: transparent;
+      --scanline-opacity: 0;
+    }
+    #crtOverlay { display: none; }
+
+    /* Latar: dua cahaya lembut, biru senja di kiri dan hangat matahari di kanan */
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background-image:
+        radial-gradient(55% 45% at 6% -8%, var(--bg-radial), transparent 70%),
+        radial-gradient(45% 40% at 96% -6%, var(--bg-radial-2), transparent 70%);
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+    }
+
+    /* Tipografi: UI humanis, angka & log monospace */
+    .font-hud { font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important; font-weight: 700; letter-spacing: 0.01em !important; }
+    .font-digital { font-family: 'JetBrains Mono', ui-monospace, monospace !important; font-weight: 600; letter-spacing: -0.02em !important; }
+    #packetLog, #packetLog *, #lastCmdLog { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    header h1 { font-weight: 800; letter-spacing: -0.01em !important; }
+    [id^="sensorCard-"] .font-digital { font-size: clamp(1.7rem, 3.6vw, 2.5rem) !important; }
+
+    /* Teks kecil dinaikkan agar nyaman dibaca */
+    [class*="text-[8px]"], [class*="text-[8.5px]"] { font-size: 10px !important; }
+    [class*="text-[9px]"] { font-size: 10.5px !important; }
+    [class*="text-[10px]"] { font-size: 11px !important; }
+
+    /* Permukaan kaca, sudut membulat, tanpa siku HUD */
+    .hud-panel { border-radius: 16px; backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); }
+    .hud-panel::before, .hud-panel::after { display: none; }
+    header.hud-panel { border-radius: 18px; }
+    .hud-subbox { border-radius: 11px; }
+    button { border-radius: 10px; font-weight: 600; }
+    input, select, textarea { border-radius: 10px; }
+
+    /* Cahaya teks hanya untuk angka utama */
+    html[data-theme="dark"] .glow-cyan, html[data-theme="dark"] .glow-green, html[data-theme="dark"] .glow-pink,
+    html[data-theme="dark"] .glow-yellow, html[data-theme="dark"] .glow-red { text-shadow: none; }
+    html[data-theme="dark"] .font-digital.glow-cyan { text-shadow: 0 0 24px color-mix(in srgb, var(--c-cyan) 45%, transparent); }
+    html[data-theme="dark"] .font-digital.glow-green { text-shadow: 0 0 24px color-mix(in srgb, var(--c-green) 45%, transparent); }
+    html[data-theme="dark"] .font-digital.glow-pink { text-shadow: 0 0 24px color-mix(in srgb, var(--c-pink) 45%, transparent); }
+    html[data-theme="dark"] .font-digital.glow-yellow { text-shadow: 0 0 24px color-mix(in srgb, var(--c-yellow) 45%, transparent); }
+    html[data-theme="dark"] .font-digital.glow-red { text-shadow: 0 0 24px color-mix(in srgb, var(--c-red) 50%, transparent); }
+
+    /* Bar tegangan jadi progress halus, bukan LED bergaris */
+    .led-bar-bg { background: var(--bar-empty) !important; border-radius: 999px !important; padding: 2px; }
+    .led-bar-bg > * { border-radius: 999px; }
+
+    /* Ringkasan sistem: garis aksen di tepi atas tiap kartu */
+    .summary-tile { border-radius: 16px; }
+    .summary-tile:nth-child(2) { box-shadow: var(--panel-shadow), inset 0 2px 0 var(--c-cyan); }
+    .summary-tile:nth-child(3) { box-shadow: var(--panel-shadow), inset 0 2px 0 var(--c-green); }
+    .summary-tile:nth-child(4) { box-shadow: var(--panel-shadow), inset 0 2px 0 var(--c-yellow); }
+
+    * { scrollbar-color: rgba(148, 170, 205, 0.4) transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 170, 205, 0.4); border-radius: 999px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+
+    /* ================= APP SHELL: SIDEBAR + HERO ================= */
+    .sidebar { display: none; }
+    section[id], div[id^="sec-"] { scroll-margin-top: 20px; }
+    @media (min-width: 1280px) {
+      .hud-panel.sidebar {
+        display: flex; position: fixed; left: 16px; top: 16px; bottom: 16px; width: 224px;
+        flex-direction: column; gap: 18px; padding: 18px 12px; z-index: 45; border-radius: 20px;
+      }
+      body > .max-w-7xl.z-10 { margin-left: 264px !important; margin-right: 24px !important; max-width: 1360px !important; }
+    }
+    .sb-brand { display: flex; align-items: center; gap: 11px; padding: 4px 8px 14px; border-bottom: 1px solid var(--panel-border); }
+    .sb-brand strong { display: block; font-size: 15px; font-weight: 800; letter-spacing: -0.01em; color: var(--text-primary); line-height: 1.2; }
+    .sb-brand small { display: block; font-size: 11px; color: var(--text-muted); }
+    .sb-logo { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; font-weight: 800; font-size: 14px; color: #0b1220;
+      background: linear-gradient(135deg, var(--c-cyan), var(--c-yellow)); flex-shrink: 0; }
+    .sb-nav { display: flex; flex-direction: column; gap: 2px; flex: 1; overflow-y: auto; }
+    .nav-link { display: flex; align-items: center; gap: 11px; padding: 9px 12px; border-radius: 11px; font-size: 13px; font-weight: 600;
+      color: var(--text-muted); text-decoration: none; transition: background-color 0.15s ease, color 0.15s ease; }
+    .nav-link:hover { background: var(--sub-bg); color: var(--text-primary); }
+    .nav-link.active { background: color-mix(in srgb, var(--c-cyan) 14%, transparent); color: var(--text-primary); }
+    .nav-dot { width: 7px; height: 7px; border-radius: 999px; background: currentColor; opacity: 0.45; flex-shrink: 0; }
+    .nav-link.active .nav-dot { background: var(--c-cyan); opacity: 1; box-shadow: 0 0 10px var(--c-cyan); }
+    .sb-status { display: flex; align-items: center; gap: 9px; padding: 11px 12px; border-radius: 12px; background: var(--sub-bg);
+      border: 1px solid var(--sub-border); font-size: 12px; font-weight: 600; color: var(--text-primary); }
+    .sb-dot { width: 9px; height: 9px; border-radius: 999px; background: var(--c-red); flex-shrink: 0; }
+
+    .hero { display: grid; grid-template-columns: 1fr; gap: 22px; padding: 24px 22px; align-items: center; overflow: hidden;
+      background-image: radial-gradient(60% 130% at 100% 50%, color-mix(in srgb, var(--c-yellow) 15%, transparent), transparent 70%),
+                        linear-gradient(180deg, var(--panel-grad-1), var(--panel-grad-2)); }
+    @media (min-width: 768px) { .hero { grid-template-columns: 1.35fr 0.65fr; padding: 34px 40px; gap: 32px; } }
+    .hero-title { font-size: clamp(1.6rem, 3.6vw, 2.7rem); font-weight: 800; letter-spacing: -0.025em; line-height: 1.1; color: var(--text-primary); }
+    .hero-sub { margin-top: 12px; font-size: 0.95rem; line-height: 1.55; color: var(--text-muted); max-width: 52ch; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    .hero-btn { padding: 11px 18px; font-size: 13px; font-weight: 700; border: 1px solid var(--panel-border); background: var(--btn-bg); color: var(--text-primary); cursor: pointer; }
+    .hero-btn-primary { background: var(--c-yellow); color: #1a1205; border-color: transparent; }
+    .hero-ring { position: relative; width: min(100%, 230px); aspect-ratio: 1; margin: 0 auto; }
+    .hero-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .hero-ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+    .hero-volt { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: clamp(1.7rem, 3vw, 2.3rem); font-weight: 700; letter-spacing: -0.03em; color: var(--text-primary); }
+    .hero-ring-label { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+
+    /* ================= FINISHING: BOHLAM, TOAST, NAV HP ================= */
+    .bulb { display: inline-block; vertical-align: -5px; margin-right: 8px; color: var(--text-muted); transition: color 0.25s ease, filter 0.25s ease, fill 0.25s ease; }
+    .bulb.on { color: var(--c-yellow); fill: color-mix(in srgb, var(--c-yellow) 35%, transparent); filter: drop-shadow(0 0 7px color-mix(in srgb, var(--c-yellow) 75%, transparent)); }
+
+    /* Lampu menyala = hangat (amber), bukan hijau */
+    #lampGrid .border-hud-green { border-color: color-mix(in srgb, var(--c-yellow) 60%, transparent) !important; }
+    #lampGrid .text-hud-green { color: var(--c-yellow) !important; }
+    #lampGrid .bg-hud-green { background-color: var(--c-yellow) !important; }
+    #lampGrid .glow-green { text-shadow: none !important; }
+    #lampGrid > div.border-hud-green {
+      background-image: radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--c-yellow) 18%, transparent), transparent 70%);
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--c-yellow) 30%, transparent), 0 0 26px -8px var(--c-yellow);
+    }
+
+    .toast-host { position: fixed; right: 18px; bottom: 18px; z-index: 80; display: flex; flex-direction: column; gap: 8px; width: min(360px, calc(100vw - 36px)); pointer-events: none; }
+    .toast { pointer-events: auto; padding: 12px 14px; border-radius: 12px; font-size: 12.5px; font-weight: 600; line-height: 1.4; color: var(--text-primary);
+      background: var(--panel-grad-2); border: 1px solid var(--panel-border); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      box-shadow: var(--panel-shadow); animation: toastIn 0.28s var(--ease) both; }
+    .toast-ok { border-left: 3px solid var(--c-green); }
+    .toast-err { border-left: 3px solid var(--c-red); }
+    .toast.out { opacity: 0; transform: translateY(6px); transition: opacity 0.25s ease, transform 0.25s ease; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    /* Navigasi bawah untuk HP & tablet */
+    @media (max-width: 1279px) {
+      .hud-panel.sidebar { display: flex; position: fixed; left: 10px; right: 10px; bottom: 10px; z-index: 45; border-radius: 18px; padding: 6px; flex-direction: row; gap: 0; }
+      .sb-brand, .sb-status { display: none; }
+      .sb-nav { flex-direction: row; overflow-x: auto; gap: 2px; scrollbar-width: none; }
+      .sb-nav::-webkit-scrollbar { display: none; }
+      .nav-link { flex: 0 0 auto; flex-direction: column; gap: 4px; padding: 8px 13px; font-size: 11px; white-space: nowrap; }
+      body { padding-bottom: 92px !important; }
+      .toast-host { bottom: 86px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+    }
   </style>
 </head>
 <body class="font-mono min-h-screen relative pb-8 sm:pb-10 selection:bg-hud-pink selection:text-white">
 
   <div id="crtOverlay" class="crt-scanlines fixed inset-0 z-50"></div>
+
+  <div id="toastHost" class="toast-host" aria-live="polite"></div>
+
+  <aside class="hud-panel sidebar" aria-label="Navigasi">
+    <div class="sb-brand">
+      <span class="sb-logo">GT</span>
+      <span><strong>GALTECH</strong><small>Kontrol lampu surya</small></span>
+    </div>
+    <nav class="sb-nav">
+      <a class="nav-link active" href="#sec-home"><span class="nav-dot"></span>Beranda</a>
+      <a class="nav-link" href="#sec-energy"><span class="nav-dot"></span>Energi</a>
+      <a class="nav-link" href="#sec-sensor"><span class="nav-dot"></span>Sensor tegangan</a>
+      <a class="nav-link" href="#sec-lamp"><span class="nav-dot"></span>Grafik &amp; lampu</a>
+      <a class="nav-link" href="#sec-voice"><span class="nav-dot"></span>Suara &amp; timer</a>
+      <a class="nav-link" href="#sec-ai"><span class="nav-dot"></span>Asisten AI</a>
+      <a class="nav-link" href="#sec-calib"><span class="nav-dot"></span>Kalibrasi</a>
+      <a class="nav-link" href="#sec-log"><span class="nav-dot"></span>Log paket</a>
+    </nav>
+    <div class="sb-status"><span id="sbDot" class="sb-dot"></span><span id="sbStatus">Memeriksa...</span></div>
+  </aside>
 
   <div class="max-w-7xl mx-auto px-2.5 sm:px-4 pt-3 sm:pt-5 relative z-10 space-y-4 sm:space-y-5">
 
@@ -339,8 +625,30 @@
       </div>
     </header>
 
+    <!-- ================= HERO: STATUS UTAMA ================= -->
+    <section id="sec-home" class="hud-panel hero">
+      <div>
+        <h2 id="heroTitle" class="hero-title">Memeriksa sistem...</h2>
+        <p id="heroSub" class="hero-sub">Menunggu data dari perangkat.</p>
+        <div class="hero-actions">
+          <button type="button" onclick="setAllLamps(true)" class="hero-btn hero-btn-primary">Nyalakan semua lampu</button>
+          <button type="button" onclick="setAllLamps(false)" class="hero-btn">Matikan semua</button>
+        </div>
+      </div>
+      <div class="hero-ring" role="img" aria-label="Level baterai">
+        <svg viewBox="0 0 140 140">
+          <circle cx="70" cy="70" r="54" fill="none" stroke="var(--bar-empty)" stroke-width="10"></circle>
+          <circle id="heroRing" cx="70" cy="70" r="54" fill="none" stroke="var(--c-green)" stroke-width="10" stroke-linecap="round" stroke-dasharray="339.29" stroke-dashoffset="339.29" style="transition: stroke-dashoffset 0.8s ease, stroke 0.3s ease"></circle>
+        </svg>
+        <div class="hero-ring-center">
+          <span id="heroVolt" class="hero-volt">0.00 V</span>
+          <span class="hero-ring-label">Baterai</span>
+        </div>
+      </div>
+    </section>
+
     <!-- ================= SECTION 0: SYSTEM POWER ANALYTICS & LIVE ENERGY TOPOLOGY ================= -->
-    <section class="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4">
+    <section id="sec-energy" class="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4">
       
       <!-- Kiri: 3 Kartu Analitik Cepat (5 Kolom) -->
       <div class="lg:col-span-5 grid grid-cols-3 gap-2 sm:gap-3">
@@ -425,8 +733,32 @@
       </div>
     </section>
 
+    <!-- ================= RINGKASAN SISTEM ================= -->
+    <section id="summaryStrip" class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3" aria-label="Ringkasan sistem">
+      <div class="hud-panel summary-tile">
+        <span class="summary-label">Koneksi perangkat</span>
+        <span id="sumLink" class="summary-value font-hud text-hud-red">--</span>
+        <span id="sumLinkSub" class="summary-sub">Menunggu data</span>
+      </div>
+      <div class="hud-panel summary-tile">
+        <span class="summary-label">Input solar</span>
+        <span class="summary-value font-hud text-hud-cyan"><span id="sumPower">0.00</span><small> V</small></span>
+        <span id="sumPowerSub" class="summary-sub">Tidak ada sumber</span>
+      </div>
+      <div class="hud-panel summary-tile">
+        <span class="summary-label">Baterai</span>
+        <span class="summary-value font-hud text-hud-green"><span id="sumBatt">0.00</span><small> V</small></span>
+        <span id="sumBattSub" class="summary-sub">Tidak ada sumber</span>
+      </div>
+      <div class="hud-panel summary-tile">
+        <span class="summary-label">Lampu menyala</span>
+        <span class="summary-value font-hud text-hud-yellow"><span id="sumLamp">0</span><small> / 8</small></span>
+        <span id="sumLampSub" class="summary-sub">Semua lampu mati</span>
+      </div>
+    </section>
+
     <!-- ================= SECTION 1: 4-CHANNEL DC VOLTAGE TELEMETRY ================= -->
-    <section>
+    <section id="sec-sensor">
       <div class="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
         <div class="flex items-center gap-2 min-w-0">
           <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-hud-cyan inline-block shrink-0"></span>
@@ -540,8 +872,33 @@
       </div>
     </section>
 
+    <!-- ================= SECTION 1B: KALIBRASI TEGANGAN ================= -->
+    <section id="sec-calib" class="hud-panel p-3 sm:p-4 md:p-5">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="w-2 h-2 bg-hud-yellow inline-block shrink-0"></span>
+          <h2 class="font-hud font-bold text-[11px] sm:text-xs tracking-wider truncate" style="color: var(--text-primary)">KALIBRASI TEGANGAN</h2>
+        </div>
+        <button type="button" id="calibToggleBtn" onclick="toggleCalibPanel()"
+          class="hud-subbox text-[9px] font-hud font-bold px-2.5 py-1 border border-hud-yellow text-hud-yellow hover:bg-hud-yellow hover:text-black transition cursor-pointer tracking-wider">BUKA</button>
+      </div>
+
+      <div id="calibBody" class="hidden mt-3 space-y-2">
+        <p class="text-[9px] sm:text-[10px] leading-snug" style="color: var(--text-muted)">
+          Ukur tegangan asli dengan multimeter, isi di kolom REAL, lalu klik SET. Dasbor menghitung faktor koreksi (gain) otomatis dan menyimpannya di browser ini. Gain dan offset juga bisa diisi manual.
+        </p>
+        <div id="calibRows" class="space-y-2"></div>
+        <div class="flex flex-wrap gap-2 pt-1">
+          <button type="button" onclick="saveCalibManual()"
+            class="font-hud font-bold text-[9px] px-3 py-2 border border-hud-green text-hud-green hover:bg-hud-green hover:text-black transition cursor-pointer tracking-wider">SIMPAN GAIN/OFFSET</button>
+          <button type="button" onclick="resetCalibration()"
+            class="font-hud font-bold text-[9px] px-3 py-2 border border-hud-red text-hud-red hover:bg-hud-red hover:text-white transition cursor-pointer tracking-wider">RESET KALIBRASI</button>
+        </div>
+      </div>
+    </section>
+
     <!-- ================= SECTION 2: OSCILLOSCOPE & 8-CH LAMP MATRIX ================= -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
+    <div id="sec-lamp" class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
       
       <!-- KIRI: REAL-TIME VOLTAGE OSCILLOSCOPE -->
       <section class="lg:col-span-5 hud-panel p-3 sm:p-4 md:p-5 flex flex-col justify-between">
@@ -609,7 +966,7 @@
     </div>
 
     <!-- ================= SECTION 3: VOICE CONTROL + TTS & LAMP SCHEDULER / TIMER ================= -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
+    <div id="sec-voice" class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
       
       <!-- KIRI: WEB SPEECH VOICE CONTROL + TEXT-TO-SPEECH AI (5 Kolom) -->
       <section class="lg:col-span-5 hud-panel p-3 sm:p-4 md:p-5 flex flex-col justify-between">
@@ -821,7 +1178,7 @@
     </div>
 
     <!-- ================= SECTION 3B: AI ASISTEN (OBROLAN) ================= -->
-    <section class="hud-panel p-3 sm:p-4 md:p-5">
+    <section id="sec-ai" class="hud-panel p-3 sm:p-4 md:p-5">
       <div class="flex items-center justify-between gap-2 mb-3">
         <div class="flex items-center gap-2 min-w-0">
           <span class="w-2 h-2 bg-hud-pink inline-block shrink-0"></span>
@@ -869,7 +1226,7 @@
     </section>
 
     <!-- ================= SECTION 4: LIVE PACKET TERMINAL ================= -->
-    <section class="hud-panel p-3 sm:p-3.5">
+    <section id="sec-log" class="hud-panel p-3 sm:p-3.5">
       <div class="flex items-center justify-between gap-2 border-b border-hud-cyan/25 pb-2 mb-2">
         <span data-i18n="terminalHeader" class="font-hud font-bold text-[9px] sm:text-[10px] text-hud-green tracking-wider truncate">&gt;_ MONITOR PAKET SERIAL / MQTT LANGSUNG</span>
         <button onclick="document.getElementById('packetLog').innerHTML=''" data-i18n="clearLogBtn"
@@ -1839,6 +2196,7 @@ function deviceAgeSec() {
     let aiHistory = [];
     let aiBusy = false;
     let aiPendingText = null;
+    let aiWaitRow = null;
     let lastTelemetryTs = 0;
     let aiCooldownUntil = 0;
     let aiCooldownTimer = null;
@@ -1979,12 +2337,28 @@ function deviceAgeSec() {
           aiCooldownRow = null;
           setTimeout(() => row.remove(), aiPendingText ? 800 : 2500);
         }
-        if (aiPendingText) {
-          const queued = aiPendingText;
-          aiPendingText = null;
-          setTimeout(() => askAI(queued), 100);
-        }
+        dispatchPendingAI();
       }
+    }
+
+    // Masukkan pesan ke antrean (gabung jika sudah ada pesan lain yang menunggu)
+    function queueAIText(text, busy) {
+      aiPendingText = aiPendingText ? `${aiPendingText}. ${text}` : text;
+      if (aiCooldownLeft() > 0) {
+        showAICooldownBubble();
+      } else if (busy && !aiWaitRow) {
+        aiWaitRow = addChatMsg('sys', currentLang === 'id'
+          ? 'Pesan antre, menunggu jawaban sebelumnya...'
+          : 'Queued, waiting for the previous answer...');
+      }
+    }
+
+    function dispatchPendingAI() {
+      if (!aiPendingText || aiBusy) return; // kalau masih sibuk, dikirim dari blok finally askAI
+      const queued = aiPendingText;
+      aiPendingText = null;
+      if (aiWaitRow) { aiWaitRow.remove(); aiWaitRow = null; }
+      setTimeout(() => askAI(queued), 100);
     }
 
     function startAICooldown(secs) {
@@ -2055,16 +2429,17 @@ async function pickGroqModel() {
     }
 
     async function askAI(text) {
-      if (aiBusy) return;
       const provider = getAIProvider();
       const key = getAIKey();
       const useClaude = provider === 'claude';
 
+      // Masih memproses pesan sebelumnya: antrekan, jangan dibuang
+      if (aiBusy) { queueAIText(text, true); return; }
+
       // Layanan gratis punya cooldown antar permintaan
       if (!useClaude) {
         if (aiCooldownLeft() > 0) {
-          aiPendingText = text; // simpan pesan terbaru, kirim otomatis saat cooldown habis
-          showAICooldownBubble();
+          queueAIText(text, false); // dikirim otomatis saat cooldown habis
           return;
         }
         startAICooldown(provider === 'groq' ? 2 : 30);
@@ -2217,7 +2592,7 @@ async function pickGroqModel() {
         if (thinking) thinking.remove();
         if (liveRow) liveRow.remove();
         if (e.isLimit) {
-          aiPendingText = text; // kirim ulang otomatis setelah batas gratis lewat
+          aiPendingText = aiPendingText ? `${text}. ${aiPendingText}` : text; // kirim ulang otomatis setelah batas gratis lewat
           startAICooldown(e.retry);
           showAICooldownBubble();
           logPacket(`AI: batas gratis tercapai, tunggu ${e.retry} detik.`, 'info');
@@ -2232,7 +2607,225 @@ async function pickGroqModel() {
         clearTimeout(timeoutId);
         aiBusy = false;
         if (sendBtn) sendBtn.disabled = false;
+        // Ada pesan yang menunggu selama AI sibuk: kirim sekarang atau tunggu cooldown
+        if (aiPendingText) {
+          if (aiCooldownLeft() > 0) showAICooldownBubble();
+          else dispatchPendingAI();
+        }
       }
+    }
+
+    // ================= KALIBRASI TEGANGAN =================
+    const CALIB_NAMES = ['V1 INPUT SOLAR', 'V2 BATTERY BANK', 'V3 STEP-DOWN OUT', 'V4 LOAD BUS'];
+    const CALIB_COLORS = ['hud-cyan', 'hud-green', 'hud-pink', 'hud-yellow'];
+    let rawVoltages = [0, 0, 0, 0];
+    let calib = [0, 1, 2, 3].map(() => ({ gain: 1, offset: 0 }));
+
+    function loadCalib() {
+      try {
+        const j = JSON.parse(localStorage.getItem('galtech_calib') || 'null');
+        if (Array.isArray(j) && j.length === 4) {
+          calib = j.map(c => ({
+            gain: (Number.isFinite(+c.gain) && +c.gain > 0) ? +c.gain : 1,
+            offset: Number.isFinite(+c.offset) ? +c.offset : 0
+          }));
+        }
+      } catch (e) {}
+    }
+
+    function saveCalib() {
+      try { localStorage.setItem('galtech_calib', JSON.stringify(calib)); } catch (e) {}
+    }
+
+    // Tegangan tampil = RAW x gain + offset (tidak boleh negatif)
+    function applyCalib(i, rawV) {
+      return Math.max(0, rawV * calib[i].gain + calib[i].offset);
+    }
+
+    function initCalibration() {
+      loadCalib();
+      const inputCls = 'hud-subbox px-2 py-1.5 text-[11px] font-semibold w-full focus:outline-none focus:border-hud-cyan';
+      document.getElementById('calibRows').innerHTML = CALIB_NAMES.map((name, i) => `
+        <div class="hud-subbox p-2 grid grid-cols-2 sm:grid-cols-12 gap-2 items-center">
+          <div class="col-span-2 sm:col-span-3 text-[10px] font-hud font-bold text-${CALIB_COLORS[i]}">${name}</div>
+          <div class="col-span-2 sm:col-span-3 text-[10px] font-semibold" style="color: var(--text-muted)">
+            RAW <span id="calRaw-${i + 1}" style="color: var(--text-primary)">--</span> V &rarr;
+            <span id="calOut-${i + 1}" class="text-${CALIB_COLORS[i]} font-bold">--</span> V
+          </div>
+          <input type="number" step="0.01" min="0" id="calReal-${i + 1}" placeholder="REAL (multimeter)"
+            class="${inputCls} sm:col-span-3" style="color: var(--text-primary)" />
+          <button type="button" onclick="calibrateChannel(${i})"
+            class="sm:col-span-3 font-hud font-bold text-[9px] px-2 py-2 border border-hud-yellow text-hud-yellow hover:bg-hud-yellow hover:text-black transition cursor-pointer tracking-wider">SET</button>
+          <input type="number" step="0.0001" id="calGain-${i + 1}" placeholder="Gain"
+            class="${inputCls} sm:col-span-6" style="color: var(--text-primary)" />
+          <input type="number" step="0.01" id="calOff-${i + 1}" placeholder="Offset (V)"
+            class="${inputCls} sm:col-span-6" style="color: var(--text-primary)" />
+        </div>`).join('');
+      fillCalibInputs();
+    }
+
+    function fillCalibInputs() {
+      calib.forEach((c, i) => {
+        document.getElementById(`calGain-${i + 1}`).value = c.gain;
+        document.getElementById(`calOff-${i + 1}`).value = c.offset;
+      });
+    }
+
+    function renderCalibLive(cv) {
+      for (let i = 0; i < 4; i++) {
+        const r = document.getElementById(`calRaw-${i + 1}`);
+        const o = document.getElementById(`calOut-${i + 1}`);
+        if (r) r.textContent = rawVoltages[i].toFixed(2);
+        if (o) o.textContent = cv[i].toFixed(2);
+      }
+    }
+
+    function toggleCalibPanel() {
+      const body = document.getElementById('calibBody');
+      body.classList.toggle('hidden');
+      document.getElementById('calibToggleBtn').textContent = body.classList.contains('hidden') ? 'BUKA' : 'TUTUP';
+    }
+
+    // Terapkan perubahan kalibrasi: bersihkan grafik lama (masih nilai lama) lalu segarkan tampilan
+    function afterCalibChange() {
+      const cv = rawVoltages.map((x, i) => applyCalib(i, x));
+      latestVoltages = cv;
+      renderCalibLive(cv);
+      resetChart();
+    }
+
+    function calibrateChannel(i) {
+      const real = parseFloat(document.getElementById(`calReal-${i + 1}`).value);
+      const rawV = rawVoltages[i];
+      if (!(real > 0)) {
+        logPacket('KALIBRASI: isi dulu tegangan REAL dari multimeter.', 'err');
+        return;
+      }
+      if (!(rawV > 0.05)) {
+        logPacket('KALIBRASI: belum ada data RAW dari ESP32 untuk kanal ini.', 'err');
+        return;
+      }
+      const gain = (real - calib[i].offset) / rawV;
+      if (!(gain > 0)) {
+        logPacket('KALIBRASI: hasil gain tidak valid, cek nilai offset.', 'err');
+        return;
+      }
+      calib[i].gain = +gain.toFixed(5);
+      saveCalib();
+      fillCalibInputs();
+      afterCalibChange();
+      logPacket(`KALIBRASI ${CALIB_NAMES[i]}: RAW ${rawV.toFixed(2)}V -> ${real.toFixed(2)}V (gain ${calib[i].gain})`, 'ok');
+    }
+
+    function saveCalibManual() {
+      for (let i = 0; i < 4; i++) {
+        const g = parseFloat(document.getElementById(`calGain-${i + 1}`).value);
+        const o = parseFloat(document.getElementById(`calOff-${i + 1}`).value);
+        calib[i].gain = (g > 0) ? g : 1;
+        calib[i].offset = Number.isFinite(o) ? o : 0;
+      }
+      saveCalib();
+      fillCalibInputs();
+      afterCalibChange();
+      logPacket('KALIBRASI: gain/offset manual disimpan.', 'ok');
+    }
+
+    function resetCalibration() {
+      calib = [0, 1, 2, 3].map(() => ({ gain: 1, offset: 0 }));
+      saveCalib();
+      fillCalibInputs();
+      afterCalibChange();
+      logPacket('KALIBRASI: dikembalikan ke nilai asli (gain 1, offset 0).', 'info');
+    }
+
+    // ================= RINGKASAN SISTEM =================
+    function updateSummary() {
+      const el = (id) => document.getElementById(id);
+      if (!el('sumLink')) return;
+
+      // Koneksi
+      const age = deviceAgeSec();
+      const mqttOk = !!(client && client.connected);
+      let label = 'OFFLINE', cls = 'text-hud-red', sub = 'Broker terputus';
+      if (isSimMode) { label = 'SIMULASI'; cls = 'text-hud-yellow'; sub = 'Data bukan dari ESP32'; }
+      else if (!isCloudMode) { label = 'LOKAL'; cls = 'text-hud-cyan'; sub = 'Mode HTTP lokal'; }
+      else if (age !== null && age <= 20) { label = 'ONLINE'; cls = 'text-hud-green'; sub = `Data ${age} detik lalu`; }
+      else if (mqttOk) { label = 'MENUNGGU'; cls = 'text-hud-yellow'; sub = age === null ? 'Belum ada data dari ESP32' : `Data terakhir ${age} detik lalu`; }
+      el('sumLink').textContent = label;
+      el('sumLink').className = `summary-value font-hud ${cls}`;
+      el('sumLinkSub').textContent = sub;
+
+      // Tegangan
+      const v1 = parseFloat(latestVoltages[0]) || 0;
+      const v2 = parseFloat(latestVoltages[1]) || 0;
+      el('sumPower').textContent = v1.toFixed(2);
+      el('sumPowerSub').textContent = v1 > 0.5 ? 'Sumber aktif' : 'Tidak ada sumber';
+      el('sumBatt').textContent = v2.toFixed(2);
+      el('sumBattSub').textContent = v2 <= 0.5 ? 'Tidak ada sumber' : (v2 < 10.5 ? 'Rendah, segera isi daya' : (v2 > 15 ? 'Terlalu tinggi' : 'Dalam batas aman'));
+
+      // Lampu
+      const on = lampStates.filter(Boolean).length;
+      el('sumLamp').textContent = on;
+
+      // Hero + status sidebar
+      const battOk = v2 > 0.5 && v2 >= 10.5 && v2 <= 15;
+      const pct = Math.max(0, Math.min(1, (v2 - 10.5) / (14.4 - 10.5)));
+      const ring = el('heroRing');
+      if (ring) {
+        ring.setAttribute('stroke-dashoffset', (339.29 * (1 - (v2 > 0.5 ? pct : 0))).toFixed(1));
+        ring.style.stroke = v2 <= 0.5 ? 'var(--text-muted)' : (battOk ? 'var(--c-green)' : 'var(--c-red)');
+        el('heroVolt').textContent = v2.toFixed(2) + ' V';
+        let title, text;
+        if (isSimMode) { title = 'Mode simulasi aktif'; text = 'Data yang tampil bukan dari ESP32 asli.'; }
+        else if (label === 'OFFLINE' || label === 'MENUNGGU') { title = 'Perangkat belum terhubung'; text = sub + '.'; }
+        else if (v2 > 0.5 && !battOk) { title = 'Perlu perhatian: tegangan baterai'; text = `Baterai ${v2.toFixed(2)} V di luar batas aman 10,5–15 V.`; }
+        else { title = 'Semua sistem berjalan normal'; text = sub + '.'; }
+        el('heroTitle').textContent = title;
+        el('heroSub').textContent = `${text} ${on} dari 8 lampu menyala.`;
+      }
+      const dot = el('sbDot');
+      if (dot) {
+        el('sbStatus').textContent = label === 'ONLINE' ? 'Perangkat online' : (label === 'SIMULASI' ? 'Mode simulasi' : (label === 'LOKAL' ? 'Mode lokal' : (label === 'MENUNGGU' ? 'Menunggu data' : 'Perangkat offline')));
+        dot.style.background = (label === 'ONLINE' || label === 'LOKAL') ? 'var(--c-green)' : (label === 'OFFLINE' ? 'var(--c-red)' : 'var(--c-yellow)');
+      }
+      el('sumLampSub').textContent = on === 0 ? 'Semua lampu mati' : (on === 8 ? 'Semua lampu menyala' : `${8 - on} lampu mati`);
+    }
+
+    // ================= NAVIGASI SAMPING =================
+    function initNav() {
+      const links = Array.from(document.querySelectorAll('.nav-link'));
+      if (!links.length || !('IntersectionObserver' in window)) return;
+      const byId = {};
+      links.forEach(l => { byId[l.getAttribute('href').slice(1)] = l; });
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting && byId[e.target.id]) {
+            links.forEach(l => l.classList.remove('active'));
+            byId[e.target.id].classList.add('active');
+          }
+        });
+      }, { rootMargin: '-30% 0px -60% 0px' });
+      Object.keys(byId).forEach(id => { const t = document.getElementById(id); if (t) obs.observe(t); });
+    }
+
+    // ================= TOAST NOTIFIKASI =================
+    let lastToast = { text: '', ts: 0 };
+    function showToast(text, type) {
+      const host = document.getElementById('toastHost');
+      if (!host) return;
+      const now = Date.now();
+      if (text === lastToast.text && now - lastToast.ts < 2000) return; // hindari duplikat beruntun
+      lastToast = { text, ts: now };
+      const t = document.createElement('div');
+      t.className = `toast toast-${type === 'err' ? 'err' : 'ok'}`;
+      t.setAttribute('role', 'status');
+      t.textContent = String(text).slice(0, 140);
+      host.appendChild(t);
+      while (host.children.length > 3) host.firstChild.remove();
+      setTimeout(() => {
+        t.classList.add('out');
+        setTimeout(() => t.remove(), 260);
+      }, type === 'err' ? 5200 : 3200);
     }
 
     // ================= PENJADWALAN & TIMER MUNDUR =================
@@ -2524,6 +3117,7 @@ async function pickGroqModel() {
 
     // ================= TERMINAL LOG HELPER =================
     function logPacket(text, type = 'info') {
+      if (type === 'err' || type === 'ok') showToast(text, type);
       const box = document.getElementById('packetLog');
       const ts = new Date().toLocaleTimeString('id-ID', { hour12: false });
       const colorMap = {
@@ -2596,7 +3190,7 @@ async function pickGroqModel() {
 
           <div class="flex items-center justify-between gap-1 mb-2.5 sm:mb-3">
             <span class="font-hud font-bold text-[11px] sm:text-xs uppercase tracking-wider truncate" style="color: var(--text-primary)">
-              ${dict.lampItemPrefix}${ch}
+              <svg class="bulb ${isOn ? 'on' : ''}" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>${dict.lampItemPrefix}${ch}
             </span>
             <span id="lampTimerBadge-${i}" class="hidden text-[8px] font-bold px-1 py-0.5 bg-hud-yellow text-black rounded shrink-0"></span>
           </div>
@@ -2951,7 +3545,10 @@ async function pickGroqModel() {
           const v3 = obj.v3 !== undefined ? obj.v3 : 0;
           const v4 = obj.v4 !== undefined ? obj.v4 : 0;
           lastTelemetryTs = Date.now();
-          updateSensorsUI(v1, v2, v3, v4, true);
+          rawVoltages = [v1, v2, v3, v4].map(x => parseFloat(x) || 0);
+          const cv = rawVoltages.map((x, i) => applyCalib(i, x));
+          renderCalibLive(cv);
+          updateSensorsUI(cv[0], cv[1], cv[2], cv[3], true);
 
           if (obj.relays) {
             syncLampStates(obj.relays);
@@ -3047,6 +3644,10 @@ async function pickGroqModel() {
     renderAutomationList();
     initBroker();
     initAIChat();
+    initCalibration();
+    updateSummary();
+    setInterval(updateSummary, 1000);
+    initNav();
   </script>
 </body>
 </html>
