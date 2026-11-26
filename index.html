@@ -580,55 +580,6 @@
       100% { filter: drop-shadow(0 0 7px color-mix(in srgb, var(--c-yellow) 75%, transparent)) brightness(1); }
     }
 
-    /* ================= GERBANG PERAN & LOGIN ================= */
-    .role-user .admin-only { display: none !important; }
-    .role-user #sec-voice > :not(.admin-only) { grid-column: 1 / -1; }
-
-    .gate { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 24px; overflow: hidden;
-      background: var(--bg-body); transition: opacity 0.45s ease, transform 0.45s var(--ease); }
-    .gate[hidden] { display: none !important; }
-    .gate.leaving { opacity: 0; transform: scale(1.03); pointer-events: none; }
-    .gate-orb { position: absolute; width: 46vmax; height: 46vmax; border-radius: 50%; filter: blur(70px); opacity: 0.5; will-change: transform; }
-    .gate-orb-a { left: -14vmax; top: -16vmax; background: radial-gradient(circle, var(--c-cyan), transparent 65%); animation: orbA 16s ease-in-out infinite alternate; }
-    .gate-orb-b { right: -16vmax; bottom: -18vmax; background: radial-gradient(circle, var(--c-yellow), transparent 65%); animation: orbB 19s ease-in-out infinite alternate; }
-    @keyframes orbA { to { transform: translate(8vmax, 6vmax) scale(1.12); } }
-    @keyframes orbB { to { transform: translate(-7vmax, -5vmax) scale(1.1); } }
-
-    .gate-inner { position: relative; width: min(760px, 100%); text-align: center; }
-    .gate-logo { width: 64px; height: 64px; margin: 0 auto 22px; border-radius: 20px; display: grid; place-items: center; font-weight: 800; font-size: 22px; color: #0b1220;
-      background: linear-gradient(135deg, var(--c-cyan), var(--c-yellow)); box-shadow: 0 18px 40px -14px var(--c-cyan); animation: gateUp 0.7s var(--ease) both; }
-    .gate-title { font-size: clamp(1.7rem, 4.6vw, 2.8rem); font-weight: 800; letter-spacing: -0.025em; line-height: 1.1; color: var(--text-primary); animation: gateUp 0.7s var(--ease) 0.08s both; }
-    .gate-sub { margin-top: 10px; color: var(--text-muted); font-size: 1rem; animation: gateUp 0.7s var(--ease) 0.16s both; }
-    .gate-choices { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 34px; }
-    @media (min-width: 640px) { .gate-choices { grid-template-columns: 1fr 1fr; } }
-    .gate-choices[hidden], .gate-form[hidden] { display: none !important; }
-    .gate-card { text-align: left; padding: 24px; border-radius: 20px; background: var(--panel-grad-2); border: 1px solid var(--panel-border);
-      box-shadow: var(--panel-shadow); cursor: pointer; display: flex; flex-direction: column; gap: 8px;
-      transition: transform 0.25s var(--ease), border-color 0.25s ease, box-shadow 0.25s ease; animation: gateUp 0.7s var(--ease) both; }
-    .gate-card:nth-child(1) { animation-delay: 0.24s; }
-    .gate-card:nth-child(2) { animation-delay: 0.32s; }
-    .gate-card:hover { transform: translateY(-5px); border-color: var(--c-cyan); box-shadow: 0 24px 50px -22px var(--c-cyan); }
-    .gate-card:active { transform: translateY(-1px); }
-    .gate-card-title { font-size: 1.3rem; font-weight: 800; color: var(--text-primary); }
-    .gate-card-desc { font-size: 0.9rem; line-height: 1.5; color: var(--text-muted); }
-
-    .gate-form { margin: 30px auto 0; width: min(380px, 100%); display: flex; flex-direction: column; gap: 12px; animation: gateUp 0.45s var(--ease) both; }
-    .gate-form input { width: 100%; padding: 15px 16px; font-size: 16px; font-weight: 600; text-align: center; border-radius: 14px;
-      background: var(--sub-bg); border: 1px solid var(--panel-border); color: var(--text-primary); outline: none; }
-    .gate-form input:focus { border-color: var(--c-cyan); }
-    .gate-form-row { display: flex; gap: 10px; }
-    .gate-btn, .gate-btn-ghost { flex: 1; padding: 13px; font-size: 14px; font-weight: 700; border-radius: 12px; cursor: pointer; }
-    .gate-btn { background: var(--c-cyan); color: #06121f; border: 0; }
-    .gate-btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--panel-border); }
-    .gate-msg { min-height: 1.3em; font-size: 13px; font-weight: 600; color: var(--c-red); }
-    .gate-form.shake { animation: shake 0.4s ease; }
-    @keyframes shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
-    @keyframes gateUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
-
-    /* Masuk ke dasbor setelah memilih peran */
-    .app-enter > .max-w-7xl.z-10, .app-enter .sidebar { animation: appEnter 0.8s var(--ease) both; }
-    @keyframes appEnter { from { opacity: 0; transform: translateY(16px) scale(0.99); } to { opacity: 1; transform: none; } }
-
     /* Gerak halus tambahan */
     [id^="sensorCard-"] { transition: transform 0.25s var(--ease), box-shadow 0.25s ease; }
     [id^="sensorCard-"]:hover { transform: translateY(-3px); }
@@ -645,34 +596,6 @@
 
   <div id="crtOverlay" class="crt-scanlines fixed inset-0 z-50"></div>
 
-  <div id="gate" class="gate" role="dialog" aria-modal="true" aria-label="Pilih cara masuk">
-    <div class="gate-orb gate-orb-a"></div>
-    <div class="gate-orb gate-orb-b"></div>
-    <div class="gate-inner">
-      <div class="gate-logo">GT</div>
-      <h1 class="gate-title">Selamat datang di GALTECH</h1>
-      <p class="gate-sub">Pilih cara Anda masuk</p>
-      <div id="gateChoices" class="gate-choices">
-        <button type="button" class="gate-card" onclick="chooseRole('user')">
-          <span class="gate-card-title">Pengguna</span>
-          <span class="gate-card-desc">Pantau sistem dan kendalikan lampu</span>
-        </button>
-        <button type="button" class="gate-card" onclick="chooseRole('admin')">
-          <span class="gate-card-title">Admin</span>
-          <span class="gate-card-desc">Masuk dengan kata sandi untuk mengatur sistem</span>
-        </button>
-      </div>
-      <form id="gateForm" class="gate-form" hidden onsubmit="submitGateLogin(event)">
-        <input id="gatePass" type="password" placeholder="Kata sandi admin" autocomplete="current-password" />
-        <div class="gate-form-row">
-          <button type="button" class="gate-btn-ghost" onclick="backToChoices()">Kembali</button>
-          <button type="submit" class="gate-btn">Masuk</button>
-        </div>
-        <p id="gateMsg" class="gate-msg" aria-live="polite"></p>
-      </form>
-    </div>
-  </div>
-
   <div id="toastHost" class="toast-host" aria-live="polite"></div>
 
   <div id="cmdk" class="cmdk" hidden>
@@ -685,7 +608,7 @@
   <aside class="hud-panel sidebar" aria-label="Navigasi">
     <div class="sb-brand">
       <span class="sb-logo">GT</span>
-      <span><strong>GALTECH</strong><small id="sbRoleLabel">Kontrol lampu surya</small></span>
+      <span><strong>GALTECH</strong><small>Kontrol lampu surya</small></span>
     </div>
     <button type="button" class="sb-cmd" onclick="openCmdk()"><span>Perintah cepat</span><kbd>Ctrl K</kbd></button>
     <nav class="sb-nav">
@@ -697,7 +620,6 @@
       <a class="nav-link" href="#sec-ai"><span class="nav-dot"></span>Asisten AI</a>
       <a class="nav-link" href="#sec-calib"><span class="nav-dot"></span>Kalibrasi</a>
       <a class="nav-link" href="#sec-log"><span class="nav-dot"></span>Log paket</a>
-      <a class="nav-link" href="#" onclick="openGate(); return false;"><span class="nav-dot"></span>Ganti peran</a>
     </nav>
     <div class="sb-status"><span id="sbDot" class="sb-dot"></span><span id="sbStatus">Memeriksa...</span></div>
   </aside>
@@ -1422,22 +1344,6 @@
         <button type="submit" id="aiSendBtn"
           class="font-hud font-bold text-[8.5px] px-3 py-2 border border-hud-cyan text-hud-cyan hover:bg-hud-cyan hover:text-black transition cursor-pointer shrink-0 tracking-wider">KIRIM</button>
       </form>
-    </section>
-
-    <!-- ================= SECTION 4B: KEAMANAN ADMIN ================= -->
-    <section id="sec-security" class="hud-panel p-3 sm:p-4 md:p-5">
-      <h2 class="font-hud font-bold text-[11px] sm:text-xs tracking-wider mb-2" style="color: var(--text-primary)">KEAMANAN ADMIN</h2>
-      <p class="text-[10px] leading-snug mb-3" style="color: var(--text-muted)">
-        Ganti kata sandi admin: ketik sandi baru (minimal 8 karakter), klik BUAT HASH, lalu salin barisnya untuk menggantikan <b>ADMIN_PASS_HASH</b> di file index.html dan upload ulang.
-        Catatan: login ini dicek di browser, jadi berfungsi sebagai pembatas tampilan, bukan pengaman penuh.
-      </p>
-      <div class="flex flex-col sm:flex-row gap-2">
-        <input type="password" id="newPassInput" autocomplete="new-password" placeholder="Kata sandi baru"
-          class="hud-subbox px-2.5 py-1.5 text-[11px] font-semibold flex-1 focus:outline-none focus:border-hud-cyan" style="color: var(--text-primary)" />
-        <button type="button" onclick="makeAdminHash()"
-          class="font-hud font-bold text-[9px] px-3 py-2 border border-hud-cyan text-hud-cyan hover:bg-hud-cyan hover:text-black transition cursor-pointer tracking-wider">BUAT HASH</button>
-      </div>
-      <textarea id="newHashOut" readonly rows="2" class="hud-subbox w-full mt-2 px-2.5 py-1.5 text-[10px] font-semibold hidden" style="color: var(--text-primary); font-family: 'JetBrains Mono', monospace"></textarea>
     </section>
 
     <!-- ================= SECTION 4: LIVE PACKET TERMINAL ================= -->
@@ -2314,7 +2220,6 @@ function deviceAgeSec() {
       }
 
       if (text.includes('gelombang') || text.includes('wave')) {
-        if (!isAdmin()) { speakAI('Fitur ini hanya untuk admin.'); return; }
         if (!runWaveTest()) { offline(); return; }
         setBadge('WAVE TEST', 'text-hud-yellow font-bold');
         logPacket(dict.msgVoiceMatched('WAVE TEST'), 'ok');
@@ -2450,7 +2355,6 @@ function deviceAgeSec() {
     }
 
     function saveAISettings() {
-      if (!requireAdmin()) return;
       const groq = document.getElementById('aiGroqInput').value.trim();
       const groqModel = document.getElementById('aiGroqModelInput').value.trim() || GROQ_DEFAULT_MODEL;
       const key = document.getElementById('aiKeyInput').value.trim();
@@ -2913,7 +2817,6 @@ async function pickGroqModel() {
     }
 
     function calibrateChannel(i) {
-      if (!requireAdmin()) return;
       const real = parseFloat(document.getElementById(`calReal-${i + 1}`).value);
       const rawV = rawVoltages[i];
       if (!(real > 0)) {
@@ -2937,7 +2840,6 @@ async function pickGroqModel() {
     }
 
     function saveCalibManual() {
-      if (!requireAdmin()) return;
       for (let i = 0; i < 4; i++) {
         const g = parseFloat(document.getElementById(`calGain-${i + 1}`).value);
         const o = parseFloat(document.getElementById(`calOff-${i + 1}`).value);
@@ -2951,7 +2853,6 @@ async function pickGroqModel() {
     }
 
     function resetCalibration() {
-      if (!requireAdmin()) return;
       calib = [0, 1, 2, 3].map(() => ({ gain: 1, offset: 0 }));
       saveCalib();
       fillCalibInputs();
@@ -3090,11 +2991,11 @@ async function pickGroqModel() {
       { label: 'Nyalakan lampu 1', cmd: 'nyalakan lampu 1' },
       { label: 'Matikan lampu 1', cmd: 'matikan lampu 1' },
       { label: 'Cek status tegangan', cmd: 'cek status tegangan' },
-      { label: 'Tes gelombang lampu', cmd: 'tes gelombang', admin: true },
+      { label: 'Tes gelombang lampu', cmd: 'tes gelombang' },
       { label: 'Apakah perangkat terhubung?', cmd: 'apakah perangkat terhubung' },
       { label: 'Buka asisten AI', nav: 'sec-ai' },
-      { label: 'Buka kalibrasi tegangan', nav: 'sec-calib', admin: true },
-      { label: 'Buka log paket', nav: 'sec-log', admin: true }
+      { label: 'Buka kalibrasi tegangan', nav: 'sec-calib' },
+      { label: 'Buka log paket', nav: 'sec-log' }
     ];
     let cmdkShown = [];
     let cmdkSel = 0;
@@ -3116,7 +3017,7 @@ async function pickGroqModel() {
       const input = document.getElementById('cmdkInput');
       const list = document.getElementById('cmdkList');
       const q = input.value.trim();
-      cmdkShown = CMDK_ITEMS.filter(it => (!it.admin || isAdmin()) && (!q || it.label.toLowerCase().includes(q.toLowerCase())));
+      cmdkShown = CMDK_ITEMS.filter(it => (!q || it.label.toLowerCase().includes(q.toLowerCase())));
       if (q) cmdkShown.push({ label: `Kirim: "${q}"`, raw: true });
       cmdkSel = Math.min(cmdkSel, cmdkShown.length - 1);
       list.textContent = '';
@@ -3215,175 +3116,6 @@ async function pickGroqModel() {
       targets.forEach((el) => { el.classList.add('reveal'); io.observe(el); });
     }
 
-    // ================= PERAN & LOGIN =================
-    // Hash SHA-256 dari "galtech-v1:" + kata sandi admin. Ganti lewat panel "Keamanan Admin".
-    const ADMIN_PASS_HASH = 'eb4dbfe97aa432f7e60744bc127c6cec544686ee5e44b680b47bdbecac90182a';
-    // Izin untuk peran Pengguna (ubah ke false untuk menjadikan tampilan pengguna hanya-lihat)
-    const USER_PERMS = { controlLamps: true };
-    const ROLE_KEY = 'galtech_role';
-    let loginFails = 0;
-    let loginLockUntil = 0;
-
-    // SHA-256 murni JS (tetap jalan di file:// dan http, tanpa crypto.subtle)
-    function sha256(ascii) {
-      const rr = (v, a) => (v >>> a) | (v << (32 - a));
-      const mp = Math.pow, mw = mp(2, 32);
-      let result = '';
-      const words = [], bitLen = ascii.length * 8;
-      let hash = [], k = [], pc = 0;
-      const comp = {};
-      for (let c = 2; pc < 64; c++) {
-        if (!comp[c]) {
-          for (let i = 0; i < 313; i += c) comp[i] = c;
-          hash[pc] = (mp(c, 0.5) * mw) | 0;
-          k[pc++] = (mp(c, 1 / 3) * mw) | 0;
-        }
-      }
-      ascii += '\x80';
-      while (ascii.length % 64 - 56) ascii += '\x00';
-      for (let i = 0; i < ascii.length; i++) {
-        const j = ascii.charCodeAt(i);
-        words[i >> 2] |= j << ((3 - i) % 4) * 8;
-      }
-      words[words.length] = (bitLen / mw) | 0;
-      words[words.length] = bitLen;
-      for (let j = 0; j < words.length;) {
-        const w = words.slice(j, j += 16);
-        const old = hash;
-        hash = hash.slice(0, 8);
-        for (let i = 0; i < 64; i++) {
-          const w15 = w[i - 15], w2 = w[i - 2], a = hash[0], e = hash[4];
-          const t1 = hash[7] + (rr(e, 6) ^ rr(e, 11) ^ rr(e, 25)) + ((e & hash[5]) ^ (~e & hash[6])) + k[i]
-            + (w[i] = (i < 16) ? w[i] : (w[i - 16] + (rr(w15, 7) ^ rr(w15, 18) ^ (w15 >>> 3)) + w[i - 7] + (rr(w2, 17) ^ rr(w2, 19) ^ (w2 >>> 10))) | 0);
-          const t2 = (rr(a, 2) ^ rr(a, 13) ^ rr(a, 22)) + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
-          hash = [(t1 + t2) | 0].concat(hash);
-          hash[4] = (hash[4] + t1) | 0;
-        }
-        for (let i = 0; i < 8; i++) hash[i] = (hash[i] + old[i]) | 0;
-      }
-      for (let i = 0; i < 8; i++) for (let j = 3; j + 1; j--) {
-        const b = (hash[i] >> (j * 8)) & 255;
-        result += ((b < 16) ? 0 : '') + b.toString(16);
-      }
-      return result;
-    }
-
-    function hashPassword(pass) {
-      return sha256(unescape(encodeURIComponent('galtech-v1:' + pass)));
-    }
-
-    function isAdmin() { return document.body.classList.contains('role-admin'); }
-    function canControlLamps() { return isAdmin() || USER_PERMS.controlLamps; }
-    function requireAdmin() {
-      if (isAdmin()) return true;
-      showToast('Fitur ini hanya untuk admin.', 'err');
-      return false;
-    }
-
-    // Elemen yang hanya tampil untuk admin
-    const ADMIN_ONLY_SELECTORS = [
-      '#sec-calib', '#sec-log', '#sec-security', '#simBtn', '#modeBtn', '#localDrawer',
-      '#aiSettingsBox', 'button[onclick="toggleAISettings()"]', 'button[onclick="runWaveTest()"]',
-      'button[onclick="exportTelemetryCSV()"]', 'button[onclick="resetChart()"]',
-      'a[href="#sec-calib"]', 'a[href="#sec-log"]', 'a[href="#sec-security"]'
-    ];
-
-    function markAdminOnly() {
-      ADMIN_ONLY_SELECTORS.forEach(sel => document.querySelectorAll(sel).forEach(el => el.classList.add('admin-only')));
-      const timerTab = document.getElementById('tabTimerBtn');
-      const panel = timerTab && timerTab.closest('.hud-panel');
-      if (panel) panel.classList.add('admin-only'); // panel timer & jadwal
-    }
-
-    function applyRole(role, animate) {
-      const b = document.body;
-      b.classList.toggle('role-admin', role === 'admin');
-      b.classList.toggle('role-user', role === 'user');
-      try { sessionStorage.setItem(ROLE_KEY, role); } catch (e) {}
-      const lbl = document.getElementById('sbRoleLabel');
-      if (lbl) lbl.textContent = role === 'admin' ? 'Mode Admin' : 'Mode Pengguna';
-      const gate = document.getElementById('gate');
-      if (gate) {
-        if (animate) {
-          gate.classList.add('leaving');
-          setTimeout(() => { gate.hidden = true; gate.classList.remove('leaving'); }, 450);
-          b.classList.add('app-enter');
-          setTimeout(() => b.classList.remove('app-enter'), 1100);
-        } else {
-          gate.hidden = true;
-        }
-      }
-    }
-
-    function openGate() {
-      try { sessionStorage.removeItem(ROLE_KEY); } catch (e) {}
-      document.body.classList.remove('role-admin', 'role-user');
-      backToChoices();
-      const gate = document.getElementById('gate');
-      gate.hidden = false;
-      window.scrollTo(0, 0);
-    }
-
-    function chooseRole(role) {
-      if (role === 'user') { applyRole('user', true); return; }
-      document.getElementById('gateChoices').hidden = true;
-      document.getElementById('gateForm').hidden = false;
-      document.getElementById('gateMsg').textContent = '';
-      const inp = document.getElementById('gatePass');
-      inp.value = '';
-      setTimeout(() => inp.focus(), 50);
-    }
-
-    function backToChoices() {
-      document.getElementById('gateForm').hidden = true;
-      document.getElementById('gateChoices').hidden = false;
-      document.getElementById('gateMsg').textContent = '';
-    }
-
-    function submitGateLogin(event) {
-      event.preventDefault();
-      const msg = document.getElementById('gateMsg');
-      const form = document.getElementById('gateForm');
-      const wait = Math.ceil((loginLockUntil - Date.now()) / 1000);
-      if (wait > 0) { msg.textContent = `Terlalu banyak percobaan. Coba lagi ${wait} detik lagi.`; return; }
-      const pass = document.getElementById('gatePass').value;
-      if (hashPassword(pass) === ADMIN_PASS_HASH) {
-        loginFails = 0;
-        applyRole('admin', true);
-        return;
-      }
-      loginFails++;
-      form.classList.remove('shake');
-      void form.offsetWidth; // ulang animasi getar
-      form.classList.add('shake');
-      if (loginFails >= 5) {
-        loginLockUntil = Date.now() + 30000;
-        loginFails = 0;
-        msg.textContent = 'Terlalu banyak percobaan. Dikunci 30 detik.';
-      } else {
-        msg.textContent = 'Kata sandi salah.';
-      }
-      document.getElementById('gatePass').select();
-    }
-
-    function makeAdminHash() {
-      if (!requireAdmin()) return;
-      const pass = document.getElementById('newPassInput').value;
-      const out = document.getElementById('newHashOut');
-      if (pass.length < 8) { showToast('Kata sandi minimal 8 karakter.', 'err'); return; }
-      out.classList.remove('hidden');
-      out.value = `const ADMIN_PASS_HASH = '${hashPassword(pass)}';`;
-      out.select();
-    }
-
-    function initRole() {
-      markAdminOnly();
-      let role = null;
-      try { role = sessionStorage.getItem(ROLE_KEY); } catch (e) {}
-      if (role === 'admin' || role === 'user') applyRole(role, false);
-      else document.getElementById('gate').hidden = false;
-    }
-
     // ================= PENJADWALAN & TIMER MUNDUR =================
     function switchSchedTab(tab) {
       const timerBtn = document.getElementById('tabTimerBtn');
@@ -3413,7 +3145,6 @@ async function pickGroqModel() {
     }
 
     function addCountdownTimer() {
-      if (!requireAdmin()) return;
       const ch = parseInt(document.getElementById('timerLampSelect').value, 10);
       const state = document.getElementById('timerActionSelect').value === '1';
       const min = Math.max(0, parseInt(document.getElementById('timerMinInput').value, 10) || 0);
@@ -3437,14 +3168,12 @@ async function pickGroqModel() {
     }
 
     function removeCountdownTimer(id) {
-      if (!requireAdmin()) return;
       activeTimers = activeTimers.filter(t => t.id !== id);
       renderAutomationList();
       updateLampTimerBadges();
     }
 
     function addDailySchedule() {
-      if (!requireAdmin()) return;
       const ch = parseInt(document.getElementById('schedLampSelect').value, 10);
       const state = document.getElementById('schedActionSelect').value === '1';
       const time = document.getElementById('schedTimeInput').value;
@@ -3468,7 +3197,6 @@ async function pickGroqModel() {
     }
 
     function toggleScheduleEnabled(id) {
-      if (!requireAdmin()) return;
       const item = dailySchedules.find(s => s.id === id);
       if (item) {
         item.enabled = !item.enabled;
@@ -3478,7 +3206,6 @@ async function pickGroqModel() {
     }
 
     function removeDailySchedule(id) {
-      if (!requireAdmin()) return;
       dailySchedules = dailySchedules.filter(s => s.id !== id);
       saveSchedules();
       renderAutomationList();
@@ -3633,7 +3360,6 @@ async function pickGroqModel() {
     }, 2000);
 
     function toggleDemoMode() {
-      if (!requireAdmin()) return;
       isSimMode = !isSimMode;
       const btn = document.getElementById('simBtn');
       if (isSimMode) {
@@ -3789,7 +3515,6 @@ async function pickGroqModel() {
 
     // Mengembalikan: 'sent' (terkirim/berubah), 'same' (sudah di status itu), 'fail' (gagal kirim)
     function sendLampCommand(index, state) {
-      if (!canControlLamps()) { showToast('Kontrol lampu dinonaktifkan untuk pengguna.', 'err'); return 'fail'; }
       if (lampStates[index] === state) return 'same';
 
       const ch = index + 1;
@@ -4175,7 +3900,6 @@ async function pickGroqModel() {
 
     // ================= UI TOGGLES =================
     function toggleHybridMode() {
-      if (!requireAdmin()) return;
       isCloudMode = !isCloudMode;
       const btn = document.getElementById('modeBtn');
       const drawer = document.getElementById('localDrawer');
@@ -4194,7 +3918,6 @@ async function pickGroqModel() {
     }
 
     function saveLocalIp() {
-      if (!requireAdmin()) return;
       const ip = document.getElementById('espIpInput').value.trim();
       localStorage.setItem('galtech_esp_ip', ip);
       logPacket(I18N[currentLang].msgSavedIp(ip), 'ok');
@@ -4219,7 +3942,6 @@ async function pickGroqModel() {
     initNav();
     initSparks();
     initReveal();
-    initRole();
     document.getElementById('cmdkInput').addEventListener('input', () => { cmdkSel = 0; renderCmdk(); });
     document.getElementById('cmdk').addEventListener('mousedown', (e) => { if (e.target.id === 'cmdk') closeCmdk(); });
   </script>
