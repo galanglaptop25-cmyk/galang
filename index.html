@@ -698,6 +698,29 @@
     /* ESP offline: data terakhir diredupkan agar tidak terlihat seperti data langsung */
     .device-offline #lampGrid, .device-offline [id^="sensorCard-"], .device-offline .hero-ring { opacity: 0.5; filter: grayscale(0.7); transition: opacity 0.4s ease, filter 0.4s ease; }
 
+    /* ================= PENYEMPURNAAN TAMPILAN (tipografi & header) ================= */
+    /* Perbaikan: kelas Tailwind .font-mono di <body> sebelumnya menimpa font utama */
+    body.font-mono { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+
+    /* Header: logo senada dengan sidebar, chip berbentuk pil, toolbar rapi */
+    .hdr-logo { border: 0 !important; border-radius: 14px; width: 46px; height: 46px; background: linear-gradient(135deg, var(--c-cyan), var(--c-yellow)) !important; }
+    .hdr-logo span:first-child { color: #0b1220 !important; text-shadow: none !important; }
+    .hdr-logo span:last-child { display: none; }
+    header span.bg-hud-cyan { border-radius: 999px; padding: 3px 10px; }
+    header .text-hud-cyan.font-semibold { letter-spacing: 0.06em; font-size: 11px; }
+
+    .hdr-btns { gap: 8px; }
+    .hdr-btns button, #connBadgeDesktop { min-height: 38px; border-radius: 11px; }
+    .hdr-btns button { padding: 0 14px; font-size: 11.5px !important; letter-spacing: 0.03em !important; border-color: var(--panel-border) !important; }
+    #connBadgeDesktop, #connBadgeMobile { border-radius: 11px; }
+    #connBadgeDesktop span, #connBadgeMobile span { font-size: 11.5px; }
+
+    /* Di layar 1280-1699px, sidebar memakan ruang: susun header jadi dua baris agar tidak berantakan */
+    @media (min-width: 1280px) and (max-width: 1699px) {
+      .hdr-row { flex-direction: column !important; align-items: stretch !important; gap: 14px !important; }
+      .hdr-tools { justify-content: space-between; }
+    }
+
     @media (prefers-reduced-motion: reduce) { .intro, .scroll-bar { display: none !important; } }
 
     @media (prefers-reduced-motion: reduce) {
@@ -757,6 +780,7 @@
       <a class="nav-link" href="#sec-ai"><span class="nav-dot"></span>Asisten AI</a>
       <a class="nav-link" href="#sec-calib"><span class="nav-dot"></span>Kalibrasi</a>
     </nav>
+    <button type="button" id="notifyBtn" class="sb-cmd" onclick="toggleNotify()"><span>Notifikasi alarm</span><kbd id="notifyState">OFF</kbd></button>
     <div class="sb-status"><span id="sbDot" class="sb-dot"></span><span id="sbStatus">Memeriksa...</span></div>
   </aside>
 
@@ -764,12 +788,12 @@
 
     <!-- ================= TOP AEROSPACE / SCADA HEADER ================= -->
     <header class="hud-panel p-3 sm:p-4 md:p-5">
-      <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-3 sm:gap-4">
+      <div class="hdr-row flex flex-col xl:flex-row xl:items-center justify-between gap-3 sm:gap-4">
         
         <!-- Baris 1 HP/Tablet: Brand Sistem + Status Koneksi -->
         <div class="flex items-center justify-between gap-2">
           <div class="flex items-center gap-3 sm:gap-4 min-w-0">
-            <div class="hidden sm:flex w-12 h-12 border border-hud-cyan/60 bg-hud-cyan/10 items-center justify-center shrink-0 relative">
+            <div class="hdr-logo hidden sm:flex w-12 h-12 border border-hud-cyan/60 bg-hud-cyan/10 items-center justify-center shrink-0 relative">
               <span class="font-hud font-extrabold text-hud-cyan text-base glow-cyan">GT</span>
               <span class="absolute -bottom-1 -right-1 w-2 h-2 bg-hud-green"></span>
             </div>
@@ -793,7 +817,7 @@
         </div>
 
         <!-- Baris 2 & 3 HP/Tablet: Jam, Ping & Kontrol Sistem -->
-        <div class="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2">
+        <div class="hdr-tools flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2">
           
           <!-- Grid 2 Kolom di HP untuk Jam Real-Time & Ping Sinyal -->
           <div class="grid grid-cols-2 sm:flex items-center gap-2">
@@ -817,7 +841,7 @@
           </div>
 
           <!-- Grid Tombol Pengaturan -->
-          <div class="grid grid-cols-3 sm:flex sm:flex-wrap items-center gap-1.5 sm:gap-2">
+          <div class="hdr-btns grid grid-cols-3 sm:flex sm:flex-wrap items-center gap-1.5 sm:gap-2">
             <button id="headerMicBtn" onclick="toggleVoiceControl()"
               class="font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border border-hud-cyan/70 text-hud-cyan hover:bg-hud-cyan hover:text-black transition cursor-pointer text-center tracking-wider"
               style="background-color: var(--btn-bg)">
@@ -3393,6 +3417,7 @@ async function pickGroqModel() {
     function addEvent(text, type) {
       try {
         const ev = { t: Date.now(), text, type: type || 'info' };
+        if (ev.type === 'warn') maybeNotify(text);
         eventLog.unshift(ev);
         eventLog = eventLog.slice(0, 60);
         try { localStorage.setItem('galtech_events', JSON.stringify(eventLog)); } catch (e) {}
@@ -3411,6 +3436,7 @@ async function pickGroqModel() {
       try { localStorage.removeItem('galtech_events'); } catch (e) {}
       renderEvents();
     initWebBasics();
+    updateNotifyUI();
     }
 
     function toggleFullscreen() {
@@ -3434,6 +3460,8 @@ async function pickGroqModel() {
         sendLampCommand(idx, !lampStates[idx]);
       } else if (e.key === 'f' || e.key === 'F') {
         toggleFullscreen();
+      } else if (e.key === '?') {
+        showToast('Pintasan: 1-8 lampu, F layar penuh, Ctrl+K perintah cepat.', 'ok');
       }
     });
 
@@ -3517,6 +3545,38 @@ async function pickGroqModel() {
       window.addEventListener('unhandledrejection', softError);
 
       document.addEventListener('visibilitychange', () => { if (!document.hidden) updateSummary(); });
+    }
+
+    // ================= NOTIFIKASI ALARM BROWSER =================
+    let notifyOn = false;
+    try { notifyOn = localStorage.getItem('galtech_notify') === '1' && ('Notification' in window) && Notification.permission === 'granted'; } catch (e) {}
+
+    function updateNotifyUI() {
+      const k = document.getElementById('notifyState');
+      if (k) k.textContent = notifyOn ? 'ON' : 'OFF';
+    }
+
+    async function toggleNotify() {
+      if (!('Notification' in window)) { showToast('Browser ini tidak mendukung notifikasi.', 'err'); return; }
+      if (notifyOn) {
+        notifyOn = false;
+        try { localStorage.setItem('galtech_notify', '0'); } catch (e) {}
+        updateNotifyUI();
+        showToast('Notifikasi alarm dimatikan.', 'ok');
+        return;
+      }
+      let perm = Notification.permission;
+      if (perm === 'default') perm = await Notification.requestPermission();
+      if (perm !== 'granted') { showToast('Izin notifikasi ditolak di pengaturan browser.', 'err'); return; }
+      notifyOn = true;
+      try { localStorage.setItem('galtech_notify', '1'); } catch (e) {}
+      updateNotifyUI();
+      showToast('Notifikasi alarm aktif selama halaman terbuka.', 'ok');
+    }
+
+    function maybeNotify(text) {
+      if (!notifyOn) return;
+      try { new Notification('GALTECH - Peringatan', { body: text }); } catch (e) {}
     }
 
     // ================= PENJADWALAN & TIMER MUNDUR =================
