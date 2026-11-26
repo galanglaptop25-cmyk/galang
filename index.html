@@ -695,6 +695,9 @@
       .hud-panel { box-shadow: none !important; backdrop-filter: none !important; border: 1px solid #ccc !important; break-inside: avoid; }
     }
 
+    /* ESP offline: data terakhir diredupkan agar tidak terlihat seperti data langsung */
+    .device-offline #lampGrid, .device-offline [id^="sensorCard-"], .device-offline .hero-ring { opacity: 0.5; filter: grayscale(0.7); transition: opacity 0.4s ease, filter 0.4s ease; }
+
     @media (prefers-reduced-motion: reduce) { .intro, .scroll-bar { display: none !important; } }
 
     @media (prefers-reduced-motion: reduce) {
@@ -2315,7 +2318,17 @@ function speakQueue(text) {
       });
     }
 
-function deviceAgeSec() {
+// ESP32 mengirim telemetri setiap 2 detik; dianggap offline bila sudah 4 siklus tanpa data
+    const DEVICE_TIMEOUT_S = 8;
+
+    function deviceOnline() {
+      if (isSimMode) return true;
+      if (!isCloudMode) return true; // mode HTTP lokal tidak punya heartbeat
+      const age = deviceAgeSec();
+      return !!(client && client.connected) && age !== null && age <= DEVICE_TIMEOUT_S;
+    }
+
+    function deviceAgeSec() {
       return lastTelemetryTs ? Math.round((Date.now() - lastTelemetryTs) / 1000) : null;
     }
 
@@ -2332,7 +2345,7 @@ function deviceAgeSec() {
         part2 = id ? 'Mode simulasi aktif, jadi datanya bukan dari ESP32 asli.' : 'Simulation mode is on, so the data is not from the real ESP32.';
       } else if (age === null) {
         part2 = id ? 'Belum ada data masuk dari ESP32.' : 'No data received from the ESP32 yet.';
-      } else if (age <= 20) {
+      } else if (age <= DEVICE_TIMEOUT_S) {
         part2 = id ? `ESP32 aktif, data terakhir ${age} detik lalu, jadi WiFi-nya terhubung.` : `The ESP32 is active, last data ${age} seconds ago, so its WiFi is connected.`;
       } else {
         part2 = id ? `ESP32 sepertinya offline, data terakhir ${age} detik lalu.` : `The ESP32 looks offline, last data ${age} seconds ago.`;
@@ -2563,7 +2576,7 @@ function deviceAgeSec() {
       const on = lampStates.map((st, i) => st ? i + 1 : null).filter(Boolean);
       const link = isSimMode ? 'mode simulasi' : (isCloudMode ? (client && client.connected ? 'MQTT online' : 'MQTT offline') : 'mode lokal HTTP');
       const age = deviceAgeSec();
-      const dev = isSimMode ? 'ESP32: tidak ada (mode simulasi)' : (age === null ? 'ESP32: belum ada data masuk' : `ESP32: data terakhir ${age} detik lalu (${age <= 20 ? 'aktif' : 'kemungkinan offline'})`);
+      const dev = isSimMode ? 'ESP32: tidak ada (mode simulasi)' : (age === null ? 'ESP32: belum ada data masuk' : `ESP32: data terakhir ${age} detik lalu (${age <= DEVICE_TIMEOUT_S ? 'aktif' : 'kemungkinan offline'})`);
       return `Kamu adalah asisten AI di dasbor GALTECH IoT SCADA, sistem lampu tenaga surya berbasis ESP32-S3 dengan panel surya, baterai, step-down, dan 8 lampu (relay). ` +
         `Balas dalam ${lang}, ramah dan santai, sangat singkat (maksimal 2 kalimat pendek). Jawaban akan dibacakan lewat suara, jadi JANGAN pakai markdown, daftar, simbol, atau emoji. ` +
         `Kamu boleh ngobrol tentang topik apa saja, tidak hanya soal dasbor. ` +
@@ -3008,7 +3021,9 @@ async function pickGroqModel() {
     // ================= RINGKASAN SISTEM =================
     function updateSummary() {
       if (document.hidden) return;
+      updateConnBadge();
       const el = (id) => document.getElementById(id);
+      document.body.classList.toggle('device-offline', !isSimMode && isCloudMode && !deviceOnline());
       document.body.classList.toggle('awaiting-data', !isSimMode && isCloudMode && lastTelemetryTs === 0);
       if (!el('sumLink')) return;
 
@@ -3018,7 +3033,7 @@ async function pickGroqModel() {
       let label = 'OFFLINE', cls = 'text-hud-red', sub = 'Broker terputus';
       if (isSimMode) { label = 'SIMULASI'; cls = 'text-hud-yellow'; sub = 'Data bukan dari ESP32'; }
       else if (!isCloudMode) { label = 'LOKAL'; cls = 'text-hud-cyan'; sub = 'Mode HTTP lokal'; }
-      else if (age !== null && age <= 20) { label = 'ONLINE'; cls = 'text-hud-green'; sub = `Data ${age} detik lalu`; }
+      else if (age !== null && age <= DEVICE_TIMEOUT_S) { label = 'ONLINE'; cls = 'text-hud-green'; sub = `Data ${age} detik lalu`; }
       else if (mqttOk) { label = 'MENUNGGU'; cls = 'text-hud-yellow'; sub = age === null ? 'Belum ada data dari ESP32' : `Data terakhir ${age} detik lalu`; }
       if (lastSumLabel !== null && lastSumLabel !== label) {
         const m = { ONLINE: ['Perangkat online', 'ok'], OFFLINE: ['Perangkat offline', 'warn'], MENUNGGU: ['Menunggu data perangkat', 'info'], SIMULASI: ['Mode simulasi aktif', 'info'], LOKAL: ['Mode lokal aktif', 'info'] }[label];
@@ -3468,7 +3483,7 @@ async function pickGroqModel() {
         `Step-down (V3): ${v[2]} V`,
         `Beban (V4): ${v[3]} V`,
         `Lampu menyala: ${on.length ? on.join(', ') : 'tidak ada'} dari 8`,
-        `Perangkat: ${age === null ? 'belum ada data' : (age <= 20 ? 'online' : 'offline')}${age === null ? '' : ` (data ${age} detik lalu)`}`
+        `Perangkat: ${age === null ? 'belum ada data' : (age <= DEVICE_TIMEOUT_S ? 'online' : 'offline')}${age === null ? '' : ` (data ${age} detik lalu)`}`
       ].join('\n');
       const done = () => showToast('Laporan disalin ke clipboard.', 'ok');
       if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -3673,6 +3688,7 @@ async function pickGroqModel() {
 
     // ================= PING SINYAL & SIGNAL BAR METER =================
     function updateSignalUI(ms) {
+      if (ms !== null && !deviceOnline()) ms = null; // tanpa ESP, ping broker tidak berarti perangkat terhubung
       const valEl = document.getElementById('pingValue');
       const boxEl = document.getElementById('pingBox');
       const bars = [1, 2, 3, 4].map(n => document.getElementById(`sigBar-${n}`));
@@ -4202,7 +4218,7 @@ async function pickGroqModel() {
         client.publish(MQTT_CFG.pingTopic, JSON.stringify({ id: browserPingId, ts: performance.now() }));
       });
 
-      client.on('message', (topic, msg) => {
+      client.on('message', (topic, msg, packet) => {
         const raw = msg.toString();
 
         if (topic === MQTT_CFG.pingTopic) {
@@ -4218,8 +4234,7 @@ async function pickGroqModel() {
         if (topic === MQTT_CFG.statusTopic) {
           try {
             const st = JSON.parse(raw);
-            lastTelemetryTs = Date.now();
-            if (st.relays) syncLampStates(st.relays);
+            if (st.relays) syncLampStates(st.relays); // status relay (retain) tidak membuktikan ESP sedang hidup
           } catch (e) {}
           return;
         }
@@ -4233,7 +4248,7 @@ async function pickGroqModel() {
           const v2 = obj.v2 !== undefined ? obj.v2 : 0;
           const v3 = obj.v3 !== undefined ? obj.v3 : 0;
           const v4 = obj.v4 !== undefined ? obj.v4 : 0;
-          lastTelemetryTs = Date.now();
+          if (!(packet && packet.retain)) lastTelemetryTs = Date.now();
           rawVoltages = [v1, v2, v3, v4].map(x => parseFloat(x) || 0);
           const cv = rawVoltages.map((x, i) => applyCalib(i, x));
           renderCalibLive(cv);
@@ -4260,7 +4275,8 @@ async function pickGroqModel() {
       });
     }
 
-    function updateConnBadge(online) {
+    function updateConnBadge() {
+      const online = deviceOnline();
       const targets = [
         {
           badge: document.getElementById('connBadgeMobile'),
@@ -4285,7 +4301,7 @@ async function pickGroqModel() {
           t.badge.className = `${t.baseBadge} border-hud-green`;
           t.dot.className = `${t.baseDot} bg-hud-green`;
           t.text.className = `${t.baseText} text-hud-green glow-green`;
-          t.text.textContent = 'ONLINE';
+          t.text.textContent = isSimMode ? 'SIMULASI' : 'ONLINE';
         } else {
           t.badge.className = `${t.baseBadge} border-hud-red`;
           t.dot.className = `${t.baseDot} bg-hud-red animate-ping`;
