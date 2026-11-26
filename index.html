@@ -544,7 +544,13 @@
       border-color: color-mix(in srgb, currentColor 28%, transparent) !important;
       background-image: linear-gradient(color-mix(in srgb, currentColor 6%, transparent), color-mix(in srgb, currentColor 6%, transparent));
     }
-    html[data-theme="light"] button[class*="hover:bg-hud-"]:hover { color: #fff !important; background-image: none; }
+    html[data-theme="light"] button[class*="hover:bg-hud-"]:not([style*="--btn-bg"]):hover { color: #fff !important; background-image: none; }
+    /* Tombol dengan latar inline (mis. tombol tema/MIC/LANG): hover pakai abu lembut + teks gelap/terang sesuai tema */
+    button[style*="--btn-bg"][class*="hover:bg-hud-"]:hover {
+      background-color: color-mix(in srgb, var(--text-primary) 9%, transparent) !important;
+      background-image: none !important;
+      color: var(--text-primary) !important;
+    }
 
     /* Lampu menyala di tema terang: hangat tapi tenang */
     html[data-theme="light"] #lampGrid > div.border-hud-green {
@@ -658,7 +664,6 @@
       <a class="nav-link" href="#sec-voice"><span class="nav-dot"></span>Suara &amp; timer</a>
       <a class="nav-link" href="#sec-ai"><span class="nav-dot"></span>Asisten AI</a>
       <a class="nav-link" href="#sec-calib"><span class="nav-dot"></span>Kalibrasi</a>
-      <a class="nav-link" href="#sec-log"><span class="nav-dot"></span>Log paket</a>
     </nav>
     <div class="sb-status"><span id="sbDot" class="sb-dot"></span><span id="sbStatus">Memeriksa...</span></div>
   </aside>
