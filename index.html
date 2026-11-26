@@ -624,6 +624,26 @@
       html[data-theme="light"] .hud-panel::before { background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), rgba(0, 0, 0, 0.035), transparent 60%); }
     }
 
+    /* ================= RIWAYAT, PERSEN BATERAI, PINTASAN ================= */
+    .lamp-pop { animation-delay: var(--pd, 0ms); animation-fill-mode: backwards; }
+    .lamp-pop .bulb.on { animation-delay: var(--pd, 0ms); animation-fill-mode: backwards; }
+
+    .hero-ring-label b { color: var(--text-primary); font-weight: 800; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    .hero-hint { margin-top: 16px; font-size: 12px; color: var(--text-muted); line-height: 1.8; }
+    @media (hover: none) { .hero-hint { display: none; } }
+
+    .ev-list { max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px; }
+    .ev-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; background: var(--sub-bg); border: 1px solid var(--sub-border); font-size: 13px; font-weight: 600; color: var(--text-body); }
+    .ev-item.fresh { animation: evIn 0.55s var(--ease); }
+    .ev-dot { width: 9px; height: 9px; border-radius: 999px; flex-shrink: 0; background: var(--c-cyan); }
+    .ev-lamp .ev-dot { background: var(--c-yellow); box-shadow: 0 0 10px color-mix(in srgb, var(--c-yellow) 70%, transparent); }
+    .ev-ok .ev-dot { background: var(--c-green); }
+    .ev-warn .ev-dot { background: var(--c-red); box-shadow: 0 0 10px color-mix(in srgb, var(--c-red) 70%, transparent); }
+    .ev-text { flex: 1; min-width: 0; }
+    .ev-time { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11.5px; color: var(--text-muted); flex-shrink: 0; }
+    .ev-empty { padding: 22px; text-align: center; font-size: 13px; color: var(--text-muted); }
+    @keyframes evIn { from { opacity: 0; transform: translateX(-18px) scale(0.98); background: color-mix(in srgb, var(--c-cyan) 22%, transparent); } to { opacity: 1; transform: none; } }
+
     @media (prefers-reduced-motion: reduce) { .intro, .scroll-bar { display: none !important; } }
 
     @media (prefers-reduced-motion: reduce) {
@@ -662,6 +682,7 @@
       <a class="nav-link" href="#sec-sensor"><span class="nav-dot"></span>Sensor tegangan</a>
       <a class="nav-link" href="#sec-lamp"><span class="nav-dot"></span>Grafik &amp; lampu</a>
       <a class="nav-link" href="#sec-voice"><span class="nav-dot"></span>Suara &amp; timer</a>
+      <a class="nav-link" href="#sec-history"><span class="nav-dot"></span>Riwayat</a>
       <a class="nav-link" href="#sec-ai"><span class="nav-dot"></span>Asisten AI</a>
       <a class="nav-link" href="#sec-calib"><span class="nav-dot"></span>Kalibrasi</a>
     </nav>
@@ -799,6 +820,7 @@
           <button type="button" onclick="setAllLamps(true)" class="hero-btn hero-btn-primary">Nyalakan semua lampu</button>
           <button type="button" onclick="setAllLamps(false)" class="hero-btn">Matikan semua</button>
         </div>
+        <p class="hero-hint">Tips: tekan <kbd>1</kbd>&ndash;<kbd>8</kbd> untuk menyalakan/mematikan lampu, <kbd>F</kbd> layar penuh, <kbd>Ctrl K</kbd> perintah cepat.</p>
       </div>
       <div class="hero-ring" role="img" aria-label="Level baterai">
         <svg viewBox="0 0 140 140">
@@ -807,7 +829,7 @@
         </svg>
         <div class="hero-ring-center">
           <span id="heroVolt" class="hero-volt">0.00 V</span>
-          <span class="hero-ring-label">Baterai</span>
+          <span class="hero-ring-label">Baterai &middot; <b id="heroPct">0%</b></span>
         </div>
       </div>
     </section>
@@ -1341,6 +1363,15 @@
       </section>
 
     </div>
+
+    <!-- ================= SECTION 3A: RIWAYAT KEJADIAN ================= -->
+    <section id="sec-history" class="hud-panel p-3 sm:p-4 md:p-5">
+      <div class="flex items-center justify-between gap-2 mb-3">
+        <h2 class="font-hud font-bold text-[11px] sm:text-xs tracking-wider" style="color: var(--text-primary)">RIWAYAT KEJADIAN</h2>
+        <button type="button" onclick="clearEvents()" class="hud-subbox text-[9px] font-hud font-bold px-2.5 py-1 cursor-pointer tracking-wider" style="color: var(--text-muted)">HAPUS</button>
+      </div>
+      <div id="evList" class="ev-list" aria-live="polite"></div>
+    </section>
 
     <!-- ================= SECTION 3B: AI ASISTEN (OBROLAN) ================= -->
     <section id="sec-ai" class="hud-panel p-3 sm:p-4 md:p-5">
@@ -2917,6 +2948,11 @@ async function pickGroqModel() {
       else if (!isCloudMode) { label = 'LOKAL'; cls = 'text-hud-cyan'; sub = 'Mode HTTP lokal'; }
       else if (age !== null && age <= 20) { label = 'ONLINE'; cls = 'text-hud-green'; sub = `Data ${age} detik lalu`; }
       else if (mqttOk) { label = 'MENUNGGU'; cls = 'text-hud-yellow'; sub = age === null ? 'Belum ada data dari ESP32' : `Data terakhir ${age} detik lalu`; }
+      if (lastSumLabel !== null && lastSumLabel !== label) {
+        const m = { ONLINE: ['Perangkat online', 'ok'], OFFLINE: ['Perangkat offline', 'warn'], MENUNGGU: ['Menunggu data perangkat', 'info'], SIMULASI: ['Mode simulasi aktif', 'info'], LOKAL: ['Mode lokal aktif', 'info'] }[label];
+        if (m) addEvent(m[0], m[1]);
+      }
+      lastSumLabel = label;
       el('sumLink').textContent = label;
       el('sumLink').className = `summary-value font-hud ${cls}`;
       el('sumLinkSub').textContent = sub;
@@ -2935,12 +2971,18 @@ async function pickGroqModel() {
 
       // Hero + status sidebar
       const battOk = v2 > 0.5 && v2 >= 10.5 && v2 <= 15;
+      const battState = v2 <= 0.5 ? 'none' : (battOk ? 'ok' : 'bad');
+      if (lastBattState && battState !== 'none' && lastBattState !== 'none' && battState !== lastBattState) {
+        addEvent(battState === 'bad' ? `Tegangan baterai di luar batas aman (${v2.toFixed(2)} V)` : 'Tegangan baterai kembali normal', battState === 'bad' ? 'warn' : 'ok');
+      }
+      lastBattState = battState;
       const pct = Math.max(0, Math.min(1, (v2 - 10.5) / (14.4 - 10.5)));
       const ring = el('heroRing');
       if (ring) {
         ring.setAttribute('stroke-dashoffset', (339.29 * (1 - (v2 > 0.5 ? pct : 0))).toFixed(1));
         ring.style.stroke = v2 <= 0.5 ? 'var(--text-muted)' : (battOk ? 'var(--c-green)' : 'var(--c-red)');
         tweenNumber(el('heroVolt'), v2, 2, ' V');
+        tweenNumber(el('heroPct'), v2 > 0.5 ? pct * 100 : 0, 0, '%');
         let title, text;
         if (isSimMode) { title = 'Mode simulasi aktif'; text = 'Data yang tampil bukan dari ESP32 asli.'; }
         else if (label === 'OFFLINE' || label === 'MENUNGGU') { title = 'Perangkat belum terhubung'; text = sub + '.'; }
@@ -3042,6 +3084,7 @@ async function pickGroqModel() {
       { label: 'Tes gelombang lampu', cmd: 'tes gelombang' },
       { label: 'Apakah perangkat terhubung?', cmd: 'apakah perangkat terhubung' },
       { label: 'Buka asisten AI', nav: 'sec-ai' },
+      { label: 'Layar penuh (F)', fn: 'toggleFullscreen' },
       { label: 'Buka kalibrasi tegangan', nav: 'sec-calib' },
       { label: 'Buka log paket', nav: 'sec-log' }
     ];
@@ -3087,6 +3130,8 @@ async function pickGroqModel() {
       if (it.nav) {
         const t = document.getElementById(it.nav);
         if (t) t.scrollIntoView({ behavior: 'smooth' });
+      } else if (it.fn) {
+        window[it.fn]();
       } else {
         processVoiceCommand(it.raw ? typed : it.cmd);
       }
@@ -3208,6 +3253,81 @@ async function pickGroqModel() {
         b.addEventListener('pointerleave', () => { b.style.transform = ''; });
       });
     }
+
+    // ================= RIWAYAT KEJADIAN & PINTASAN =================
+    let eventLog = [];
+    let lastSumLabel = null;
+    let lastBattState = null;
+    try { eventLog = JSON.parse(localStorage.getItem('galtech_events') || '[]'); } catch (e) { eventLog = []; }
+    if (!Array.isArray(eventLog)) eventLog = [];
+
+    function eventNode(ev, fresh) {
+      const row = document.createElement('div');
+      row.className = `ev-item ev-${ev.type}${fresh ? ' fresh' : ''}`;
+      const dot = document.createElement('span'); dot.className = 'ev-dot';
+      const txt = document.createElement('span'); txt.className = 'ev-text'; txt.textContent = ev.text;
+      const tm = document.createElement('span'); tm.className = 'ev-time';
+      tm.textContent = new Date(ev.t).toLocaleTimeString('id-ID', { hour12: false });
+      row.append(dot, txt, tm);
+      return row;
+    }
+
+    function renderEvents() {
+      const box = document.getElementById('evList');
+      if (!box) return;
+      box.textContent = '';
+      if (!eventLog.length) {
+        const e = document.createElement('div'); e.className = 'ev-empty'; e.textContent = 'Belum ada kejadian tercatat.';
+        box.appendChild(e);
+        return;
+      }
+      eventLog.forEach(ev => box.appendChild(eventNode(ev, false)));
+    }
+
+    function addEvent(text, type) {
+      try {
+        const ev = { t: Date.now(), text, type: type || 'info' };
+        eventLog.unshift(ev);
+        eventLog = eventLog.slice(0, 60);
+        try { localStorage.setItem('galtech_events', JSON.stringify(eventLog)); } catch (e) {}
+        const box = document.getElementById('evList');
+        if (!box) return;
+        const empty = box.querySelector('.ev-empty');
+        if (empty) empty.remove();
+        box.insertBefore(eventNode(ev, true), box.firstChild);
+        while (box.children.length > 60) box.lastChild.remove();
+      } catch (e) {}
+    }
+
+    function clearEvents() {
+      eventLog = [];
+      try { localStorage.removeItem('galtech_events'); } catch (e) {}
+      renderEvents();
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        const el = document.documentElement;
+        if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+      } else if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+
+    // Pintasan keyboard: 1-8 = lampu, F = layar penuh
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+      const box = document.getElementById('cmdk');
+      if (box && !box.hidden) return;
+      if (/^[1-8]$/.test(e.key)) {
+        const idx = parseInt(e.key, 10) - 1;
+        sendLampCommand(idx, !lampStates[idx]);
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      }
+    });
 
     // ================= PENJADWALAN & TIMER MUNDUR =================
     function switchSchedTab(tab) {
@@ -3545,6 +3665,8 @@ async function pickGroqModel() {
       let activeCount = 0;
       const prevStates = prevLampStates;
       prevLampStates = lampStates.slice();
+      const changedN = prevStates.length ? lampStates.filter((v, k) => v !== prevStates[k]).length : 0;
+      let batchLogged = false;
 
       for (let i = 0; i < 8; i++) {
         const ch = i + 1;
@@ -3557,7 +3679,14 @@ async function pickGroqModel() {
           : 'hud-subbox p-2.5 sm:p-3 transition-all relative overflow-hidden';
 
         const btnLabel = isOn ? dict.btnTurnOff : dict.btnTurnOn;
-        if (prevStates.length && prevStates[i] !== isOn && !REDUCED_MOTION) card.classList.add('lamp-pop');
+        if (prevStates.length && prevStates[i] !== isOn) {
+          if (!REDUCED_MOTION) { card.classList.add('lamp-pop'); card.style.setProperty('--pd', (changedN >= 3 ? i * 45 : 0) + 'ms'); }
+          if (changedN >= 3) {
+            if (!batchLogged) { batchLogged = true; addEvent(`${changedN} lampu ${isOn ? 'dinyalakan' : 'dimatikan'}`, 'lamp'); }
+          } else {
+            addEvent(`Lampu ${i + 1} ${isOn ? 'dinyalakan' : 'dimatikan'}`, 'lamp');
+          }
+        }
 
         card.innerHTML = `
           <div class="absolute top-0 left-0 right-0 h-0.5 ${isOn ? 'bg-hud-green' : 'bg-transparent'}"></div>
@@ -4036,6 +4165,7 @@ async function pickGroqModel() {
     initSparks();
     setTimeout(initReveal, (document.documentElement.classList.contains('no-intro') || REDUCED_MOTION) ? 0 : 1100);
     initPremiumMotion();
+    renderEvents();
     document.getElementById('cmdkInput').addEventListener('input', () => { cmdkSel = 0; renderCmdk(); });
     document.getElementById('cmdk').addEventListener('mousedown', (e) => { if (e.target.id === 'cmdk') closeCmdk(); });
   </script>
