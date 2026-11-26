@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
   <title>GALTECH IoT // SCADA TELEMETRY HUD v4.7</title>
+  <meta name="description" content="GALTECH SCADA HUD: dasbor pemantauan dan kontrol lampu tenaga surya berbasis ESP32-S3." />
+  <meta name="theme-color" content="#070b13" />
+  <meta property="og:title" content="GALTECH // SCADA HUD" />
+  <meta property="og:description" content="Pantau tegangan, baterai, dan kendalikan lampu tenaga surya secara real-time." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2356c8f5'/%3E%3Ctext x='32' y='42' font-size='28' font-weight='800' text-anchor='middle' fill='%230b1220' font-family='Arial'%3EGT%3C/text%3E%3C/svg%3E" />
 
   <!-- Google Fonts: Aerospace Orbitron, Digital LED & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -644,6 +650,51 @@
     .ev-empty { padding: 22px; text-align: center; font-size: 13px; color: var(--text-muted); }
     @keyframes evIn { from { opacity: 0; transform: translateX(-18px) scale(0.98); background: color-mix(in srgb, var(--c-cyan) 22%, transparent); } to { opacity: 1; transform: none; } }
 
+    /* ================= FITUR UMUM WEB ================= */
+    .skip-link { position: fixed; left: 12px; top: -60px; z-index: 120; padding: 10px 16px; border-radius: 10px; background: var(--c-cyan); color: #06121f; font-weight: 700; font-size: 13px; text-decoration: none; transition: top 0.2s ease; }
+    .skip-link:focus { top: 12px; }
+
+    .to-top { position: fixed; right: 18px; bottom: 18px; z-index: 55; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; cursor: pointer;
+      background: var(--panel-grad-2); border: 1px solid var(--panel-border); color: var(--text-primary); box-shadow: var(--panel-shadow);
+      opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity 0.3s ease, transform 0.3s var(--ease); }
+    .to-top.show { opacity: 1; transform: none; pointer-events: auto; }
+    .toast-host { bottom: 76px; }
+    @media (max-width: 1279px) { .to-top { bottom: 92px; } .toast-host { bottom: 146px; } }
+
+    .net-banner { position: fixed; top: 0; left: 50%; transform: translateX(-50%); z-index: 70; padding: 9px 18px; border-radius: 0 0 14px 14px; font-size: 12.5px; font-weight: 700;
+      background: var(--c-red); color: #fff; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5); animation: bannerIn 0.4s var(--ease) both; }
+    .net-banner[hidden] { display: none !important; }
+    @keyframes bannerIn { from { transform: translate(-50%, -100%); } to { transform: translate(-50%, 0); } }
+
+    .dlg { position: fixed; inset: 0; z-index: 95; display: grid; place-items: center; padding: 20px; background: rgba(4, 8, 16, 0.55); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); }
+    .dlg[hidden] { display: none !important; }
+    .dlg-box { width: min(380px, 100%); padding: 22px; border-radius: 18px; background: var(--panel-grad-2); border: 1px solid var(--panel-border); box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.8); animation: toastIn 0.22s var(--ease) both; }
+    html[data-theme="light"] .dlg-box { background: #fff; }
+    .dlg-msg { font-size: 15px; font-weight: 700; line-height: 1.5; color: var(--text-primary); }
+    .dlg-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    .dlg-btn { padding: 10px 16px; font-size: 13px; font-weight: 700; border-radius: 11px; cursor: pointer; background: transparent; border: 1px solid var(--panel-border); color: var(--text-body); }
+    .dlg-btn-primary { background: var(--c-red); border-color: transparent; color: #fff; }
+
+    .ripple { position: absolute; border-radius: 50%; pointer-events: none; background: currentColor; opacity: 0.22; transform: scale(0); animation: ripple 0.6s ease-out forwards; }
+    @keyframes ripple { to { transform: scale(1); opacity: 0; } }
+
+    /* Kerangka (skeleton) sementara menunggu data pertama */
+    .awaiting-data .summary-tile:nth-child(n+2):nth-child(-n+3) .summary-value,
+    .awaiting-data .hero-volt {
+      color: transparent !important; border-radius: 8px; min-width: 5.5ch; width: fit-content;
+      background: linear-gradient(90deg, var(--sub-bg) 25%, var(--panel-border) 50%, var(--sub-bg) 75%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite;
+    }
+    .awaiting-data .summary-value * { color: transparent !important; }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* Cetak: hanya isi dasbor */
+    @media print {
+      .sidebar, .toast-host, .cmdk, .dlg, .intro, .scroll-bar, .to-top, .net-banner, .skip-link { display: none !important; }
+      body { background: #fff !important; color: #000 !important; }
+      body > .max-w-7xl.z-10 { margin: 0 !important; max-width: none !important; }
+      .hud-panel { box-shadow: none !important; backdrop-filter: none !important; border: 1px solid #ccc !important; break-inside: avoid; }
+    }
+
     @media (prefers-reduced-motion: reduce) { .intro, .scroll-bar { display: none !important; } }
 
     @media (prefers-reduced-motion: reduce) {
@@ -658,8 +709,25 @@
 
   <div id="crtOverlay" class="crt-scanlines fixed inset-0 z-50"></div>
 
+  <a class="skip-link" href="#sec-home">Lewati ke konten</a>
   <div id="intro" class="intro" aria-hidden="true"><div class="intro-logo">GT</div><div class="intro-bar"><i></i></div></div>
   <div id="scrollBar" class="scroll-bar" aria-hidden="true"></div>
+
+  <div id="netBanner" class="net-banner" role="status" hidden>Koneksi internet terputus. Data mungkin tidak terbaru.</div>
+
+  <button type="button" id="toTop" class="to-top" aria-label="Kembali ke atas" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+  </button>
+
+  <div id="dlg" class="dlg" hidden>
+    <div class="dlg-box" role="alertdialog" aria-modal="true" aria-labelledby="dlgMsg">
+      <p id="dlgMsg" class="dlg-msg"></p>
+      <div class="dlg-actions">
+        <button type="button" id="dlgNo" class="dlg-btn">Batal</button>
+        <button type="button" id="dlgYes" class="dlg-btn dlg-btn-primary">Ya, hapus</button>
+      </div>
+    </div>
+  </div>
 
   <div id="toastHost" class="toast-host" aria-live="polite"></div>
 
@@ -819,6 +887,7 @@
         <div class="hero-actions">
           <button type="button" onclick="setAllLamps(true)" class="hero-btn hero-btn-primary">Nyalakan semua lampu</button>
           <button type="button" onclick="setAllLamps(false)" class="hero-btn">Matikan semua</button>
+          <button type="button" onclick="copyReport()" class="hero-btn">Salin laporan</button>
         </div>
         <p class="hero-hint">Tips: tekan <kbd>1</kbd>&ndash;<kbd>8</kbd> untuk menyalakan/mematikan lampu, <kbd>F</kbd> layar penuh, <kbd>Ctrl K</kbd> perintah cepat.</p>
       </div>
@@ -2447,7 +2516,8 @@ function deviceAgeSec() {
       cancelAICooldown();
     }
 
-    function clearAIChat() {
+    async function clearAIChat() {
+      if (!(await askConfirm('Hapus seluruh percakapan dengan AI?'))) return;
       aiHistory = [];
       document.getElementById('aiChatLog').innerHTML = '';
       initAIChat();
@@ -2937,7 +3007,9 @@ async function pickGroqModel() {
 
     // ================= RINGKASAN SISTEM =================
     function updateSummary() {
+      if (document.hidden) return;
       const el = (id) => document.getElementById(id);
+      document.body.classList.toggle('awaiting-data', !isSimMode && isCloudMode && lastTelemetryTs === 0);
       if (!el('sumLink')) return;
 
       // Koneksi
@@ -3220,9 +3292,28 @@ async function pickGroqModel() {
           const h = document.documentElement;
           const max = h.scrollHeight - h.clientHeight;
           bar.style.transform = `scaleX(${max > 0 ? Math.min(1, h.scrollTop / max) : 0})`;
+          const tt = document.getElementById('toTop');
+          if (tt) tt.classList.toggle('show', h.scrollTop > 600);
         };
         window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
         update();
+      }
+
+      // Efek riak (ripple) pada tombol
+      if (!REDUCED_MOTION) {
+        document.addEventListener('pointerdown', (e) => {
+          const b = e.target.closest && e.target.closest('button');
+          if (!b || b.disabled) return;
+          if (getComputedStyle(b).position === 'static') b.style.position = 'relative';
+          b.style.overflow = 'hidden';
+          const r = b.getBoundingClientRect();
+          const d = Math.max(r.width, r.height) * 1.6;
+          const sp = document.createElement('span');
+          sp.className = 'ripple';
+          sp.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - r.left - d / 2}px;top:${e.clientY - r.top - d / 2}px`;
+          b.appendChild(sp);
+          setTimeout(() => sp.remove(), 650);
+        }, { passive: true });
       }
 
       if (REDUCED_MOTION || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
@@ -3299,10 +3390,12 @@ async function pickGroqModel() {
       } catch (e) {}
     }
 
-    function clearEvents() {
+    async function clearEvents() {
+      if (!(await askConfirm('Hapus semua riwayat kejadian?'))) return;
       eventLog = [];
       try { localStorage.removeItem('galtech_events'); } catch (e) {}
       renderEvents();
+    initWebBasics();
     }
 
     function toggleFullscreen() {
@@ -3320,7 +3413,7 @@ async function pickGroqModel() {
       const t = e.target;
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
       const box = document.getElementById('cmdk');
-      if (box && !box.hidden) return;
+      if ((box && !box.hidden) || !document.getElementById('dlg').hidden) return;
       if (/^[1-8]$/.test(e.key)) {
         const idx = parseInt(e.key, 10) - 1;
         sendLampCommand(idx, !lampStates[idx]);
@@ -3328,6 +3421,88 @@ async function pickGroqModel() {
         toggleFullscreen();
       }
     });
+
+    // ================= FITUR UMUM WEB =================
+    // Dialog konfirmasi (pengganti window.confirm)
+    function askConfirm(msg) {
+      return new Promise((resolve) => {
+        const dlg = document.getElementById('dlg');
+        const yes = document.getElementById('dlgYes');
+        const no = document.getElementById('dlgNo');
+        document.getElementById('dlgMsg').textContent = msg;
+        dlg.hidden = false;
+        yes.focus();
+        const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); close(false); } };
+        const close = (v) => {
+          dlg.hidden = true;
+          yes.onclick = no.onclick = dlg.onmousedown = null;
+          document.removeEventListener('keydown', onKey, true);
+          resolve(v);
+        };
+        document.addEventListener('keydown', onKey, true);
+        yes.onclick = () => close(true);
+        no.onclick = () => close(false);
+        dlg.onmousedown = (e) => { if (e.target === dlg) close(false); };
+      });
+    }
+
+    // Salin laporan ke clipboard
+    function fallbackCopy(text, done) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { showToast('Gagal menyalin laporan.', 'err'); }
+      ta.remove();
+    }
+
+    function copyReport() {
+      const v = latestVoltages.map(x => (parseFloat(x) || 0).toFixed(2));
+      const on = lampStates.map((st, i) => st ? i + 1 : null).filter(Boolean);
+      const age = deviceAgeSec();
+      const text = [
+        `Laporan GALTECH - ${new Date().toLocaleString('id-ID')}`,
+        `Input solar (V1): ${v[0]} V`,
+        `Baterai (V2): ${v[1]} V`,
+        `Step-down (V3): ${v[2]} V`,
+        `Beban (V4): ${v[3]} V`,
+        `Lampu menyala: ${on.length ? on.join(', ') : 'tidak ada'} dari 8`,
+        `Perangkat: ${age === null ? 'belum ada data' : (age <= 20 ? 'online' : 'offline')}${age === null ? '' : ` (data ${age} detik lalu)`}`
+      ].join('\n');
+      const done = () => showToast('Laporan disalin ke clipboard.', 'ok');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+      } else {
+        fallbackCopy(text, done);
+      }
+    }
+
+    // Status internet browser, error global, dan hemat sumber daya saat tab tersembunyi
+    function initWebBasics() {
+      const banner = document.getElementById('netBanner');
+      const setNet = (online, announce) => {
+        banner.hidden = online;
+        if (!announce) return;
+        showToast(online ? 'Koneksi internet kembali.' : 'Koneksi internet terputus.', online ? 'ok' : 'err');
+        addEvent(online ? 'Internet tersambung kembali' : 'Internet terputus', online ? 'ok' : 'warn');
+      };
+      window.addEventListener('online', () => setNet(true, true));
+      window.addEventListener('offline', () => setNet(false, true));
+      if (!navigator.onLine) setNet(false, false);
+
+      let lastErr = 0;
+      const softError = () => {
+        const now = Date.now();
+        if (now - lastErr < 8000) return;
+        lastErr = now;
+        showToast('Terjadi kesalahan kecil di halaman. Coba muat ulang jika ada yang tidak berfungsi.', 'err');
+      };
+      window.addEventListener('error', (e) => { if (e && e.message) softError(); });
+      window.addEventListener('unhandledrejection', softError);
+
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) updateSummary(); });
+    }
 
     // ================= PENJADWALAN & TIMER MUNDUR =================
     function switchSchedTab(tab) {
