@@ -367,7 +367,7 @@
     .font-digital { font-family: 'JetBrains Mono', ui-monospace, monospace !important; font-weight: 600; letter-spacing: -0.02em !important; }
     #packetLog, #packetLog *, #lastCmdLog { font-family: 'JetBrains Mono', ui-monospace, monospace; }
     header h1 { font-weight: 800; letter-spacing: -0.01em !important; }
-    [id^="sensorCard-"] .font-digital { font-size: clamp(1.7rem, 3.6vw, 2.5rem) !important; }
+    [id^="sensorCard-"] .font-digital { font-size: clamp(1.35rem, 2vw, 1.85rem) !important; }
 
     /* Teks kecil dinaikkan agar nyaman dibaca */
     [class*="text-[8px]"], [class*="text-[8.5px]"] { font-size: 10px !important; }
@@ -721,6 +721,45 @@
       .hdr-tools { justify-content: space-between; }
     }
 
+    /* ================= HASIL PENGUJIAN TAMPILAN (QA) ================= */
+    /* Ringkasan atas duplikat dengan hero + kartu sensor, disembunyikan agar halaman tidak berulang */
+    #summaryStrip { display: none !important; }
+
+    /* Kartu sensor: judul & rentang tidak terpotong, terutama di HP */
+    [id^="sensorCard-"] .font-hud { white-space: normal; line-height: 1.25; }
+    [id^="sensorCard-"] [class*="text-[9px]"], [id^="sensorCard-"] [class*="text-[8px]"], [id^="sensorCard-"] [class*="text-[8.5px]"] { white-space: nowrap; }
+    @media (max-width: 639px) {
+      [id^="sensorCard-"] { padding: 12px !important; }
+      [id^="sensorCard-"] .font-digital { font-size: 1.2rem !important; }
+      [id^="sensorCard-"] .hud-subbox [class*="text-["]:not(.font-digital) { font-size: 8px !important; letter-spacing: 0 !important; }
+      [id^="sensorCard-"] [class*="justify-between"] > span:nth-child(2) { display: none; } /* "10.5-15V" disembunyikan di HP */
+    }
+
+    /* Sparkline: lebih tipis & halus */
+    .spark { height: 24px; margin-top: 8px; }
+    .spark-fill { fill-opacity: 0.08; }
+
+    /* Kartu lampu: sudut membulat konsisten (kartu menyala sebelumnya bersudut tajam) */
+    #lampGrid > div { border-radius: 14px; }
+    #lampGrid > div span[class*="border"], #lampGrid > div [class*="px-1.5"] { border-radius: 8px; }
+
+    /* Judul panel tidak patah di tengah kata; tombol di sebelahnya boleh turun baris */
+    @media (min-width: 640px) { .hud-panel h2 { white-space: nowrap; } }
+    #sec-lamp .hud-panel > div:first-child { flex-wrap: wrap; row-gap: 8px; }
+
+    /* Topologi energi: label node tidak terpotong di layar sempit */
+    @media (max-width: 639px) { #sec-energy [class*="text-[8px]"], #sec-energy [class*="text-[9px]"] { font-size: 9px !important; letter-spacing: 0 !important; } }
+
+    /* ================= PERANGKAT ONLINE ================= */
+    .vis-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 14px; border-radius: 11px; background: var(--sub-bg);
+      border: 1px solid var(--panel-border); font-size: 11.5px; font-weight: 600; color: var(--text-body); }
+    .vis-chip b { color: var(--text-primary); font-weight: 800; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    .vis-dot { width: 8px; height: 8px; border-radius: 999px; background: var(--c-green); box-shadow: 0 0 8px var(--c-green); }
+    .vis-count { min-width: 34px; text-align: center; padding: 3px 12px; border-radius: 999px; font-weight: 800; font-size: 13px; color: var(--c-green);
+      background: color-mix(in srgb, var(--c-green) 14%, transparent); font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    .vis-me { margin-left: 8px; padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; color: var(--c-cyan); background: color-mix(in srgb, var(--c-cyan) 14%, transparent); }
+    .vis-note { margin-top: 12px; font-size: 11px; line-height: 1.5; color: var(--text-muted); }
+
     @media (prefers-reduced-motion: reduce) { .intro, .scroll-bar { display: none !important; } }
 
     @media (prefers-reduced-motion: reduce) {
@@ -777,6 +816,7 @@
       <a class="nav-link" href="#sec-lamp"><span class="nav-dot"></span>Grafik &amp; lampu</a>
       <a class="nav-link" href="#sec-voice"><span class="nav-dot"></span>Suara &amp; timer</a>
       <a class="nav-link" href="#sec-history"><span class="nav-dot"></span>Riwayat</a>
+      <a class="nav-link" href="#sec-visitors"><span class="nav-dot"></span>Perangkat online</a>
       <a class="nav-link" href="#sec-ai"><span class="nav-dot"></span>Asisten AI</a>
       <a class="nav-link" href="#sec-calib"><span class="nav-dot"></span>Kalibrasi</a>
     </nav>
@@ -841,7 +881,8 @@
           </div>
 
           <!-- Grid Tombol Pengaturan -->
-          <div class="hdr-btns grid grid-cols-3 sm:flex sm:flex-wrap items-center gap-1.5 sm:gap-2">
+          <span id="visChip" class="vis-chip" title="Perangkat yang sedang membuka dasbor"><span class="vis-dot"></span><b id="visChipN">1</b> online</span>
+            <div class="hdr-btns grid grid-cols-3 sm:flex sm:flex-wrap items-center gap-1.5 sm:gap-2">
             <button id="headerMicBtn" onclick="toggleVoiceControl()"
               class="font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border border-hud-cyan/70 text-hud-cyan hover:bg-hud-cyan hover:text-black transition cursor-pointer text-center tracking-wider"
               style="background-color: var(--btn-bg)">
@@ -1467,6 +1508,16 @@
         <button type="button" onclick="clearEvents()" class="hud-subbox text-[9px] font-hud font-bold px-2.5 py-1 cursor-pointer tracking-wider" style="color: var(--text-muted)">HAPUS</button>
       </div>
       <div id="evList" class="ev-list" aria-live="polite"></div>
+    </section>
+
+    <!-- ================= SECTION 3C: PERANGKAT ONLINE ================= -->
+    <section id="sec-visitors" class="hud-panel p-3 sm:p-4 md:p-5">
+      <div class="flex items-center justify-between gap-2 mb-3">
+        <h2 class="font-hud font-bold text-[11px] sm:text-xs tracking-wider" style="color: var(--text-primary)">PERANGKAT ONLINE</h2>
+        <span id="visCount" class="vis-count">1</span>
+      </div>
+      <div id="visList" class="ev-list" aria-live="polite"></div>
+      <p id="visNote" class="vis-note"></p>
     </section>
 
     <!-- ================= SECTION 3B: AI ASISTEN (OBROLAN) ================= -->
@@ -3436,6 +3487,7 @@ async function pickGroqModel() {
       try { localStorage.removeItem('galtech_events'); } catch (e) {}
       renderEvents();
     initWebBasics();
+    initPresence();
     updateNotifyUI();
     }
 
@@ -3577,6 +3629,117 @@ async function pickGroqModel() {
     function maybeNotify(text) {
       if (!notifyOn) return;
       try { new Notification('GALTECH - Peringatan', { body: text }); } catch (e) {}
+    }
+
+    // ================= PERANGKAT ONLINE (PRESENCE VIA MQTT) =================
+    // Tiap browser mengumumkan kehadirannya ke broker; semua dasbor yang terbuka saling melihat.
+    // Hanya jenis perangkat & browser yang dibagikan (tanpa IP / data pribadi).
+    const PRESENCE_TOPIC = 'galtech/presence';
+    const PRESENCE_TTL_MS = 25000;
+    const myPresenceId = 'v' + Math.random().toString(16).slice(2, 8);
+    const presenceSince = Date.now();
+    const visitors = new Map(); // id -> { label, kind, first, seen, me }
+    let lastPresencePub = 0;
+
+    function detectDevice() {
+      const ua = navigator.userAgent || '';
+      let os = 'Perangkat';
+      if (/Android/i.test(ua)) os = 'Android';
+      else if (/iPhone|iPad|iPod/i.test(ua)) os = 'iOS';
+      else if (/Windows/i.test(ua)) os = 'Windows';
+      else if (/Mac OS X|Macintosh/i.test(ua)) os = 'macOS';
+      else if (/Linux/i.test(ua)) os = 'Linux';
+      let br = 'Browser';
+      if (/Edg\//.test(ua)) br = 'Edge';
+      else if (/OPR\/|Opera/.test(ua)) br = 'Opera';
+      else if (/Firefox\//.test(ua)) br = 'Firefox';
+      else if (/Chrome\//.test(ua)) br = 'Chrome';
+      else if (/Safari\//.test(ua)) br = 'Safari';
+      const mobile = /Android.+Mobile|iPhone|iPod/i.test(ua);
+      const tablet = /iPad|Android(?!.*Mobile)/i.test(ua);
+      return { label: `${os} - ${br}`, kind: mobile ? 'Ponsel' : (tablet ? 'Tablet' : 'Komputer') };
+    }
+    const myDevice = detectDevice();
+
+    function publishPresence(gone) {
+      if (!client || !client.connected) return;
+      lastPresencePub = Date.now();
+      try {
+        client.publish(`${PRESENCE_TOPIC}/${myPresenceId}`, JSON.stringify(
+          gone ? { id: myPresenceId, gone: true } : { id: myPresenceId, label: myDevice.label, kind: myDevice.kind }));
+      } catch (e) {}
+    }
+
+    function handlePresence(raw) {
+      try {
+        const p = JSON.parse(raw);
+        if (!p || typeof p.id !== 'string') return;
+        const id = p.id.slice(0, 24);
+        if (p.gone) { visitors.delete(id); renderVisitors(); return; }
+        const now = Date.now();
+        const prev = visitors.get(id);
+        visitors.set(id, {
+          label: String(p.label || 'Perangkat').slice(0, 40),
+          kind: String(p.kind || '').slice(0, 12),
+          first: prev ? prev.first : now,
+          seen: now,
+          me: id === myPresenceId
+        });
+        // Ada perangkat baru: balas segera supaya ia langsung melihat kita (tanpa menunggu 10 detik)
+        if (!prev && id !== myPresenceId && Date.now() - lastPresencePub > 1500) {
+          setTimeout(() => publishPresence(false), Math.random() * 700);
+        }
+        renderVisitors();
+      } catch (e) {}
+    }
+
+    function durationText(ms) {
+      const m = Math.floor(ms / 60000);
+      if (m < 1) return 'baru saja';
+      if (m < 60) return `${m} mnt`;
+      return `${Math.floor(m / 60)} jam ${m % 60} mnt`;
+    }
+
+    function renderVisitors() {
+      const now = Date.now();
+      // Diri sendiri selalu tampil selama halaman terbuka (juga saat broker terputus)
+      const self = visitors.get(myPresenceId);
+      visitors.set(myPresenceId, { label: myDevice.label, kind: myDevice.kind, first: self ? self.first : presenceSince, seen: now, me: true });
+      visitors.forEach((v, id) => { if (!v.me && now - v.seen > PRESENCE_TTL_MS) visitors.delete(id); });
+
+      const list = Array.from(visitors.values()).sort((a, b) => (b.me - a.me) || (a.first - b.first));
+      const n = list.length;
+      const c1 = document.getElementById('visCount'); if (c1) c1.textContent = n;
+      const c2 = document.getElementById('visChipN'); if (c2) c2.textContent = n;
+
+      const box = document.getElementById('visList');
+      if (box) {
+        box.textContent = '';
+        list.forEach(v => {
+          const row = document.createElement('div'); row.className = 'ev-item ev-ok';
+          const dot = document.createElement('span'); dot.className = 'ev-dot';
+          const txt = document.createElement('span'); txt.className = 'ev-text';
+          txt.textContent = v.label + (v.kind ? ` (${v.kind})` : '');
+          if (v.me) { const tag = document.createElement('span'); tag.className = 'vis-me'; tag.textContent = 'Anda'; txt.appendChild(tag); }
+          const tm = document.createElement('span'); tm.className = 'ev-time'; tm.textContent = durationText(now - v.first);
+          row.append(dot, txt, tm);
+          box.appendChild(row);
+        });
+      }
+      const note = document.getElementById('visNote');
+      if (note) {
+        const live = !!(client && client.connected);
+        note.textContent = live
+          ? 'Menampilkan perangkat yang sedang membuka dasbor ini. Hanya jenis perangkat dan browser yang tampil, tanpa alamat IP atau data pribadi.'
+          : 'Tidak terhubung ke broker, jadi hanya perangkat ini yang terlihat.';
+      }
+    }
+
+    function initPresence() {
+      renderVisitors();
+      setInterval(() => publishPresence(false), 10000);
+      setInterval(renderVisitors, 5000);
+      window.addEventListener('pagehide', () => publishPresence(true));
     }
 
     // ================= PENJADWALAN & TIMER MUNDUR =================
@@ -4268,18 +4431,22 @@ async function pickGroqModel() {
         username: MQTT_CFG.username,
         password: MQTT_CFG.password,
         clean: true,
-        reconnectPeriod: 3000
+        reconnectPeriod: 3000,
+        will: { topic: `${PRESENCE_TOPIC}/${myPresenceId}`, payload: JSON.stringify({ id: myPresenceId, gone: true }), qos: 0, retain: false }
       });
 
       client.on('connect', () => {
         updateConnBadge(true);
         logPacket(I18N[currentLang].msgBrokerConnected, 'ok');
-        client.subscribe([MQTT_CFG.subTopic, MQTT_CFG.statusTopic, MQTT_CFG.pingTopic]);
+        client.subscribe([MQTT_CFG.subTopic, MQTT_CFG.statusTopic, MQTT_CFG.pingTopic, PRESENCE_TOPIC + '/+']);
         client.publish(MQTT_CFG.pingTopic, JSON.stringify({ id: browserPingId, ts: performance.now() }));
+        publishPresence();
       });
 
       client.on('message', (topic, msg, packet) => {
         const raw = msg.toString();
+
+        if (topic.startsWith(PRESENCE_TOPIC + '/')) { handlePresence(raw); return; }
 
         if (topic === MQTT_CFG.pingTopic) {
           try {
