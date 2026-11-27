@@ -800,6 +800,61 @@
     .sun-toggle.on .sun-switch { background: var(--c-yellow); }
     .sun-toggle.on .sun-switch i { transform: translateX(14px); }
 
+    /* ================= ADEGAN MATAHARI (detail tinggi) ================= */
+    .sun-card { --hill-b: #16222e; --hill-f: #0e1721; --cloud-o: 0.5; --haze-o: 0.55; }
+    .sun-card.phase-dusk { --hill-b: #1f1730; --hill-f: #140e22; --cloud-o: 0.55; --haze-o: 1; }
+    .sun-card.phase-night { --hill-b: #0b1020; --hill-f: #070b16; --cloud-o: 0.1; --haze-o: 0; }
+    html[data-theme="light"] .sun-card.phase-day { --hill-b: #c3d1e0; --hill-f: #aebfd2; }
+    html[data-theme="light"] .sun-card.phase-dusk { --hill-b: #b9a9c9; --hill-f: #a091b4; }
+
+    .sun-svg { margin-top: 4px; shape-rendering: geometricPrecision; }
+    /* Layar lebar: adegan melebar sampai tepi kartu (tanpa tepi bukit yang terpotong) */
+    @media (min-width: 640px) { .sun-svg { width: calc(100% + 56px); margin: 4px -28px 0; max-width: none; } }
+    .sun-arc { stroke-width: 3; stroke-opacity: 0.3; stroke-dasharray: 1; }
+    .sun-arc-done { stroke-width: 5; }
+    @media (min-width: 640px) { .sun-arc { stroke-width: 1.4; } .sun-arc-done { stroke-width: 2.6; } }
+    .haze { opacity: var(--haze-o); transition: opacity 1.5s ease; }
+    .hill { transition: fill 1.5s ease; }
+    .hill-b { fill: var(--hill-b); }
+    .hill-f { fill: var(--hill-f); }
+
+    .sun-core { fill: url(#gSun); transition: fill 1s ease; }
+    .phase-dusk .sun-core { fill: #ff7a45; }
+    .sun-ring { fill: none; stroke: #ffd98a; stroke-opacity: 0.55; stroke-width: 1.2; }
+    .sun-glow { fill: url(#gGlow); opacity: 1; animation: glowBreath 4s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+    @keyframes glowBreath { from { transform: scale(0.9); opacity: 0.8; } to { transform: scale(1.18); opacity: 1; } }
+    .sun-rays { transform-box: fill-box; transform-origin: center; animation: raySpin 48s linear infinite; }
+    .sun-rays line { stroke: #ffc54d; stroke-width: 2.2; stroke-linecap: round; stroke-opacity: 0.85; }
+    .phase-dusk .sun-rays line { stroke: #ff8a55; }
+    @keyframes raySpin { to { transform: rotate(360deg); } }
+
+    .moon-dark { fill: #2a3350; opacity: 0.9; }
+    .moon-lit { fill: #eef2ff; filter: drop-shadow(0 0 5px rgba(200, 214, 255, 0.9)); }
+    .crater { fill: #9aa7d0; opacity: 0.25; }
+
+    .cloud { fill: #fff; opacity: var(--cloud-o); animation: cloudDrift linear infinite; transition: opacity 1.5s ease; }
+    html[data-theme="light"] .cloud { fill: #8fa3bd; }
+    @keyframes cloudDrift { from { transform: translateX(-120px); } to { transform: translateX(920px); } }
+
+    .shoot { display: none; opacity: 0; }
+    .phase-night .shoot { display: block; animation: shootStar 11s linear infinite; }
+    .shoot line { stroke: #fff; stroke-width: 1.8; stroke-linecap: round; }
+    @keyframes shootStar {
+      0%, 100% { opacity: 0; transform: translate(640px, 18px); }
+      3% { opacity: 1; }
+      9% { opacity: 0; transform: translate(470px, 86px); }
+    }
+
+    .pole { stroke: var(--hill-f); stroke-width: 2.2; stroke-linecap: round; }
+    .pbulb { fill: #4a5568; transition: fill 0.5s ease; }
+    .pglow { opacity: 0; transition: opacity 0.6s ease; }
+    .post.on .pbulb { fill: #ffd36b; }
+    .post.on .pglow { opacity: 1; animation: lampFlicker 3s ease-in-out infinite alternate; }
+    @keyframes lampFlicker { from { opacity: 0.85; } to { opacity: 1; } }
+    .panel { opacity: 0.55; transition: opacity 1s ease; }
+    .phase-day .panel { opacity: 1; }
+    .phase-dusk .panel { opacity: 0.8; }
+
     @media (prefers-reduced-motion: reduce) { .intro, .scroll-bar { display: none !important; } }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1023,13 +1078,42 @@
           <span class="sun-switch"><i></i></span><span id="autoSunText">Otomatis senja: OFF</span>
         </button>
       </div>
-      <svg class="sun-svg" viewBox="0 0 600 150" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Posisi matahari hari ini">
+      <svg class="sun-svg" viewBox="0 0 800 215" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Posisi matahari dan bulan hari ini">
+        <defs>
+          <radialGradient id="gSun" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff7cf"/><stop offset="0.5" stop-color="#ffc54d"/><stop offset="1" stop-color="#ff9a1f"/></radialGradient>
+          <radialGradient id="gGlow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffc54d" stop-opacity="0.6"/><stop offset="1" stop-color="#ffc54d" stop-opacity="0"/></radialGradient>
+          <radialGradient id="gMoonGlow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#c8d6ff" stop-opacity="0.5"/><stop offset="1" stop-color="#c8d6ff" stop-opacity="0"/></radialGradient>
+          <radialGradient id="gLamp" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffd36b" stop-opacity="0.85"/><stop offset="1" stop-color="#ffd36b" stop-opacity="0"/></radialGradient>
+          <linearGradient id="gHaze" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb06a" stop-opacity="0"/><stop offset="1" stop-color="#ffb06a" stop-opacity="0.45"/></linearGradient>
+          <linearGradient id="gPanel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4b86c7"/><stop offset="1" stop-color="#1b3556"/></linearGradient>
+          <linearGradient id="gGround" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--hill-f)"/><stop offset="1" stop-color="var(--hill-f)" stop-opacity="0"/></linearGradient>
+        </defs>
         <g id="stars"></g>
-        <line x1="10" y1="120" x2="590" y2="120" class="sun-horizon"></line>
-        <path d="M40 120 Q300 -40 560 120" pathLength="1" class="sun-arc"></path>
-        <path id="arcDone" d="M40 120 Q300 -40 560 120" pathLength="1" class="sun-arc-done" style="stroke-dasharray: 0 1"></path>
-        <g id="sunDot" class="sun-dot"><circle r="20" class="sun-glow"></circle><circle r="9" class="sun-core"></circle></g>
-        <g id="moonDot" class="sun-dot" style="opacity: 0"><circle r="9" class="moon-core"></circle></g>
+        <g class="shoot"><line x1="0" y1="0" x2="-52" y2="20"></line></g>
+        <g class="clouds">
+          <g transform="translate(0,62)"><g class="cloud" style="animation-duration: 86s; animation-delay: -30s"><ellipse cx="0" cy="0" rx="38" ry="10"></ellipse><ellipse cx="-18" cy="-6" rx="20" ry="10"></ellipse><ellipse cx="16" cy="-9" rx="24" ry="12"></ellipse></g></g>
+          <g transform="translate(0,112)"><g class="cloud" style="animation-duration: 120s; animation-delay: -75s"><ellipse cx="0" cy="0" rx="46" ry="11"></ellipse><ellipse cx="-22" cy="-7" rx="22" ry="11"></ellipse><ellipse cx="20" cy="-10" rx="28" ry="13"></ellipse></g></g>
+          <g transform="translate(0,34)"><g class="cloud" style="animation-duration: 100s; animation-delay: -10s"><ellipse cx="0" cy="0" rx="30" ry="8"></ellipse><ellipse cx="-14" cy="-5" rx="16" ry="8"></ellipse><ellipse cx="12" cy="-7" rx="19" ry="9"></ellipse></g></g>
+        </g>
+        <rect x="0" y="140" width="800" height="62" fill="url(#gHaze)" class="haze"></rect>
+        <path d="M60 200 Q400 -40 740 200" pathLength="1" class="sun-arc"></path>
+        <path id="arcDone" d="M60 200 Q400 -40 740 200" pathLength="1" class="sun-arc-done" style="stroke-dasharray: 0 1"></path>
+        <g id="sunDot" class="sun-dot">
+          <circle r="56" class="sun-glow"></circle>
+          <g class="sun-rays" id="sunRays"></g>
+          <circle r="15" class="sun-core"></circle>
+          <circle r="20" class="sun-ring"></circle>
+        </g>
+        <g id="moonDot" class="sun-dot" style="opacity: 0">
+          <circle r="42" fill="url(#gMoonGlow)"></circle>
+          <circle r="12" class="moon-dark"></circle>
+          <path id="moonLit" class="moon-lit" d=""></path>
+          <circle cx="-3" cy="-3" r="2.2" class="crater"></circle><circle cx="4" cy="3" r="1.6" class="crater"></circle><circle cx="-1" cy="6" r="1.2" class="crater"></circle>
+        </g>
+        <path class="hill hill-b" d="M0 200 L0 184 C80 166 160 190 260 180 S420 158 520 178 S700 190 800 170 L800 215 L0 215 Z"></path>
+        <g id="hzPanels"></g>
+        <path class="hill hill-f" d="M0 200 L0 196 C120 184 220 200 340 193 S560 182 680 194 S760 196 800 190 L800 215 L0 215 Z"></path>
+        <g id="hzLamps"></g>
       </svg>
       <div class="sun-stats">
         <div class="sun-stat"><span>Terbit</span><b id="sunRise">--:--</b></div>
@@ -3199,6 +3283,7 @@ async function pickGroqModel() {
       // Lampu
       const on = lampStates.filter(Boolean).length;
       el('sumLamp').textContent = on;
+      setHorizonLamps(on);
 
       // Hero + status sidebar
       const battOk = v2 > 0.5 && v2 >= 10.5 && v2 <= 15;
@@ -3831,7 +3916,61 @@ async function pickGroqModel() {
 
     const fmtClock = (dt) => dt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace('.', ':');
     const fmtDur = (ms) => { const mn = Math.max(0, Math.round(ms / 60000)); return `${Math.floor(mn / 60)} j ${mn % 60} mnt`; };
-    const arcPoint = (t) => { const u = 1 - t; return { x: u * u * 40 + 2 * u * t * 300 + t * t * 560, y: u * u * 120 + 2 * u * t * -40 + t * t * 120 }; };
+    const arcPoint = (t) => { const u = 1 - t; return { x: u * u * 60 + 2 * u * t * 400 + t * t * 740, y: u * u * 200 + 2 * u * t * -40 + t * t * 200 }; };
+
+    // Fase bulan (siklus sinodik 29,53 hari dari bulan baru 6 Jan 2000)
+    function moonInfo(d) {
+      const days = (d.getTime() - Date.UTC(2000, 0, 6, 18, 14)) / 86400000;
+      const p = ((days / 29.530588853) % 1 + 1) % 1;
+      const illum = Math.round((1 - Math.cos(2 * Math.PI * p)) / 2 * 100);
+      const names = ['baru', 'sabit awal', 'separuh awal', 'cembung awal', 'purnama', 'cembung akhir', 'separuh akhir', 'sabit akhir'];
+      return { p, illum, name: names[Math.floor(p * 8 + 0.5) % 8] };
+    }
+
+    function setMoon(mi) {
+      const r = 12, k = r * Math.cos(2 * Math.PI * mi.p);
+      const lit = document.getElementById('moonLit');
+      if (!lit) return;
+      lit.setAttribute('d', `M0 ${-r} A${r} ${r} 0 0 1 0 ${r} A${Math.abs(k).toFixed(2)} ${r} 0 0 ${k > 0 ? 0 : 1} 0 ${-r} Z`);
+      lit.setAttribute('transform', mi.p >= 0.5 ? 'scale(-1,1)' : ''); // fase menyusut: sisi terang di kiri
+    }
+
+    // Tiang lampu di cakrawala menyala sesuai jumlah lampu yang aktif
+    function setHorizonLamps(on) {
+      const posts = document.querySelectorAll('#hzLamps .post');
+      const lit = Math.round(on / 8 * posts.length);
+      posts.forEach((p, i) => p.classList.toggle('on', i < lit));
+    }
+
+    function buildScene() {
+      const NS = 'http://www.w3.org/2000/svg';
+      const mk = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); Object.keys(attrs).forEach(k => e.setAttribute(k, attrs[k])); parent.appendChild(e); return e; };
+      const rays = document.getElementById('sunRays');
+      if (rays && !rays.children.length) {
+        for (let i = 0; i < 16; i++) {
+          const a = i * Math.PI / 8, long = i % 2 === 0;
+          mk('line', { x1: (Math.cos(a) * 25).toFixed(1), y1: (Math.sin(a) * 25).toFixed(1), x2: (Math.cos(a) * (long ? 42 : 34)).toFixed(1), y2: (Math.sin(a) * (long ? 42 : 34)).toFixed(1) }, rays);
+        }
+      }
+      const lamps = document.getElementById('hzLamps');
+      if (lamps && !lamps.children.length) {
+        for (let i = 0; i < 6; i++) {
+          const x = 470 + i * 46, g = mk('g', { class: 'post' }, lamps);
+          mk('line', { x1: x, y1: 199, x2: x, y2: 170, class: 'pole' }, g);
+          mk('line', { x1: x, y1: 170, x2: x + 7, y2: 170, class: 'pole' }, g);
+          mk('circle', { cx: x + 7, cy: 172, r: 16, class: 'pglow', fill: 'url(#gLamp)' }, g);
+          mk('circle', { cx: x + 7, cy: 171.5, r: 3, class: 'pbulb' }, g);
+        }
+      }
+      const panels = document.getElementById('hzPanels');
+      if (panels && !panels.children.length) {
+        for (let i = 0; i < 4; i++) {
+          const x = 90 + i * 40;
+          mk('line', { x1: x + 14, y1: 190, x2: x + 14, y2: 182, class: 'pole' }, panels);
+          mk('rect', { x: x, y: 172, width: 30, height: 12, rx: 1.5, transform: `rotate(-16 ${x + 15} 178)`, fill: 'url(#gPanel)', class: 'panel' }, panels);
+        }
+      }
+    }
 
     function updateSun(first) {
       const el = (id) => document.getElementById(id);
@@ -3848,7 +3987,8 @@ async function pickGroqModel() {
         if (now > st.sunset) { prevSet = st.sunset; nextRise = sunCalc(new Date(now.getTime() + 86400000)).sunrise; }
         else { prevSet = sunCalc(new Date(now.getTime() - 86400000)).sunset; nextRise = st.sunrise; }
         t = (now - prevSet) / (nextRise - prevSet);
-        sub = `Malam hari. Matahari terbit pukul ${fmtClock(nextRise)} (${fmtDur(nextRise - now)} lagi).`;
+        const mi = moonInfo(now);
+        sub = `Malam hari. Bulan ${mi.name}, ${mi.illum}% tampak. Matahari terbit pukul ${fmtClock(nextRise)} (${fmtDur(nextRise - now)} lagi).`;
       }
       t = Math.max(0, Math.min(1, t));
       const near = Math.min(Math.abs(now - st.sunrise), Math.abs(now - st.sunset)) < 40 * 60000;
@@ -3857,6 +3997,7 @@ async function pickGroqModel() {
       card.classList.add(!day ? 'phase-night' : (near ? 'phase-dusk' : 'phase-day'));
       if (!day && near) { card.classList.remove('phase-night'); card.classList.add('phase-dusk'); }
 
+      setMoon(moonInfo(now));
       const dot = el(day ? 'sunDot' : 'moonDot');
       const other = el(day ? 'moonDot' : 'sunDot');
       other.style.opacity = '0';
@@ -3922,15 +4063,23 @@ async function pickGroqModel() {
       renderAutoSun();
     }
 
+    function fitSunScene() {
+      const svg = document.querySelector('.sun-svg');
+      if (svg) svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    }
+
     function initSun() {
+      buildScene();
+      fitSunScene();
+      let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(fitSunScene, 150); });
       const stars = document.getElementById('stars');
       if (stars) {
         let seed = 7;
         const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
-        for (let i = 0; i < 16; i++) {
+        for (let i = 0; i < 30; i++) {
           const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          c.setAttribute('cx', (20 + rnd() * 560).toFixed(0));
-          c.setAttribute('cy', (8 + rnd() * 70).toFixed(0));
+          c.setAttribute('cx', (20 + rnd() * 760).toFixed(0));
+          c.setAttribute('cy', (8 + rnd() * 120).toFixed(0));
           c.setAttribute('r', (0.8 + rnd() * 1.2).toFixed(1));
           c.style.animationDelay = (rnd() * 3).toFixed(1) + 's';
           stars.appendChild(c);
