@@ -760,6 +760,46 @@
     .vis-me { margin-left: 8px; padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; color: var(--c-cyan); background: color-mix(in srgb, var(--c-cyan) 14%, transparent); }
     .vis-note { margin-top: 12px; font-size: 11px; line-height: 1.5; color: var(--text-muted); }
 
+    /* ================= MATAHARI HARI INI ================= */
+    .sun-card { padding: 20px 22px; background-size: 100% 100%; }
+    @media (min-width: 640px) { .sun-card { padding: 24px 28px; } }
+    .sun-card.phase-day { background-image: linear-gradient(180deg, rgba(255, 184, 77, 0.17), transparent 65%), linear-gradient(180deg, var(--panel-grad-1), var(--panel-grad-2)); }
+    .sun-card.phase-dusk { background-image: linear-gradient(180deg, rgba(255, 110, 90, 0.2), rgba(120, 90, 200, 0.08) 55%, transparent 80%), linear-gradient(180deg, var(--panel-grad-1), var(--panel-grad-2)); }
+    .sun-card.phase-night { background-image: linear-gradient(180deg, rgba(50, 70, 170, 0.32), transparent 70%), linear-gradient(180deg, var(--panel-grad-1), var(--panel-grad-2)); }
+
+    .sun-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+    .sun-sub { margin-top: 6px; font-size: 14px; font-weight: 600; color: var(--text-body); }
+    .sun-svg { display: block; width: 100%; max-height: 190px; margin-top: 8px; overflow: visible; }
+    .sun-horizon { stroke: var(--panel-border); stroke-width: 1.5; }
+    .sun-arc { fill: none; stroke: var(--text-muted); stroke-opacity: 0.35; stroke-width: 2.2; stroke-dasharray: 1; stroke-dashoffset: 1; stroke-linecap: round; animation: arcDraw 1.8s var(--ease) 0.2s forwards; }
+    .sun-arc-done { fill: none; stroke: var(--c-yellow); stroke-width: 3.6; stroke-linecap: round; transition: stroke-dasharray 1s var(--ease); }
+    @media (min-width: 640px) { .sun-arc { stroke-width: 1.2; } .sun-arc-done { stroke-width: 2.2; } .sun-horizon { stroke-width: 1; } }
+    @keyframes arcDraw { to { stroke-dashoffset: 0; } }
+    .sun-dot { transition: transform 1.6s var(--ease), opacity 0.6s ease; }
+    .sun-core { fill: var(--c-yellow); }
+    .sun-glow { fill: var(--c-yellow); opacity: 0.25; animation: sunPulse 3.2s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+    @keyframes sunPulse { to { transform: scale(1.45); opacity: 0.08; } }
+    .moon-core { fill: #dfe7ff; filter: drop-shadow(0 0 8px rgba(190, 205, 255, 0.8)); }
+    #stars circle { fill: #fff; opacity: 0; }
+    .phase-night #stars circle { animation: twinkle 3s ease-in-out infinite; }
+    @keyframes twinkle { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.9; } }
+    html[data-theme="light"] #stars circle { fill: #6b7bb8; }
+
+    .sun-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; }
+    @media (min-width: 640px) { .sun-stats { grid-template-columns: repeat(4, 1fr); } }
+    .sun-stat { padding: 12px 14px; border-radius: 12px; background: var(--sub-bg); border: 1px solid var(--sub-border); display: flex; flex-direction: column; gap: 2px; }
+    .sun-stat span { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+    .sun-stat b { font-size: 1.1rem; font-weight: 800; color: var(--text-primary); font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    .sun-note { margin-top: 12px; font-size: 11px; line-height: 1.5; color: var(--text-muted); }
+
+    .sun-toggle { display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px; border-radius: 999px; font-size: 12.5px; font-weight: 700; cursor: pointer;
+      background: var(--sub-bg); border: 1px solid var(--panel-border); color: var(--text-body); }
+    .sun-toggle.on { border-color: var(--c-yellow); color: var(--text-primary); }
+    .sun-switch { width: 34px; height: 20px; border-radius: 999px; background: var(--bar-empty); position: relative; transition: background-color 0.25s ease; flex-shrink: 0; }
+    .sun-switch i { position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: transform 0.3s var(--ease); }
+    .sun-toggle.on .sun-switch { background: var(--c-yellow); }
+    .sun-toggle.on .sun-switch i { transform: translateX(14px); }
+
     @media (prefers-reduced-motion: reduce) { .intro, .scroll-bar { display: none !important; } }
 
     @media (prefers-reduced-motion: reduce) {
@@ -811,6 +851,7 @@
     <button type="button" class="sb-cmd" onclick="openCmdk()"><span>Perintah cepat</span><kbd>Ctrl K</kbd></button>
     <nav class="sb-nav">
       <a class="nav-link active" href="#sec-home"><span class="nav-dot"></span>Beranda</a>
+      <a class="nav-link" href="#sec-sun"><span class="nav-dot"></span>Matahari</a>
       <a class="nav-link" href="#sec-energy"><span class="nav-dot"></span>Energi</a>
       <a class="nav-link" href="#sec-sensor"><span class="nav-dot"></span>Sensor tegangan</a>
       <a class="nav-link" href="#sec-lamp"><span class="nav-dot"></span>Grafik &amp; lampu</a>
@@ -969,6 +1010,34 @@
           <span class="hero-ring-label">Baterai &middot; <b id="heroPct">0%</b></span>
         </div>
       </div>
+    </section>
+
+    <!-- ================= MATAHARI HARI INI & MODE OTOMATIS SENJA ================= -->
+    <section id="sec-sun" class="hud-panel sun-card phase-day">
+      <div class="sun-head">
+        <div>
+          <h2 class="font-hud font-bold text-[11px] sm:text-xs tracking-wider" style="color: var(--text-primary)">MATAHARI HARI INI</h2>
+          <p id="sunSub" class="sun-sub">Menghitung posisi matahari...</p>
+        </div>
+        <button type="button" id="autoSunBtn" class="sun-toggle" onclick="toggleAutoSun()" aria-pressed="false">
+          <span class="sun-switch"><i></i></span><span id="autoSunText">Otomatis senja: OFF</span>
+        </button>
+      </div>
+      <svg class="sun-svg" viewBox="0 0 600 150" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Posisi matahari hari ini">
+        <g id="stars"></g>
+        <line x1="10" y1="120" x2="590" y2="120" class="sun-horizon"></line>
+        <path d="M40 120 Q300 -40 560 120" pathLength="1" class="sun-arc"></path>
+        <path id="arcDone" d="M40 120 Q300 -40 560 120" pathLength="1" class="sun-arc-done" style="stroke-dasharray: 0 1"></path>
+        <g id="sunDot" class="sun-dot"><circle r="20" class="sun-glow"></circle><circle r="9" class="sun-core"></circle></g>
+        <g id="moonDot" class="sun-dot" style="opacity: 0"><circle r="9" class="moon-core"></circle></g>
+      </svg>
+      <div class="sun-stats">
+        <div class="sun-stat"><span>Terbit</span><b id="sunRise">--:--</b></div>
+        <div class="sun-stat"><span>Puncak</span><b id="sunNoon">--:--</b></div>
+        <div class="sun-stat"><span>Terbenam</span><b id="sunSet">--:--</b></div>
+        <div class="sun-stat"><span>Lama siang</span><b id="sunLen">--</b></div>
+      </div>
+      <p class="sun-note">Mode otomatis menyalakan semua lampu saat matahari terbenam dan mematikannya saat terbit. Hanya berjalan selama dasbor terbuka. Lokasi acuan: Jakarta.</p>
     </section>
 
     <!-- ================= SECTION 0: SYSTEM POWER ANALYTICS & LIVE ENERGY TOPOLOGY ================= -->
@@ -3486,9 +3555,6 @@ async function pickGroqModel() {
       eventLog = [];
       try { localStorage.removeItem('galtech_events'); } catch (e) {}
       renderEvents();
-    initWebBasics();
-    initPresence();
-    updateNotifyUI();
     }
 
     function toggleFullscreen() {
@@ -3740,6 +3806,140 @@ async function pickGroqModel() {
       setInterval(() => publishPresence(false), 10000);
       setInterval(renderVisitors, 5000);
       window.addEventListener('pagehide', () => publishPresence(true));
+    }
+
+    // ================= MATAHARI & MODE OTOMATIS SENJA =================
+    const SITE = { lat: -6.2, lon: 106.82 }; // Jakarta; ubah sesuai lokasi lampu
+    let autoSun = false;
+    let lastAutoKey = '';
+    try { autoSun = localStorage.getItem('galtech_autosun') === '1'; lastAutoKey = localStorage.getItem('galtech_autosun_key') || ''; } catch (e) {}
+
+    // Waktu terbit/terbenam/puncak (rumus NOAA yang disederhanakan)
+    function sunCalc(d) {
+      const rad = Math.PI / 180;
+      const y = d.getFullYear(), m = d.getMonth(), day = d.getDate();
+      const doy = Math.floor((Date.UTC(y, m, day) - Date.UTC(y, 0, 0)) / 86400000);
+      const g = 2 * Math.PI / 365 * (doy - 1);
+      const eq = 229.18 * (0.000075 + 0.001868 * Math.cos(g) - 0.032077 * Math.sin(g) - 0.014615 * Math.cos(2 * g) - 0.040849 * Math.sin(2 * g));
+      const decl = 0.006918 - 0.399912 * Math.cos(g) + 0.070257 * Math.sin(g) - 0.006758 * Math.cos(2 * g) + 0.000907 * Math.sin(2 * g) - 0.002697 * Math.cos(3 * g) + 0.00148 * Math.sin(3 * g);
+      const cosH = Math.cos(90.833 * rad) / (Math.cos(SITE.lat * rad) * Math.cos(decl)) - Math.tan(SITE.lat * rad) * Math.tan(decl);
+      const ha = Math.acos(Math.max(-1, Math.min(1, cosH))) / rad;
+      const base = Date.UTC(y, m, day);
+      const at = (min) => new Date(base + min * 60000);
+      return { sunrise: at(720 - 4 * (SITE.lon + ha) - eq), sunset: at(720 - 4 * (SITE.lon - ha) - eq), noon: at(720 - 4 * SITE.lon - eq) };
+    }
+
+    const fmtClock = (dt) => dt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false }).replace('.', ':');
+    const fmtDur = (ms) => { const mn = Math.max(0, Math.round(ms / 60000)); return `${Math.floor(mn / 60)} j ${mn % 60} mnt`; };
+    const arcPoint = (t) => { const u = 1 - t; return { x: u * u * 40 + 2 * u * t * 300 + t * t * 560, y: u * u * 120 + 2 * u * t * -40 + t * t * 120 }; };
+
+    function updateSun(first) {
+      const el = (id) => document.getElementById(id);
+      if (!el('sunDot')) return;
+      const now = new Date();
+      const st = sunCalc(now);
+      const day = now >= st.sunrise && now <= st.sunset;
+      let t, sub, nextRise;
+      if (day) {
+        t = (now - st.sunrise) / (st.sunset - st.sunrise);
+        sub = `Siang hari. Matahari terbenam dalam ${fmtDur(st.sunset - now)}.`;
+      } else {
+        let prevSet;
+        if (now > st.sunset) { prevSet = st.sunset; nextRise = sunCalc(new Date(now.getTime() + 86400000)).sunrise; }
+        else { prevSet = sunCalc(new Date(now.getTime() - 86400000)).sunset; nextRise = st.sunrise; }
+        t = (now - prevSet) / (nextRise - prevSet);
+        sub = `Malam hari. Matahari terbit pukul ${fmtClock(nextRise)} (${fmtDur(nextRise - now)} lagi).`;
+      }
+      t = Math.max(0, Math.min(1, t));
+      const near = Math.min(Math.abs(now - st.sunrise), Math.abs(now - st.sunset)) < 40 * 60000;
+      const card = el('sec-sun');
+      card.classList.remove('phase-day', 'phase-dusk', 'phase-night');
+      card.classList.add(!day ? 'phase-night' : (near ? 'phase-dusk' : 'phase-day'));
+      if (!day && near) { card.classList.remove('phase-night'); card.classList.add('phase-dusk'); }
+
+      const dot = el(day ? 'sunDot' : 'moonDot');
+      const other = el(day ? 'moonDot' : 'sunDot');
+      other.style.opacity = '0';
+      const p = arcPoint(t);
+      if (first && !REDUCED_MOTION) {
+        const s0 = arcPoint(0);
+        dot.style.transition = 'none';
+        dot.style.transform = `translate(${s0.x}px, ${s0.y}px)`;
+        void dot.getBoundingClientRect();
+        dot.style.transition = '';
+      }
+      requestAnimationFrame(() => { dot.style.opacity = '1'; dot.style.transform = `translate(${p.x}px, ${p.y}px)`; });
+      el('arcDone').style.strokeDasharray = `${day ? t : 0} 1`;
+      el('arcDone').style.opacity = day ? '1' : '0'; // sembunyikan titik sisa saat malam
+
+      el('sunSub').textContent = sub;
+      el('sunRise').textContent = fmtClock(st.sunrise);
+      el('sunNoon').textContent = fmtClock(st.noon);
+      el('sunSet').textContent = fmtClock(st.sunset);
+      el('sunLen').textContent = fmtDur(st.sunset - st.sunrise);
+    }
+
+    // Kunci fase saat ini; berubah tepat saat matahari terbenam / terbit
+    function currentAutoKey() {
+      const now = new Date();
+      const st = sunCalc(now);
+      if (now >= st.sunset) return 'on:' + now.toDateString();
+      if (now >= st.sunrise) return 'off:' + now.toDateString();
+      return 'on:' + new Date(now.getTime() - 86400000).toDateString();
+    }
+
+    function autoSunTick() {
+      if (!autoSun) return;
+      const key = currentAutoKey();
+      if (key === lastAutoKey) return;
+      const turnOn = key.startsWith('on:');
+      const res = setAllLamps(turnOn);
+      if (res === 'fail') return; // perangkat belum terhubung: coba lagi di putaran berikutnya
+      lastAutoKey = key;
+      try { localStorage.setItem('galtech_autosun_key', key); } catch (e) {}
+      addEvent(turnOn ? 'Senja: semua lampu dinyalakan otomatis' : 'Fajar: semua lampu dimatikan otomatis', 'lamp');
+      showToast(turnOn ? 'Matahari terbenam: lampu dinyalakan otomatis.' : 'Matahari terbit: lampu dimatikan otomatis.', 'ok');
+    }
+
+    function renderAutoSun() {
+      const b = document.getElementById('autoSunBtn');
+      if (!b) return;
+      b.setAttribute('aria-pressed', autoSun ? 'true' : 'false');
+      b.classList.toggle('on', autoSun);
+      document.getElementById('autoSunText').textContent = `Otomatis senja: ${autoSun ? 'ON' : 'OFF'}`;
+    }
+
+    function toggleAutoSun() {
+      autoSun = !autoSun;
+      try { localStorage.setItem('galtech_autosun', autoSun ? '1' : '0'); } catch (e) {}
+      if (autoSun) {
+        lastAutoKey = currentAutoKey(); // mulai dari fase sekarang; aksi berikutnya terjadi pada pergantian terbit/terbenam
+        try { localStorage.setItem('galtech_autosun_key', lastAutoKey); } catch (e) {}
+        showToast('Mode otomatis senja aktif. Lampu mengikuti terbit dan terbenam matahari.', 'ok');
+      } else {
+        showToast('Mode otomatis senja dimatikan.', 'ok');
+      }
+      renderAutoSun();
+    }
+
+    function initSun() {
+      const stars = document.getElementById('stars');
+      if (stars) {
+        let seed = 7;
+        const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+        for (let i = 0; i < 16; i++) {
+          const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          c.setAttribute('cx', (20 + rnd() * 560).toFixed(0));
+          c.setAttribute('cy', (8 + rnd() * 70).toFixed(0));
+          c.setAttribute('r', (0.8 + rnd() * 1.2).toFixed(1));
+          c.style.animationDelay = (rnd() * 3).toFixed(1) + 's';
+          stars.appendChild(c);
+        }
+      }
+      updateSun(true);
+      renderAutoSun();
+      setInterval(() => { updateSun(false); autoSunTick(); }, 30000);
+      setTimeout(autoSunTick, 4000);
     }
 
     // ================= PENJADWALAN & TIMER MUNDUR =================
@@ -4584,6 +4784,10 @@ async function pickGroqModel() {
     setTimeout(initReveal, (document.documentElement.classList.contains('no-intro') || REDUCED_MOTION) ? 0 : 1100);
     initPremiumMotion();
     renderEvents();
+    initWebBasics();
+    initPresence();
+    initSun();
+    updateNotifyUI();
     document.getElementById('cmdkInput').addEventListener('input', () => { cmdkSel = 0; renderCmdk(); });
     document.getElementById('cmdk').addEventListener('mousedown', (e) => { if (e.target.id === 'cmdk') closeCmdk(); });
   </script>
