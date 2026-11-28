@@ -807,7 +807,7 @@
     html[data-theme="light"] .sun-card.phase-day { --hill-b: #c3d1e0; --hill-f: #aebfd2; }
     html[data-theme="light"] .sun-card.phase-dusk { --hill-b: #b9a9c9; --hill-f: #a091b4; }
 
-    .sun-svg { margin-top: 4px; shape-rendering: geometricPrecision; }
+    .sun-svg { margin-top: 4px; max-height: none; overflow: hidden; shape-rendering: geometricPrecision; }
     /* Layar lebar: adegan melebar sampai tepi kartu (tanpa tepi bukit yang terpotong) */
     @media (min-width: 640px) { .sun-svg { width: calc(100% + 56px); margin: 4px -28px 0; max-width: none; } }
     .sun-arc { stroke-width: 3; stroke-opacity: 0.3; stroke-dasharray: 1; }
@@ -854,6 +854,78 @@
     .panel { opacity: 0.55; transition: opacity 1s ease; }
     .phase-day .panel { opacity: 1; }
     .phase-dusk .panel { opacity: 0.8; }
+
+    /* ================= CUACA ================= */
+    .wx-card { position: relative; padding: 20px 22px; overflow: hidden; }
+    @media (min-width: 640px) { .wx-card { padding: 26px 30px; } }
+    .wx-card > *:not(.wx-fx):not(svg) { position: relative; z-index: 1; }
+    .wx-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .wx-place { margin-top: 6px; font-size: 14px; font-weight: 700; color: var(--text-body); }
+    .wx-actions { display: flex; gap: 8px; }
+    .wx-btn { padding: 8px 14px; border-radius: 10px; font-size: 12.5px; font-weight: 700; cursor: pointer; background: var(--sub-bg); border: 1px solid var(--panel-border); color: var(--text-body); }
+    .wx-btn-primary { background: var(--c-cyan); border-color: transparent; color: #06121f; }
+
+    .wx-settings { margin-top: 14px; padding: 14px; border-radius: 14px; background: var(--sub-bg); border: 1px solid var(--sub-border); display: flex; flex-direction: column; gap: 12px; animation: gateUp 0.35s var(--ease) both; }
+    .wx-settings[hidden] { display: none !important; }
+    .wx-set-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .wx-set-row input { flex: 1; min-width: 180px; padding: 10px 12px; font-size: 13px; font-weight: 600; border-radius: 10px; background: var(--panel-grad-2); border: 1px solid var(--panel-border); color: var(--text-primary); outline: none; }
+    .wx-set-opts label { display: flex; flex-direction: column; gap: 5px; font-size: 11.5px; font-weight: 600; color: var(--text-muted); flex: 1; min-width: 140px; }
+    .wx-set-opts select { padding: 9px 10px; font-size: 13px; font-weight: 600; border-radius: 10px; background: var(--panel-grad-2); border: 1px solid var(--panel-border); color: var(--text-primary); }
+    .wx-results { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: var(--text-muted); }
+    .wx-result { text-align: left; padding: 10px 12px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; background: var(--panel-grad-2); border: 1px solid var(--panel-border); color: var(--text-body); }
+    .wx-result:hover { border-color: var(--c-cyan); color: var(--text-primary); }
+
+    .wx-main { display: grid; grid-template-columns: 1fr; gap: 18px; margin-top: 18px; align-items: center; }
+    @media (min-width: 768px) { .wx-main { grid-template-columns: 0.9fr 1.1fr; } }
+    .wx-now { display: flex; align-items: center; gap: 18px; }
+    .wx-icon { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; color: var(--c-yellow); flex-shrink: 0; }
+    .wx-icon.big { width: 92px; height: 92px; animation: wxFloat 5s ease-in-out infinite alternate; filter: drop-shadow(0 0 14px color-mix(in srgb, currentColor 40%, transparent)); }
+    .wx-icon.sm { width: 24px; height: 24px; }
+    @keyframes wxFloat { to { transform: translateY(-6px); } }
+    .wx-temp { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: clamp(2.6rem, 6vw, 3.8rem); font-weight: 800; line-height: 1; color: var(--text-primary); letter-spacing: -0.04em; }
+    .wx-temp small { font-size: 0.4em; margin-left: 4px; color: var(--text-muted); font-weight: 700; letter-spacing: 0; }
+    .wx-cond { margin-top: 6px; font-size: 1.05rem; font-weight: 700; color: var(--text-primary); }
+    .wx-sub { font-size: 12.5px; color: var(--text-muted); font-weight: 600; margin-top: 3px; }
+    .wx-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    @media (min-width: 480px) { .wx-grid { grid-template-columns: repeat(3, 1fr); } }
+    .wx-tile { padding: 12px 14px; border-radius: 12px; background: var(--sub-bg); border: 1px solid var(--sub-border); display: flex; flex-direction: column; gap: 3px; }
+    .wx-tile span { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+    .wx-tile b { font-size: 0.98rem; font-weight: 800; color: var(--text-primary); }
+
+    .wx-solar { margin-top: 18px; padding: 14px 16px; border-radius: 14px; background: var(--sub-bg); border: 1px solid var(--sub-border); }
+    .wx-solar-top { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 12.5px; font-weight: 600; color: var(--text-muted); }
+    .wx-solar-top b { color: var(--c-yellow); font-weight: 800; }
+    .wx-bar { height: 8px; border-radius: 999px; background: var(--bar-empty); margin: 10px 0 6px; overflow: hidden; }
+    .wx-bar i { display: block; height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg, var(--c-cyan), var(--c-yellow)); transition: width 1.2s var(--ease); }
+    .wx-alert { margin-top: 12px; padding: 11px 14px; border-radius: 12px; font-size: 13px; font-weight: 700; color: var(--text-primary); background: color-mix(in srgb, var(--c-cyan) 14%, transparent); border: 1px solid color-mix(in srgb, var(--c-cyan) 45%, transparent); }
+    .wx-alert[hidden] { display: none !important; }
+
+    .wx-sec-title { margin: 20px 0 10px; font-size: 12px; font-weight: 800; letter-spacing: 0.04em; color: var(--text-muted); }
+    .wx-hourly { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x proximity; }
+    .wx-hour { flex: 0 0 66px; scroll-snap-align: start; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px; border-radius: 14px; background: var(--sub-bg); border: 1px solid var(--sub-border); animation: gateUp 0.5s var(--ease) both; }
+    .wx-hour:first-child { border-color: var(--c-cyan); }
+    .wx-h-t { font-size: 11px; color: var(--text-muted); font-weight: 700; }
+    .wx-h-v { font-size: 1rem; color: var(--text-primary); font-weight: 800; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    .wx-h-r { font-size: 10.5px; color: var(--c-cyan); font-weight: 700; }
+    .wx-daily { display: flex; flex-direction: column; gap: 6px; }
+    .wx-day { display: grid; grid-template-columns: 1fr 24px 1.2fr 0.8fr auto; gap: 12px; align-items: center; padding: 10px 14px; border-radius: 12px; background: var(--sub-bg); border: 1px solid var(--sub-border); font-size: 13px; font-weight: 600; color: var(--text-body); animation: gateUp 0.5s var(--ease) both; }
+    .wx-d-n { color: var(--text-primary); font-weight: 800; text-transform: capitalize; }
+    .wx-d-r { color: var(--c-cyan); font-size: 12px; }
+    .wx-d-t { font-family: 'JetBrains Mono', ui-monospace, monospace; color: var(--text-primary); }
+    @media (max-width: 560px) { .wx-day { grid-template-columns: 1fr 24px auto; } .wx-d-c, .wx-d-r { display: none; } }
+    .wx-note { margin-top: 14px; font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+
+    /* Efek latar cuaca (hanya transform/opacity) */
+    .wx-fx { position: absolute !important; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; border-radius: inherit; }
+    .wx-fx.sunny { background: radial-gradient(60% 80% at 90% 0%, rgba(255, 184, 77, 0.2), transparent 70%); }
+    .wx-fx.cloudy { background: linear-gradient(180deg, rgba(150, 165, 190, 0.12), transparent 60%); }
+    .wx-fx.night { background: linear-gradient(180deg, rgba(50, 70, 170, 0.22), transparent 70%); }
+    .wx-fx.rain, .wx-fx.snow { background: linear-gradient(180deg, rgba(90, 110, 150, 0.18), transparent 70%); }
+    .wx-fx.rain::before, .wx-fx.snow::before { content: ''; position: absolute; left: 0; right: 0; top: -100%; height: 200%; will-change: transform; animation: wxFall 0.9s linear infinite; }
+    .wx-fx.rain::before { background-image: repeating-linear-gradient(105deg, transparent 0 14px, rgba(160, 190, 255, 0.28) 14px 15px); background-size: 100% 100%; opacity: 0.5; }
+    .wx-fx.snow::before { background-image: radial-gradient(circle, rgba(255, 255, 255, 0.8) 1.5px, transparent 2px); background-size: 34px 34px; animation-duration: 7s; opacity: 0.6; }
+    @keyframes wxFall { to { transform: translateY(50%); } }
+    html[data-theme="light"] .wx-fx.rain::before { background-image: repeating-linear-gradient(105deg, transparent 0 14px, rgba(60, 100, 190, 0.22) 14px 15px); }
 
     @media (prefers-reduced-motion: reduce) { .intro, .scroll-bar { display: none !important; } }
 
@@ -907,6 +979,7 @@
     <nav class="sb-nav">
       <a class="nav-link active" href="#sec-home"><span class="nav-dot"></span>Beranda</a>
       <a class="nav-link" href="#sec-sun"><span class="nav-dot"></span>Matahari</a>
+      <a class="nav-link" href="#sec-weather"><span class="nav-dot"></span>Cuaca</a>
       <a class="nav-link" href="#sec-energy"><span class="nav-dot"></span>Energi</a>
       <a class="nav-link" href="#sec-sensor"><span class="nav-dot"></span>Sensor tegangan</a>
       <a class="nav-link" href="#sec-lamp"><span class="nav-dot"></span>Grafik &amp; lampu</a>
@@ -977,7 +1050,8 @@
           </div>
 
           <!-- Grid Tombol Pengaturan -->
-          <span id="visChip" class="vis-chip" title="Perangkat yang sedang membuka dasbor"><span class="vis-dot"></span><b id="visChipN">1</b> online</span>
+          <a id="wxChip" class="vis-chip" href="#sec-weather" title="Cuaca saat ini" hidden><svg class="wx-icon sm" viewBox="0 0 24 24"><use id="wxChipIcon" href="#i-cloud"></use></svg><b id="wxChipT">--</b></a>
+            <span id="visChip" class="vis-chip" title="Perangkat yang sedang membuka dasbor"><span class="vis-dot"></span><b id="visChipN">1</b> online</span>
             <div class="hdr-btns grid grid-cols-3 sm:flex sm:flex-wrap items-center gap-1.5 sm:gap-2">
             <button id="headerMicBtn" onclick="toggleVoiceControl()"
               class="font-hud font-bold text-[8px] sm:text-[9px] px-2 sm:px-2.5 py-2.5 border border-hud-cyan/70 text-hud-cyan hover:bg-hud-cyan hover:text-black transition cursor-pointer text-center tracking-wider"
@@ -1121,7 +1195,79 @@
         <div class="sun-stat"><span>Terbenam</span><b id="sunSet">--:--</b></div>
         <div class="sun-stat"><span>Lama siang</span><b id="sunLen">--</b></div>
       </div>
-      <p class="sun-note">Mode otomatis menyalakan semua lampu saat matahari terbenam dan mematikannya saat terbit. Hanya berjalan selama dasbor terbuka. Lokasi acuan: Jakarta.</p>
+      <p class="sun-note">Mode otomatis menyalakan semua lampu saat matahari terbenam dan mematikannya saat terbit. Hanya berjalan selama dasbor terbuka. Lokasi acuan: <b id="sunLoc">Jakarta</b>.</p>
+    </section>
+
+    <!-- ================= CUACA REAL-TIME ================= -->
+    <section id="sec-weather" class="hud-panel wx-card">
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></symbol>
+        <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol>
+        <symbol id="i-part" viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><path d="M8 2v1.5M2 8h1.5M3.8 3.8l1 1M12.2 3.8l-1 1"/><path d="M9 20h8.5a3.5 3.5 0 0 0 .5-6.95A4.8 4.8 0 0 0 9.2 12.3 4 4 0 0 0 9 20z"/></symbol>
+        <symbol id="i-partn" viewBox="0 0 24 24"><path d="M10 6.5A4.5 4.5 0 1 1 5 2.2a3.6 3.6 0 0 0 5 4.3z"/><path d="M9 20h8.5a3.5 3.5 0 0 0 .5-6.95A4.8 4.8 0 0 0 9.2 12.3 4 4 0 0 0 9 20z"/></symbol>
+        <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 19h10a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7.1 10.1 4.5 4.5 0 0 0 7 19z"/></symbol>
+        <symbol id="i-rain" viewBox="0 0 24 24"><path d="M7 15h10a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7.1 6.1 4.5 4.5 0 0 0 7 15z"/><path d="M8 18.5l-1 2.5M12 18.5l-1 2.5M16 18.5l-1 2.5"/></symbol>
+        <symbol id="i-storm" viewBox="0 0 24 24"><path d="M7 15h10a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7.1 6.1 4.5 4.5 0 0 0 7 15z"/><path d="M12.5 15l-2.5 3.5h3L11 22"/></symbol>
+        <symbol id="i-fog" viewBox="0 0 24 24"><path d="M4 9h16M6 13h12M4 17h16"/></symbol>
+        <symbol id="i-snow" viewBox="0 0 24 24"><path d="M7 15h10a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7.1 6.1 4.5 4.5 0 0 0 7 15z"/><path d="M8 19v.01M12 21v.01M16 19v.01" stroke-width="2.6"/></symbol>
+      </svg>
+      <div class="wx-fx" id="wxFx"></div>
+      <div class="wx-head">
+        <div>
+          <h2 class="font-hud font-bold text-[11px] sm:text-xs tracking-wider" style="color: var(--text-primary)">CUACA SAAT INI</h2>
+          <p id="wxPlace" class="wx-place">Memuat lokasi...</p>
+        </div>
+        <div class="wx-actions">
+          <button type="button" class="wx-btn" onclick="loadWeather(true)">Segarkan</button>
+          <button type="button" class="wx-btn" onclick="toggleWxSettings()" aria-expanded="false" id="wxSetBtn">Pengaturan</button>
+        </div>
+      </div>
+
+      <div id="wxSettings" class="wx-settings" hidden>
+        <div class="wx-set-row">
+          <input id="wxSearch" type="text" placeholder="Cari kota atau wilayah (mis. Bandung)" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();searchPlace();}" />
+          <button type="button" class="wx-btn wx-btn-primary" onclick="searchPlace()">Cari</button>
+          <button type="button" class="wx-btn" onclick="useMyLocation()">Lokasi saya</button>
+        </div>
+        <div id="wxResults" class="wx-results"></div>
+        <div class="wx-set-row wx-set-opts">
+          <label>Suhu<select id="wxUnitSel" onchange="setWxOpt('unit', this.value)"><option value="celsius">Celsius (&deg;C)</option><option value="fahrenheit">Fahrenheit (&deg;F)</option></select></label>
+          <label>Kecepatan angin<select id="wxWindSel" onchange="setWxOpt('wind', this.value)"><option value="kmh">km/jam</option><option value="ms">m/detik</option><option value="mph">mph</option></select></label>
+          <label>Perbarui otomatis<select id="wxIntSel" onchange="setWxOpt('interval', +this.value)"><option value="10">Tiap 10 menit</option><option value="30">Tiap 30 menit</option><option value="60">Tiap 1 jam</option></select></label>
+        </div>
+      </div>
+
+      <div class="wx-main">
+        <div class="wx-now">
+          <svg class="wx-icon big" viewBox="0 0 24 24" aria-hidden="true"><use id="wxIcon" href="#i-cloud"></use></svg>
+          <div>
+            <div class="wx-temp"><span id="wxTemp">--</span><small id="wxUnit">&deg;C</small></div>
+            <div id="wxCond" class="wx-cond">Memuat...</div>
+            <div id="wxFeels" class="wx-sub"></div>
+          </div>
+        </div>
+        <div class="wx-grid">
+          <div class="wx-tile"><span>Kelembapan</span><b id="wxHum">--</b></div>
+          <div class="wx-tile"><span>Angin</span><b id="wxWind">--</b></div>
+          <div class="wx-tile"><span>Tutupan awan</span><b id="wxCloud">--</b></div>
+          <div class="wx-tile"><span>Curah hujan</span><b id="wxRain">--</b></div>
+          <div class="wx-tile"><span>Indeks UV</span><b id="wxUv">--</b></div>
+          <div class="wx-tile"><span>Radiasi surya</span><b id="wxRad">--</b></div>
+        </div>
+      </div>
+
+      <div class="wx-solar">
+        <div class="wx-solar-top"><span>Potensi tenaga surya sekarang</span><b id="wxSolarLbl">--</b></div>
+        <div class="wx-bar"><i id="wxSolarBar"></i></div>
+        <p id="wxSolarNote" class="wx-sub"></p>
+      </div>
+      <p id="wxAlert" class="wx-alert" hidden></p>
+
+      <div class="wx-sec-title">24 jam ke depan</div>
+      <div id="wxHourly" class="wx-hourly"></div>
+      <div class="wx-sec-title">Prakiraan harian</div>
+      <div id="wxDaily" class="wx-daily"></div>
+      <p id="wxNote" class="wx-note">Sumber data: Open-Meteo.</p>
     </section>
 
     <!-- ================= SECTION 0: SYSTEM POWER ANALYTICS & LIVE ENERGY TOPOLOGY ================= -->
@@ -2811,7 +2957,7 @@ function speakQueue(text) {
         `Data live saat ini: V1 solar ${v[0]} V, V2 baterai ${v[1]} V, V3 step-down ${v[2]} V, V4 beban ${v[3]} V. ` +
         `Lampu menyala: ${on.length ? on.join(', ') : 'tidak ada'} dari 8. Koneksi dasbor: ${link} (hanya berarti dasbor terhubung ke broker, BUKAN bukti ESP32 aktif). ${dev}. ` +
         `Kamu tidak bisa mengontrol lampu secara langsung; kalau pengguna ingin menyalakan atau mematikan lampu, arahkan untuk mengucapkan atau mengetik perintah seperti "nyalakan lampu 1". ` +
-        `Jangan mengarang data sensor selain yang diberikan di atas.`;
+        `${wxSummaryText()} Jangan mengarang data sensor selain yang diberikan di atas.`;
     }
 
     // ----- Cooldown realtime AI gratis -----
@@ -3901,6 +4047,8 @@ async function pickGroqModel() {
 
     // Waktu terbit/terbenam/puncak (rumus NOAA yang disederhanakan)
     function sunCalc(d) {
+      const official = (typeof wxSunFor === 'function') ? wxSunFor(d) : null;
+      if (official) return official;
       const rad = Math.PI / 180;
       const y = d.getFullYear(), m = d.getMonth(), day = d.getDate();
       const doy = Math.floor((Date.UTC(y, m, day) - Date.UTC(y, 0, 0)) / 86400000);
@@ -4089,6 +4237,256 @@ async function pickGroqModel() {
       renderAutoSun();
       setInterval(() => { updateSun(false); autoSunTick(); }, 30000);
       setTimeout(autoSunTick, 4000);
+    }
+
+    // ================= CUACA REAL-TIME (Open-Meteo, gratis tanpa kunci) =================
+    const WX_DEFAULT = { name: 'Jakarta', admin: 'DKI Jakarta', country: 'Indonesia', lat: -6.2, lon: 106.82, unit: 'celsius', wind: 'kmh', interval: 30 };
+    let wxCfg = Object.assign({}, WX_DEFAULT);
+    try { Object.assign(wxCfg, JSON.parse(localStorage.getItem('galtech_wx_cfg') || '{}')); } catch (e) {}
+    let wxData = null;
+    let wxLoading = false;
+    let wxPlaces = [];
+
+    const WX_CODES = {
+      0: ['Cerah', 'sun'], 1: ['Cerah berawan', 'part'], 2: ['Berawan sebagian', 'part'], 3: ['Mendung', 'cloud'],
+      45: ['Berkabut', 'fog'], 48: ['Kabut tebal', 'fog'],
+      51: ['Gerimis ringan', 'rain'], 53: ['Gerimis', 'rain'], 55: ['Gerimis lebat', 'rain'], 56: ['Gerimis beku', 'rain'], 57: ['Gerimis beku lebat', 'rain'],
+      61: ['Hujan ringan', 'rain'], 63: ['Hujan sedang', 'rain'], 65: ['Hujan lebat', 'rain'], 66: ['Hujan beku', 'rain'], 67: ['Hujan beku lebat', 'rain'],
+      71: ['Salju ringan', 'snow'], 73: ['Salju', 'snow'], 75: ['Salju lebat', 'snow'], 77: ['Butiran salju', 'snow'],
+      80: ['Hujan lokal ringan', 'rain'], 81: ['Hujan lokal', 'rain'], 82: ['Hujan lokal deras', 'rain'], 85: ['Hujan salju', 'snow'], 86: ['Hujan salju lebat', 'snow'],
+      95: ['Badai petir', 'storm'], 96: ['Badai petir & es', 'storm'], 99: ['Badai petir lebat', 'storm']
+    };
+
+    function wxInfo(code, isDay) {
+      const e = WX_CODES[code] || ['Tidak diketahui', 'cloud'];
+      let icon = e[1];
+      if (!isDay) { if (icon === 'sun') icon = 'moon'; else if (icon === 'part') icon = 'partn'; }
+      return { text: e[0], icon, kind: e[1] };
+    }
+
+    const wxUnitLbl = () => wxCfg.unit === 'fahrenheit' ? '\u00B0F' : '\u00B0C';
+    const wxWindLbl = () => ({ kmh: 'km/j', ms: 'm/s', mph: 'mph' }[wxCfg.wind] || 'km/j');
+    const wxDir = (deg) => ['U', 'TL', 'T', 'TG', 'S', 'BD', 'B', 'BL'][Math.round((deg || 0) / 45) % 8];
+    const wxUvLbl = (u) => u < 3 ? 'Rendah' : (u < 6 ? 'Sedang' : (u < 8 ? 'Tinggi' : (u < 11 ? 'Sangat tinggi' : 'Ekstrem')));
+    function saveWxCfg() { try { localStorage.setItem('galtech_wx_cfg', JSON.stringify(wxCfg)); } catch (e) {} }
+    function wxCacheKey() { return [wxCfg.lat, wxCfg.lon, wxCfg.unit, wxCfg.wind].join('|'); }
+    function wxPlaceText() { return [wxCfg.name, wxCfg.admin, wxCfg.country].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(', '); }
+
+    // Jam terbit/terbenam resmi dari data cuaca (lebih akurat daripada rumus), aman untuk zona waktu berbeda
+    function wxSunFor(d) {
+      try {
+        if (!wxData || !wxData.d.daily) return null;
+        const off = (wxData.d.utc_offset_seconds || 0) * 1000;
+        const key = new Date(d.getTime() + off).toISOString().slice(0, 10);
+        const i = wxData.d.daily.time.indexOf(key);
+        if (i < 0) return null;
+        const toDate = (str) => new Date(Date.parse(str + ':00Z') - off);
+        const sr = toDate(wxData.d.daily.sunrise[i]), ss = toDate(wxData.d.daily.sunset[i]);
+        return { sunrise: sr, sunset: ss, noon: new Date((sr.getTime() + ss.getTime()) / 2) };
+      } catch (e) { return null; }
+    }
+
+    function applyLocation() {
+      SITE.lat = wxCfg.lat; SITE.lon = wxCfg.lon;
+      const loc = document.getElementById('sunLoc'); if (loc) loc.textContent = wxCfg.name;
+      const p = document.getElementById('wxPlace'); if (p) p.textContent = wxPlaceText();
+    }
+
+    async function loadWeather(manual) {
+      if (wxLoading) return;
+      wxLoading = true;
+      const note = document.getElementById('wxNote');
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${wxCfg.lat}&longitude=${wxCfg.lon}`
+        + `&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,is_day,uv_index`
+        + `&hourly=temperature_2m,precipitation_probability,weather_code,shortwave_radiation,is_day`
+        + `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,uv_index_max`
+        + `&timezone=auto&past_days=1&forecast_days=3&temperature_unit=${wxCfg.unit}&wind_speed_unit=${wxCfg.wind}`;
+      const ctrl = new AbortController();
+      const to = setTimeout(() => ctrl.abort(), 12000);
+      try {
+        const r = await fetch(url, { signal: ctrl.signal });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const d = await r.json();
+        if (!d || !d.current) throw new Error('Data tidak lengkap');
+        wxData = { d, ts: Date.now(), key: wxCacheKey() };
+        try { localStorage.setItem('galtech_wx_cache', JSON.stringify(wxData)); } catch (e) {}
+        renderWeather(false);
+        if (manual) showToast('Cuaca diperbarui.', 'ok');
+      } catch (e) {
+        let cached = null;
+        try { cached = JSON.parse(localStorage.getItem('galtech_wx_cache') || 'null'); } catch (e2) {}
+        if (cached && cached.key === wxCacheKey() && cached.d && cached.d.current) {
+          wxData = cached;
+          renderWeather(true);
+        } else if (note) {
+          note.textContent = 'Gagal memuat cuaca (' + (e.name === 'AbortError' ? 'waktu habis' : e.message) + '). Periksa koneksi internet lalu tekan Segarkan.';
+          document.getElementById('wxCond').textContent = 'Tidak tersedia';
+        }
+        if (manual) showToast('Gagal memuat cuaca.', 'err');
+      } finally {
+        clearTimeout(to);
+        wxLoading = false;
+      }
+    }
+
+    function renderWeather(stale) {
+      if (!wxData) return;
+      const d = wxData.d, c = d.current, el = (id) => document.getElementById(id);
+      const info = wxInfo(c.weather_code, c.is_day);
+      const hourKey = String(c.time).slice(0, 13);
+      const hi = Math.max(0, d.hourly.time.findIndex(t => t.slice(0, 13) === hourKey));
+      const rad = Math.round(d.hourly.shortwave_radiation[hi] || 0);
+
+      el('wxPlace').textContent = wxPlaceText();
+      el('wxIcon').setAttribute('href', '#i-' + info.icon);
+      tweenNumber(el('wxTemp'), Math.round(c.temperature_2m), 0);
+      el('wxUnit').textContent = wxUnitLbl();
+      el('wxCond').textContent = info.text;
+      el('wxFeels').textContent = `Terasa seperti ${Math.round(c.apparent_temperature)}${wxUnitLbl()}`;
+      el('wxHum').textContent = Math.round(c.relative_humidity_2m) + '%';
+      el('wxWind').textContent = `${Math.round(c.wind_speed_10m)} ${wxWindLbl()} ${wxDir(c.wind_direction_10m)}`;
+      el('wxCloud').textContent = Math.round(c.cloud_cover) + '%';
+      el('wxRain').textContent = (c.precipitation || 0).toFixed(1) + ' mm';
+      const uv = c.uv_index == null ? 0 : c.uv_index;
+      el('wxUv').textContent = `${uv.toFixed(1)} (${wxUvLbl(uv)})`;
+      el('wxRad').textContent = rad + ' W/m\u00B2';
+
+      // Potensi tenaga surya dari radiasi matahari saat ini
+      const pct = Math.max(0, Math.min(100, rad / 10));
+      const lbl = rad < 30 ? 'Hampir nol' : (rad < 250 ? 'Rendah' : (rad < 550 ? 'Sedang' : (rad < 800 ? 'Tinggi' : 'Sangat tinggi')));
+      el('wxSolarLbl').textContent = `${lbl} (${rad} W/m\u00B2)`;
+      el('wxSolarBar').style.width = pct + '%';
+      const todayKey = String(c.time).slice(0, 10);
+      let peak = 0, peakH = '';
+      d.hourly.time.forEach((t, i) => { if (t.slice(0, 10) === todayKey && (d.hourly.shortwave_radiation[i] || 0) > peak) { peak = d.hourly.shortwave_radiation[i]; peakH = t.slice(11, 16); } });
+      el('wxSolarNote').textContent = peak > 0 ? `Puncak radiasi hari ini sekitar ${Math.round(peak)} W/m\u00B2 pukul ${peakH}.` : 'Tidak ada radiasi surya signifikan hari ini.';
+
+      // Peringatan hujan 12 jam ke depan
+      const alertEl = el('wxAlert');
+      let rainAt = -1;
+      for (let i = hi + 1; i <= hi + 12 && i < d.hourly.time.length; i++) { if ((d.hourly.precipitation_probability[i] || 0) >= 60) { rainAt = i; break; } }
+      if (rainAt >= 0) {
+        alertEl.hidden = false;
+        alertEl.textContent = `Kemungkinan hujan sekitar pukul ${d.hourly.time[rainAt].slice(11, 16)} (${d.hourly.precipitation_probability[rainAt]}%). Produksi tenaga surya bisa turun.`;
+      } else { alertEl.hidden = true; }
+
+      // 24 jam ke depan
+      const hb = el('wxHourly'); hb.textContent = '';
+      for (let k = 0; k < 24 && hi + k < d.hourly.time.length; k++) {
+        const i = hi + k, hinfo = wxInfo(d.hourly.weather_code[i], d.hourly.is_day ? d.hourly.is_day[i] : 1);
+        const it = document.createElement('div'); it.className = 'wx-hour'; it.style.animationDelay = (k * 25) + 'ms';
+        it.innerHTML = '<span class="wx-h-t"></span><svg class="wx-icon sm" viewBox="0 0 24 24"><use></use></svg><b class="wx-h-v"></b><span class="wx-h-r"></span>';
+        it.querySelector('.wx-h-t').textContent = k === 0 ? 'Kini' : d.hourly.time[i].slice(11, 13) + ':00';
+        it.querySelector('use').setAttribute('href', '#i-' + hinfo.icon);
+        it.querySelector('.wx-h-v').textContent = Math.round(d.hourly.temperature_2m[i]) + '\u00B0';
+        it.querySelector('.wx-h-r').textContent = (d.hourly.precipitation_probability[i] || 0) + '%';
+        hb.appendChild(it);
+      }
+
+      // Prakiraan harian (mulai hari ini)
+      const db = el('wxDaily'); db.textContent = '';
+      const di0 = Math.max(0, d.daily.time.indexOf(todayKey));
+      for (let k = di0; k < d.daily.time.length; k++) {
+        const dinfo = wxInfo(d.daily.weather_code[k], 1);
+        const row = document.createElement('div'); row.className = 'wx-day'; row.style.animationDelay = ((k - di0) * 80) + 'ms';
+        row.innerHTML = '<span class="wx-d-n"></span><svg class="wx-icon sm" viewBox="0 0 24 24"><use></use></svg><span class="wx-d-c"></span><span class="wx-d-r"></span><b class="wx-d-t"></b>';
+        row.querySelector('.wx-d-n').textContent = k === di0 ? 'Hari ini' : (k === di0 + 1 ? 'Besok' : new Date(d.daily.time[k] + 'T12:00:00').toLocaleDateString('id-ID', { weekday: 'long' }));
+        row.querySelector('use').setAttribute('href', '#i-' + dinfo.icon);
+        row.querySelector('.wx-d-c').textContent = dinfo.text;
+        row.querySelector('.wx-d-r').textContent = (d.daily.precipitation_probability_max[k] || 0) + '% hujan';
+        row.querySelector('.wx-d-t').textContent = `${Math.round(d.daily.temperature_2m_max[k])}\u00B0 / ${Math.round(d.daily.temperature_2m_min[k])}\u00B0`;
+        db.appendChild(row);
+      }
+
+      // Efek latar sesuai cuaca
+      const fx = el('wxFx');
+      fx.className = 'wx-fx ' + (info.kind === 'rain' || info.kind === 'storm' ? 'rain' : (info.kind === 'snow' ? 'snow' : (!c.is_day ? 'night' : (info.kind === 'sun' ? 'sunny' : 'cloudy'))));
+
+      // Chip di header
+      const chip = el('wxChip'); chip.hidden = false;
+      el('wxChipIcon').setAttribute('href', '#i-' + info.icon);
+      el('wxChipT').textContent = `${Math.round(c.temperature_2m)}${wxUnitLbl()}`;
+
+      const ago = Math.round((Date.now() - wxData.ts) / 60000);
+      el('wxNote').textContent = (stale ? 'Tidak bisa memperbarui, menampilkan data tersimpan. ' : '') + `Sumber data: Open-Meteo. Diperbarui ${ago < 1 ? 'baru saja' : ago + ' menit lalu'}.`;
+      if (typeof updateSun === 'function') updateSun(false); // jam terbit/terbenam resmi
+    }
+
+    function wxSummaryText() {
+      if (!wxData) return '';
+      const c = wxData.d.current, info = wxInfo(c.weather_code, c.is_day);
+      return `Cuaca di ${wxCfg.name}: ${info.text}, ${Math.round(c.temperature_2m)}${wxUnitLbl()}, kelembapan ${Math.round(c.relative_humidity_2m)}%, awan ${Math.round(c.cloud_cover)}%.`;
+    }
+
+    function toggleWxSettings() {
+      const box = document.getElementById('wxSettings');
+      box.hidden = !box.hidden;
+      document.getElementById('wxSetBtn').setAttribute('aria-expanded', box.hidden ? 'false' : 'true');
+      if (!box.hidden) document.getElementById('wxSearch').focus();
+    }
+
+    function setWxOpt(key, value) {
+      wxCfg[key] = value;
+      saveWxCfg();
+      if (key !== 'interval') loadWeather(false);
+    }
+
+    function setWxLocation(p) {
+      wxCfg.name = p.name; wxCfg.admin = p.admin || ''; wxCfg.country = p.country || '';
+      wxCfg.lat = +(+p.lat).toFixed(4); wxCfg.lon = +(+p.lon).toFixed(4);
+      saveWxCfg();
+      applyLocation();
+      document.getElementById('wxResults').textContent = '';
+      document.getElementById('wxSearch').value = '';
+      wxData = null;
+      loadWeather(false);
+      if (typeof updateSun === 'function') updateSun(true);
+      addEvent('Lokasi cuaca diubah ke ' + wxPlaceText(), 'info');
+    }
+
+    async function searchPlace() {
+      const q = document.getElementById('wxSearch').value.trim();
+      const box = document.getElementById('wxResults');
+      if (q.length < 2) { box.textContent = 'Ketik minimal 2 huruf nama kota.'; return; }
+      box.textContent = 'Mencari...';
+      try {
+        const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=6&language=id&format=json`);
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const j = await r.json();
+        wxPlaces = (j.results || []).map(x => ({ name: x.name, admin: x.admin1, country: x.country, lat: x.latitude, lon: x.longitude }));
+        box.textContent = '';
+        if (!wxPlaces.length) { box.textContent = 'Lokasi tidak ditemukan. Coba nama kota lain.'; return; }
+        wxPlaces.forEach((p, i) => {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'wx-result';
+          b.textContent = [p.name, p.admin, p.country].filter(Boolean).join(', ');
+          b.addEventListener('click', () => setWxLocation(wxPlaces[i]));
+          box.appendChild(b);
+        });
+      } catch (e) { box.textContent = 'Gagal mencari lokasi. Periksa koneksi internet.'; }
+    }
+
+    function useMyLocation() {
+      if (!navigator.geolocation) { showToast('Browser tidak mendukung lokasi.', 'err'); return; }
+      showToast('Meminta izin lokasi...', 'ok');
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setWxLocation({ name: 'Lokasi saya', admin: '', country: '', lat: pos.coords.latitude, lon: pos.coords.longitude }),
+        () => showToast('Izin lokasi ditolak atau tidak tersedia.', 'err'),
+        { timeout: 10000 }
+      );
+    }
+
+    function initWeather() {
+      applyLocation();
+      document.getElementById('wxUnitSel').value = wxCfg.unit;
+      document.getElementById('wxWindSel').value = wxCfg.wind;
+      document.getElementById('wxIntSel').value = String(wxCfg.interval);
+      try { // tampilkan data tersimpan lebih dulu agar langsung terisi
+        const c = JSON.parse(localStorage.getItem('galtech_wx_cache') || 'null');
+        if (c && c.key === wxCacheKey() && c.d && c.d.current) { wxData = c; renderWeather(Date.now() - c.ts > wxCfg.interval * 60000); }
+      } catch (e) {}
+      loadWeather(false);
+      setInterval(() => { if (!document.hidden && (!wxData || Date.now() - wxData.ts >= wxCfg.interval * 60000)) loadWeather(false); }, 60000);
     }
 
     // ================= PENJADWALAN & TIMER MUNDUR =================
@@ -4935,6 +5333,7 @@ async function pickGroqModel() {
     renderEvents();
     initWebBasics();
     initPresence();
+    initWeather();
     initSun();
     updateNotifyUI();
     document.getElementById('cmdkInput').addEventListener('input', () => { cmdkSel = 0; renderCmdk(); });
