@@ -976,6 +976,79 @@
     .wx-grid-main { margin-top: 12px; }
     .sun-stats { margin-top: 14px; }
 
+    .deck { opacity: var(--deck-o, 0); transition: opacity 1.8s ease; }
+    .w-cloud { --deck-o: 0.65; }
+    .w-rain { --deck-o: 0.9; }
+    .w-storm { --deck-o: 1; }
+    .w-snow { --deck-o: 0.6; }
+    .w-fog { --deck-o: 0.4; }
+
+    @media (max-width: 639px) {
+      .wx-actions { width: 100%; flex-wrap: wrap; }
+      .wx-actions .sun-toggle { flex: 1 1 100%; justify-content: center; }
+      .wx-actions .wx-btn { flex: 1; }
+    }
+
+    /* ================= RUMAH, PANEL SURYA, DAN DETAIL ADEGAN ================= */
+    .sun-card { --tree-c: #1f4d3b; --tree-c2: #28634a; --mtn: #2a3c55; --wall: #263144; --roof: #3b3347; --rm-off: #1b2535; --rm-floor-off: #111925; --fur-off: #232e40; --lamp-off: #4a566d; }
+    .sun-card.phase-dusk { --tree-c: #1f3c3b; --tree-c2: #27494a; --mtn: #3a3050; --wall: #1f2336; --roof: #2d2740; --rm-off: #141a2b; --rm-floor-off: #0d1220; --fur-off: #1a2133; }
+    .sun-card.phase-night { --tree-c: #0e2020; --tree-c2: #123030; --mtn: #0e1626; --wall: #131a29; --roof: #1b1829; --rm-off: #0b101a; --rm-floor-off: #070b12; --fur-off: #111825; --lamp-off: #2c3547; }
+    html[data-theme="light"] .sun-card { --wall: #b9c6d6; --roof: #8a7b94; --rm-off: #cfd9e6; --rm-floor-off: #b4c0d0; --fur-off: #a9b6c8; --mtn: #b9c8da; --tree-c: #5f9a7c; --tree-c2: #73b08f; }
+    html[data-theme="light"] .sun-card.phase-night { --wall: #4a5670; --roof: #3a3550; --rm-off: #2a3347; --rm-floor-off: #1e2636; --fur-off: #353f55; --mtn: #556482; --tree-c: #2e5a4a; --tree-c2: #3a6b58; }
+
+    .mtn { fill: var(--mtn); opacity: 0.55; transition: fill 1.5s ease; }
+    .trunk { fill: #3a2a22; }
+    .leaf { fill: var(--tree-c); transition: fill 1.5s ease; }
+    .leaf2 { fill: var(--tree-c2); }
+    .tree-top { transform-box: fill-box; transform-origin: 50% 100%; animation: treeSway 5s ease-in-out infinite alternate; }
+    @keyframes treeSway { from { transform: rotate(-1.6deg); } to { transform: rotate(1.6deg); } }
+
+    .house-wall { fill: var(--wall); transition: fill 1.5s ease; }
+    .roof { fill: var(--roof); transition: fill 1.5s ease; }
+    .eave { stroke: rgba(255, 255, 255, 0.12); stroke-width: 1.2; }
+    .rm-bg { fill: var(--rm-off); transition: fill 0.6s ease; }
+    .rm-floor { fill: var(--rm-floor-off); transition: fill 0.6s ease; }
+    .fur { fill: var(--fur-off); transition: fill 0.6s ease; }
+    .rm-wire { stroke: var(--lamp-off); stroke-width: 0.8; }
+    .rm-lamp { fill: var(--lamp-off); transition: fill 0.6s ease; }
+    .rm-glow { opacity: 0; transition: opacity 0.6s ease; }
+    .room.on .rm-bg { fill: #f4c872; }
+    .room.on .rm-floor { fill: #d19a45; }
+    .room.on .fur { fill: #a8742f; }
+    .room.on .rm-lamp { fill: #fff3b0; }
+    .room.on .rm-wire { stroke: #fff3b0; }
+    .room.on .rm-glow { opacity: 1; animation: lampFlicker 3.4s ease-in-out infinite alternate; }
+
+    .roofpanel { opacity: 1; animation: panelGlint 7s ease-in-out infinite; }
+    @keyframes panelGlint { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.45); } }
+    .phase-night .roofpanel { animation: none; opacity: 0.6; }
+    .wire { fill: none; stroke: #6b7790; stroke-width: 1; }
+    .inverter { fill: #3a4558; stroke: rgba(255, 255, 255, 0.15); stroke-width: 0.6; }
+    .inv-led { fill: #5af09a; animation: ledBlink 1.6s ease-in-out infinite; }
+    .phase-night .inv-led { fill: #ff9a4d; }
+    @keyframes ledBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+    .smoke { fill: #cfd6e2; opacity: 0; animation: smokeRise 5.1s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+    @keyframes smokeRise { 0% { opacity: 0; transform: translate(0, 0) scale(0.6); } 15% { opacity: 0.45; } 100% { opacity: 0; transform: translate(14px, -34px) scale(2.4); } }
+
+    .bush { fill: #1d4a35; }
+    .picket { fill: #8b7355; opacity: 0.85; }
+    .mailbox { fill: #c9453a; }
+    .phase-night .bush { fill: #0e2a21; } .phase-night .picket { fill: #4a3f30; }
+
+    .bird { animation: birdFly linear infinite; }
+    .birds { display: none; }
+    .phase-day .w-clear .birds, .phase-day .w-part .birds, .phase-dusk .w-clear .birds { display: inline; }
+    .bird-w { fill: none; stroke: var(--text-body); stroke-width: 1.3; stroke-linecap: round; transform-box: fill-box; transform-origin: center; animation: birdFlap 0.45s ease-in-out infinite alternate; opacity: 0.7; }
+    @keyframes birdFly { from { transform: translateX(-60px); } to { transform: translateX(860px); } }
+    @keyframes birdFlap { from { transform: scaleY(1); } to { transform: scaleY(0.2); } }
+
+    .fireflies { display: none; }
+    .phase-night .w-clear .fireflies, .phase-night .w-part .fireflies, .phase-dusk .w-clear .fireflies { display: inline; }
+    .ff { fill: #e6ff8a; filter: drop-shadow(0 0 3px #e6ff8a); animation: fireflyDrift ease-in-out infinite alternate, fireflyBlink 2.4s ease-in-out infinite; }
+    @keyframes fireflyDrift { from { transform: translate(0, 0); } to { transform: translate(14px, -10px); } }
+    @keyframes fireflyBlink { 0%, 100% { opacity: 0.15; } 50% { opacity: 1; } }
+
     @media (prefers-reduced-motion: reduce) { .intro, .scroll-bar { display: none !important; } }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1237,10 +1310,14 @@
           <radialGradient id="gLamp" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffd36b" stop-opacity="0.85"/><stop offset="1" stop-color="#ffd36b" stop-opacity="0"/></radialGradient>
           <linearGradient id="gHaze" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb06a" stop-opacity="0"/><stop offset="1" stop-color="#ffb06a" stop-opacity="0.45"/></linearGradient>
           <linearGradient id="gFog" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#dfe6ee" stop-opacity="0"/><stop offset="0.5" stop-color="#dfe6ee" stop-opacity="0.55"/><stop offset="1" stop-color="#dfe6ee" stop-opacity="0"/></linearGradient>
+          <linearGradient id="gDeck" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color: var(--wx-cloud-fill)" stop-opacity="0.95"/><stop offset="0.6" style="stop-color: var(--wx-cloud-fill)" stop-opacity="0.55"/><stop offset="1" style="stop-color: var(--wx-cloud-fill)" stop-opacity="0"/></linearGradient>
+          <radialGradient id="gFogR" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#dfe6ee" stop-opacity="0.6"/><stop offset="1" stop-color="#dfe6ee" stop-opacity="0"/></radialGradient>
+          <clipPath id="rmClip"><rect width="47" height="30"/></clipPath>
           <linearGradient id="gPanel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4b86c7"/><stop offset="1" stop-color="#1b3556"/></linearGradient>
         </defs>
         <g id="stars"></g>
         <g class="shoot"><line x1="0" y1="0" x2="-52" y2="20"></line></g>
+        <rect class="deck" x="0" y="0" width="800" height="130" fill="url(#gDeck)"></rect>
         <g class="clouds">
           <g class="cw" transform="translate(0,62)"><g class="cloud" style="animation-duration: 86s; animation-delay: -30s"><ellipse cx="0" cy="0" rx="38" ry="10"></ellipse><ellipse cx="-18" cy="-6" rx="20" ry="10"></ellipse><ellipse cx="16" cy="-9" rx="24" ry="12"></ellipse></g></g>
           <g class="cw" transform="translate(0,112)"><g class="cloud" style="animation-duration: 120s; animation-delay: -75s"><ellipse cx="0" cy="0" rx="46" ry="11"></ellipse><ellipse cx="-22" cy="-7" rx="22" ry="11"></ellipse><ellipse cx="20" cy="-10" rx="28" ry="13"></ellipse></g></g>
@@ -1266,14 +1343,18 @@
           <path id="moonLit" class="moon-lit" d=""></path>
           <circle cx="-3" cy="-3" r="2.2" class="crater"></circle><circle cx="4" cy="3" r="1.6" class="crater"></circle><circle cx="-1" cy="6" r="1.2" class="crater"></circle>
         </g>
+        <g id="skyLife"></g>
         <g class="fog">
-          <rect class="fog-band" x="-200" y="120" width="1000" height="34" fill="url(#gFog)" style="animation-duration: 38s"></rect>
-          <rect class="fog-band" x="-100" y="150" width="1000" height="38" fill="url(#gFog)" style="animation-duration: 52s; animation-delay: -20s"></rect>
-          <rect class="fog-band" x="-300" y="96" width="1000" height="28" fill="url(#gFog)" style="animation-duration: 64s; animation-delay: -35s"></rect>
+          <ellipse class="fog-band" cx="300" cy="150" rx="520" ry="26" fill="url(#gFogR)" style="animation-duration: 38s"></ellipse>
+          <ellipse class="fog-band" cx="520" cy="176" rx="560" ry="30" fill="url(#gFogR)" style="animation-duration: 52s; animation-delay: -20s"></ellipse>
+          <ellipse class="fog-band" cx="200" cy="118" rx="480" ry="24" fill="url(#gFogR)" style="animation-duration: 64s; animation-delay: -35s"></ellipse>
+          <ellipse class="fog-band" cx="620" cy="132" rx="500" ry="22" fill="url(#gFogR)" style="animation-duration: 46s; animation-delay: -12s"></ellipse>
         </g>
+        <path class="mtn" d="M0 172 L60 142 L120 162 L190 130 L260 160 L330 138 L420 168 L500 134 L580 162 L660 140 L740 166 L800 150 L800 215 L0 215 Z"></path>
         <path class="hill hill-b" d="M0 200 L0 184 C80 166 160 190 260 180 S420 158 520 178 S700 190 800 170 L800 215 L0 215 Z"></path>
         <g id="hzPanels"></g>
         <path class="hill hill-f" d="M0 200 L0 196 C120 184 220 200 340 193 S560 182 680 194 S760 196 800 190 L800 215 L0 215 Z"></path>
+        <g id="frontLife"></g>
         <g class="heat" id="heatWaves"></g>
         <g id="hzLamps"></g>
       </svg>
@@ -1293,7 +1374,6 @@
         <div class="sun-stat"><span>Terbenam</span><b id="sunSet">--:--</b></div>
         <div class="sun-stat"><span>Lama siang</span><b id="sunLen">--</b></div>
       </div>
-      <p class="sun-note">Mode otomatis menyalakan semua lampu saat matahari terbenam dan mematikannya saat terbit. Hanya berjalan selama dasbor terbuka. Lokasi acuan: <b id="sunLoc">Jakarta</b>.</p>
       <div class="wx-grid wx-grid-main">
         <div class="wx-tile"><span>Kelembapan</span><b id="wxHum">--</b></div>
         <div class="wx-tile"><span>Angin</span><b id="wxWind">--</b></div>
@@ -3477,6 +3557,7 @@ async function pickGroqModel() {
       const on = lampStates.filter(Boolean).length;
       el('sumLamp').textContent = on;
       setHorizonLamps(on);
+      setHouseLights();
 
       // Hero + status sidebar
       const battOk = v2 > 0.5 && v2 >= 10.5 && v2 <= 15;
@@ -4130,7 +4211,110 @@ async function pickGroqModel() {
       lit.setAttribute('transform', mi.p >= 0.5 ? 'scale(-1,1)' : ''); // fase menyusut: sisi terang di kiri
     }
 
-    // Tiang lampu di cakrawala menyala sesuai jumlah lampu yang aktif
+// ================= RUMAH 8 RUANGAN (lampu 1-8 = ruangan 1-8) =================
+    const ROOMS = [
+      ['Kamar utama', 'bed'], ['Kamar anak', 'kid'], ['Ruang kerja', 'desk'], ['Ruang TV', 'tv'],
+      ['Ruang tamu', 'sofa'], ['Dapur', 'kitchen'], ['Ruang makan', 'dining'], ['Garasi', 'car']
+    ];
+    // perabot per ruangan: [x, y, lebar, tinggi, radius]
+    const FUR = {
+      bed: [[6, 19, 22, 7, 1], [4, 13, 3, 13, 1], [8, 16.5, 7, 3, 1.5], [34, 8, 9, 18, 1]],
+      kid: [[6, 21, 16, 5, 1], [30, 22, 5, 4, 1], [33, 10, 10, 2, 0.5], [8, 12, 6, 6, 1]],
+      desk: [[8, 20, 22, 2.5, 0], [10, 22.5, 2, 3.5, 0], [26, 22.5, 2, 3.5, 0], [14, 13, 9, 7, 1], [32, 19, 6, 7, 1], [38, 6, 6, 12, 0.5]],
+      tv: [[7, 8, 19, 11, 1], [27, 17, 15, 9, 2], [29, 14, 4, 5, 1], [10, 22, 12, 3, 0]],
+      sofa: [[6, 18, 22, 8, 2], [4, 16, 5, 10, 1.5], [30, 22, 9, 4, 0.5], [40, 13, 4, 13, 1]],
+      kitchen: [[3, 18, 29, 8, 0], [3, 6, 29, 6, 0.5], [36, 6, 9, 20, 1], [10, 13, 5, 5, 1]],
+      dining: [[12, 18, 24, 3, 0], [14, 21, 2, 5, 0], [32, 21, 2, 5, 0], [7, 20, 4, 6, 1], [37, 20, 4, 6, 1]],
+      car: [[5, 15, 36, 9, 3], [11, 11, 22, 6, 3], [10, 23, 6, 6, 3], [30, 23, 6, 6, 3]]
+    };
+
+    function buildHouse(mk) {
+      const host = document.getElementById('hzPanels');
+      if (!host || host.children.length) return;
+      const rnd = (() => { let sd = 11; return () => { sd = (sd * 9301 + 49297) % 233280; return sd / 233280; }; })();
+
+      // Pepohonan (goyang pelan tertiup angin)
+      [[96, 1.1], [150, 0.8], [246, 0.7], [560, 0.9], [616, 1.15], [694, 0.85]].forEach(([x, k], n) => {
+        const g = mk('g', { class: 'tree' }, host);
+        mk('rect', { x: x - 2 * k, y: 200 - 26 * k, width: 4 * k, height: 26 * k, class: 'trunk' }, g);
+        const top = mk('g', { class: 'tree-top', style: `animation-delay:${-n * 0.9}s` }, g);
+        mk('circle', { cx: x, cy: 200 - 36 * k, r: 13 * k, class: 'leaf' }, top);
+        mk('circle', { cx: x - 9 * k, cy: 200 - 28 * k, r: 10 * k, class: 'leaf leaf2' }, top);
+        mk('circle', { cx: x + 9 * k, cy: 200 - 28 * k, r: 10 * k, class: 'leaf leaf2' }, top);
+      });
+
+      // Cahaya yang merembes keluar dari jendela saat lampu menyala
+      mk('ellipse', { id: 'houseGlow', cx: 400, cy: 168, rx: 175, ry: 82, fill: 'url(#gLamp)', style: 'opacity:0' }, host);
+
+      // Cerobong + asap
+      mk('rect', { x: 462, y: 104, width: 12, height: 28, class: 'roof' }, host);
+      [0, -1.7, -3.4].forEach(d => mk('circle', { cx: 468, cy: 102, r: 3, class: 'smoke', style: `animation-delay:${d}s` }, host));
+
+      // Dinding & ruangan (penampang rumah 2 lantai, 4 ruangan per lantai)
+      mk('rect', { x: 298, y: 130, width: 204, height: 72, rx: 2, class: 'house-wall' }, host);
+      ROOMS.forEach((r, i) => {
+        const col = i % 4, row = i < 4 ? 0 : 1;
+        const g = mk('g', { class: 'room', transform: `translate(${301 + col * 49.5},${133 + row * 33})` }, host);
+        mk('title', {}, g).textContent = `${r[0]} (Lampu ${i + 1})`;
+        mk('rect', { width: 47, height: 30, class: 'rm-bg' }, g);
+        mk('rect', { y: 26, width: 47, height: 4, class: 'rm-floor' }, g);
+        FUR[r[1]].forEach(f => mk('rect', { x: f[0], y: f[1], width: f[2], height: f[3], rx: f[4], class: 'fur' }, g));
+        mk('line', { x1: 23.5, y1: 0, x2: 23.5, y2: 4.5, class: 'rm-wire' }, g);
+        mk('circle', { cx: 23.5, cy: 6.2, r: 2.2, class: 'rm-lamp' }, g);
+        mk('circle', { cx: 23.5, cy: 8, r: 26, fill: 'url(#gLamp)', class: 'rm-glow', 'clip-path': 'url(#rmClip)' }, g);
+      });
+
+      // Atap + panel surya di kedua sisi
+      mk('polygon', { points: '288,131 400,101 512,131', class: 'roof' }, host);
+      mk('line', { x1: 288, y1: 131, x2: 512, y2: 131, class: 'eave' }, host);
+      [-1, 1].forEach(side => [0.2, 0.42, 0.64, 0.86].forEach((t, n) => {
+        const cx = 400 + side * 112 * t, cy = 101 + 30 * t - 5;
+        const p = mk('rect', { x: cx - 10, y: cy - 3.2, width: 20, height: 6.4, rx: 0.8, transform: `rotate(${side * 15.1} ${cx} ${cy})`, fill: 'url(#gPanel)', class: 'panel roofpanel', style: `animation-delay:${-(n + (side > 0 ? 4 : 0)) * 0.7}s` }, host);
+      }));
+
+      // Inverter di dinding dengan LED berkedip + kabel dari atap
+      mk('path', { d: 'M512 131 L514 134 L514 172', class: 'wire' }, host);
+      mk('rect', { x: 508, y: 172, width: 12, height: 14, rx: 1.5, class: 'inverter' }, host);
+      mk('circle', { cx: 514, cy: 176, r: 1.3, class: 'inv-led' }, host);
+
+      // Detail depan: semak, bunga, pagar, kotak surat, kunang-kunang
+      const front = document.getElementById('frontLife');
+      if (front && !front.children.length) {
+        [[270, 198, 10, 6], [290, 199, 8, 5], [514, 198, 9, 5.5], [570, 199, 12, 6.5], [652, 198, 10, 6], [70, 199, 11, 6]].forEach(([x, y, rx, ry]) => {
+          mk('ellipse', { cx: x, cy: y, rx, ry, class: 'bush' }, front);
+          ['#ff7aa8', '#ffd36b', '#ffffff'].forEach((c, k) => mk('circle', { cx: x - rx * 0.5 + k * rx * 0.5, cy: y - ry * 0.4, r: 1.3, fill: c, opacity: 0.9 }, front));
+        });
+        for (let i = 0; i < 7; i++) mk('rect', { x: 520 + i * 9, y: 190, width: 5, height: 9, rx: 1, class: 'picket' }, front);
+        mk('rect', { x: 522, y: 193, width: 60, height: 1.6, class: 'picket' }, front);
+        mk('rect', { x: 285, y: 187, width: 1.8, height: 12, class: 'pole' }, front);
+        mk('rect', { x: 279, y: 182, width: 13, height: 7, rx: 3, class: 'mailbox' }, front);
+        const ff = mk('g', { class: 'fireflies' }, front);
+        for (let i = 0; i < 8; i++) mk('circle', { cx: (40 + rnd() * 720).toFixed(0), cy: (150 + rnd() * 45).toFixed(0), r: 1.4, class: 'ff', style: `animation-delay:${(-rnd() * 6).toFixed(1)}s;animation-duration:${(5 + rnd() * 4).toFixed(1)}s` }, ff);
+      }
+
+      // Burung terbang di siang hari
+      const life = document.getElementById('skyLife');
+      if (life && !life.children.length) {
+        [[46, 44, -4], [58, 52, -14], [38, 36, -24]].forEach(([y, dur, delay]) => {
+          const w = mk('g', { transform: `translate(0,${y})`, class: 'birds' }, life);
+          const b = mk('g', { class: 'bird', style: `animation-duration:${dur}s;animation-delay:${delay}s` }, w);
+          mk('path', { d: 'M0 0 q3 -3.5 6 0 q3 -3.5 6 0', class: 'bird-w' }, b);
+        });
+      }
+    }
+
+    // Nyalakan ruangan sesuai lampu 1-8 dan cahaya yang merembes keluar rumah
+    function setHouseLights() {
+      const rooms = document.querySelectorAll('#hzPanels .room');
+      if (!rooms.length) return;
+      let lit = 0;
+      rooms.forEach((r, i) => { const on = !!lampStates[i]; r.classList.toggle('on', on); if (on) lit++; });
+      const g = document.getElementById('houseGlow');
+      const card = document.getElementById('sec-sky');
+      if (g && card) g.style.opacity = String((lit / 8) * (card.classList.contains('phase-night') ? 0.95 : (card.classList.contains('phase-dusk') ? 0.7 : 0.25)));
+    }
+
+        // Tiang lampu di cakrawala menyala sesuai jumlah lampu yang aktif
     function setHorizonLamps(on) {
       const posts = document.querySelectorAll('#hzLamps .post');
       const lit = Math.round(on / 8 * posts.length);
@@ -4149,8 +4333,9 @@ async function pickGroqModel() {
       }
       const lamps = document.getElementById('hzLamps');
       if (lamps && !lamps.children.length) {
-        for (let i = 0; i < 6; i++) {
-          const x = 470 + i * 46, g = mk('g', { class: 'post' }, lamps);
+        const POST_X = [232, 524, 600, 668];
+        for (let i = 0; i < POST_X.length; i++) {
+          const x = POST_X[i], g = mk('g', { class: 'post' }, lamps);
           mk('line', { x1: x, y1: 199, x2: x, y2: 170, class: 'pole' }, g);
           mk('line', { x1: x, y1: 170, x2: x + 7, y2: 170, class: 'pole' }, g);
           mk('circle', { cx: x + 7, cy: 172, r: 16, class: 'pglow', fill: 'url(#gLamp)' }, g);
@@ -4165,14 +4350,7 @@ async function pickGroqModel() {
           const p = mk('path', { d, class: 'heat-wave', style: `animation-duration:${dur}s;animation-delay:${-k * 1.3}s;stroke-opacity:${op}` }, heat);
         });
       }
-      const panels = document.getElementById('hzPanels');
-      if (panels && !panels.children.length) {
-        for (let i = 0; i < 4; i++) {
-          const x = 90 + i * 40;
-          mk('line', { x1: x + 14, y1: 190, x2: x + 14, y2: 182, class: 'pole' }, panels);
-          mk('rect', { x: x, y: 172, width: 30, height: 12, rx: 1.5, transform: `rotate(-16 ${x + 15} 178)`, fill: 'url(#gPanel)', class: 'panel' }, panels);
-        }
-      }
+      buildHouse(mk);
     }
 
     function updateSun(first) {
@@ -4213,6 +4391,7 @@ async function pickGroqModel() {
         dot.style.transition = '';
       }
       requestAnimationFrame(() => { dot.style.opacity = '1'; dot.style.transform = `translate(${p.x}px, ${p.y}px)`; });
+      setHouseLights();
       el('arcDone').style.strokeDasharray = `${day ? t : 0} 1`;
       el('arcDone').style.opacity = day ? '1' : '0'; // sembunyikan titik sisa saat malam
 
@@ -4622,7 +4801,7 @@ async function pickGroqModel() {
         while (f.drops.length < n) f.drops.push(newDrop(true));
         f.drops.length = Math.min(f.drops.length, n);
         const light = document.documentElement.getAttribute('data-theme') === 'light';
-        ctx.lineCap = 'round'; ctx.lineWidth = 1.1;
+        ctx.lineCap = 'round'; ctx.lineWidth = 1.3;
         for (const d of f.drops) {
           d.y += d.v * dt; d.x += d.v * dt * f.lean;
           if (d.y > f.groundY) {
@@ -5023,6 +5202,7 @@ async function pickGroqModel() {
       const grid = document.getElementById('lampGrid');
       const dict = I18N[currentLang];
       grid.innerHTML = '';
+      if (typeof setHouseLights === 'function') setHouseLights();
       let activeCount = 0;
       const prevStates = prevLampStates;
       prevLampStates = lampStates.slice();
