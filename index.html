@@ -927,6 +927,55 @@
     @keyframes wxFall { to { transform: translateY(50%); } }
     html[data-theme="light"] .wx-fx.rain::before { background-image: repeating-linear-gradient(105deg, transparent 0 14px, rgba(60, 100, 190, 0.22) 14px 15px); }
 
+    /* ================= KARTU CUACA & MATAHARI TERPADU ================= */
+    #sec-sky { padding-bottom: 22px; }
+    .sky-stage { position: relative; overflow: hidden; margin: 12px -22px 0; width: calc(100% + 44px); isolation: isolate;
+      --wx-cloud-k: 1; --wx-cloud-fill: #fff; --wx-sun-o: 1; --wx-rays-o: 1; --wx-star-o: 1; --gloom-o: 0; --heat-o: 0; --fog-o: 0; }
+    @media (min-width: 640px) { #sec-sky { padding-bottom: 28px; } .sky-stage { margin: 12px -30px 0; width: calc(100% + 60px); } }
+    .sky-stage .sun-svg { width: 100%; margin: 0; display: block; }
+    #skyFx { position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none; }
+    .sky-stage::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: var(--gloom-o); transition: opacity 1.8s ease;
+      background: linear-gradient(180deg, rgba(14, 20, 34, 0.95), rgba(14, 20, 34, 0.15) 85%); }
+    .sky-stage::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: var(--heat-o); transition: opacity 1.8s ease;
+      background: radial-gradient(70% 90% at 50% 20%, rgba(255, 214, 120, 0.3), rgba(255, 150, 60, 0.12) 60%, transparent 85%); }
+
+    .sky-overlay { position: absolute; z-index: 3; left: 28px; top: 14px; display: flex; align-items: center; gap: 14px; padding: 12px 18px 12px 14px; border-radius: 18px;
+      background: color-mix(in srgb, var(--panel-grad-2) 70%, transparent); border: 1px solid var(--panel-border); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+    .sky-overlay .wx-icon.big { width: 64px; height: 64px; }
+    .sky-overlay .wx-temp { font-size: clamp(2rem, 4vw, 2.8rem); }
+    .sky-overlay .wx-cond { margin-top: 3px; font-size: 0.95rem; }
+    @media (max-width: 639px) { .sky-overlay { position: relative; left: auto; top: auto; margin: 12px 22px; } }
+
+    /* Awan: jumlah, warna, dan kegelapan mengikuti cuaca */
+    .cw { transition: opacity 1.6s ease; }
+    .cloud { fill: var(--wx-cloud-fill); opacity: calc(var(--cloud-o) * var(--wx-cloud-k)); }
+    html[data-theme="light"] .cloud { fill: #8fa3bd; }
+    .sun-inner { opacity: var(--wx-sun-o); transform-origin: 0 0; transition: opacity 1.8s ease, transform 1.8s var(--ease); }
+    .sun-rays { opacity: var(--wx-rays-o); transition: opacity 1.8s ease; }
+    #stars { opacity: var(--wx-star-o); transition: opacity 1.8s ease; }
+
+    .w-part { --wx-cloud-k: 1.3; }
+    .w-cloud { --wx-cloud-fill: #b6bfcc; --wx-cloud-k: 1.7; --wx-sun-o: 0.4; --wx-rays-o: 0; --wx-star-o: 0.3; --gloom-o: 0.25; }
+    .w-rain { --wx-cloud-fill: #7b879b; --wx-cloud-k: 1.9; --wx-sun-o: 0.1; --wx-rays-o: 0; --wx-star-o: 0.1; --gloom-o: 0.42; }
+    .w-storm { --wx-cloud-fill: #475063; --wx-cloud-k: 2; --wx-sun-o: 0; --wx-rays-o: 0; --wx-star-o: 0; --gloom-o: 0.62; }
+    .w-snow { --wx-cloud-fill: #dfe6f0; --wx-cloud-k: 1.6; --wx-sun-o: 0.3; --wx-rays-o: 0; --wx-star-o: 0.25; --gloom-o: 0.15; }
+    .w-fog { --wx-cloud-k: 0.6; --wx-sun-o: 0.3; --wx-rays-o: 0; --wx-star-o: 0.2; --fog-o: 1; --gloom-o: 0.12; }
+    .w-hot { --heat-o: 1; --wx-cloud-k: 0.7; }
+    .w-hot .sun-inner { transform: scale(1.22); }
+    .w-hot .sun-glow { animation-duration: 2s; }
+    .w-hot .sun-rays line { stroke: #fff3b0; stroke-width: 2.8; }
+
+    .fog { opacity: var(--fog-o); transition: opacity 1.8s ease; }
+    .fog-band { animation: fogDrift linear infinite alternate; }
+    @keyframes fogDrift { from { transform: translateX(-90px); } to { transform: translateX(90px); } }
+
+    .heat { opacity: var(--heat-o); transition: opacity 1.8s ease; }
+    .heat-wave { fill: none; stroke: #fff; stroke-width: 1.4; animation: heatMove linear infinite; }
+    @keyframes heatMove { to { transform: translateX(40px); } }
+
+    .wx-grid-main { margin-top: 12px; }
+    .sun-stats { margin-top: 14px; }
+
     @media (prefers-reduced-motion: reduce) { .intro, .scroll-bar { display: none !important; } }
 
     @media (prefers-reduced-motion: reduce) {
@@ -978,8 +1027,7 @@
     <button type="button" class="sb-cmd" onclick="openCmdk()"><span>Perintah cepat</span><kbd>Ctrl K</kbd></button>
     <nav class="sb-nav">
       <a class="nav-link active" href="#sec-home"><span class="nav-dot"></span>Beranda</a>
-      <a class="nav-link" href="#sec-sun"><span class="nav-dot"></span>Matahari</a>
-      <a class="nav-link" href="#sec-weather"><span class="nav-dot"></span>Cuaca</a>
+      <a class="nav-link" href="#sec-sky"><span class="nav-dot"></span>Cuaca &amp; matahari</a>
       <a class="nav-link" href="#sec-energy"><span class="nav-dot"></span>Energi</a>
       <a class="nav-link" href="#sec-sensor"><span class="nav-dot"></span>Sensor tegangan</a>
       <a class="nav-link" href="#sec-lamp"><span class="nav-dot"></span>Grafik &amp; lampu</a>
@@ -1050,7 +1098,7 @@
           </div>
 
           <!-- Grid Tombol Pengaturan -->
-          <a id="wxChip" class="vis-chip" href="#sec-weather" title="Cuaca saat ini" hidden><svg class="wx-icon sm" viewBox="0 0 24 24"><use id="wxChipIcon" href="#i-cloud"></use></svg><b id="wxChipT">--</b></a>
+          <a id="wxChip" class="vis-chip" href="#sec-sky" title="Cuaca saat ini" hidden><svg class="wx-icon sm" viewBox="0 0 24 24"><use id="wxChipIcon" href="#i-cloud"></use></svg><b id="wxChipT">--</b></a>
             <span id="visChip" class="vis-chip" title="Perangkat yang sedang membuka dasbor"><span class="vis-dot"></span><b id="visChipN">1</b> online</span>
             <div class="hdr-btns grid grid-cols-3 sm:flex sm:flex-wrap items-center gap-1.5 sm:gap-2">
             <button id="headerMicBtn" onclick="toggleVoiceControl()"
@@ -1141,65 +1189,8 @@
       </div>
     </section>
 
-    <!-- ================= MATAHARI HARI INI & MODE OTOMATIS SENJA ================= -->
-    <section id="sec-sun" class="hud-panel sun-card phase-day">
-      <div class="sun-head">
-        <div>
-          <h2 class="font-hud font-bold text-[11px] sm:text-xs tracking-wider" style="color: var(--text-primary)">MATAHARI HARI INI</h2>
-          <p id="sunSub" class="sun-sub">Menghitung posisi matahari...</p>
-        </div>
-        <button type="button" id="autoSunBtn" class="sun-toggle" onclick="toggleAutoSun()" aria-pressed="false">
-          <span class="sun-switch"><i></i></span><span id="autoSunText">Otomatis senja: OFF</span>
-        </button>
-      </div>
-      <svg class="sun-svg" viewBox="0 0 800 215" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Posisi matahari dan bulan hari ini">
-        <defs>
-          <radialGradient id="gSun" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff7cf"/><stop offset="0.5" stop-color="#ffc54d"/><stop offset="1" stop-color="#ff9a1f"/></radialGradient>
-          <radialGradient id="gGlow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffc54d" stop-opacity="0.6"/><stop offset="1" stop-color="#ffc54d" stop-opacity="0"/></radialGradient>
-          <radialGradient id="gMoonGlow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#c8d6ff" stop-opacity="0.5"/><stop offset="1" stop-color="#c8d6ff" stop-opacity="0"/></radialGradient>
-          <radialGradient id="gLamp" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffd36b" stop-opacity="0.85"/><stop offset="1" stop-color="#ffd36b" stop-opacity="0"/></radialGradient>
-          <linearGradient id="gHaze" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb06a" stop-opacity="0"/><stop offset="1" stop-color="#ffb06a" stop-opacity="0.45"/></linearGradient>
-          <linearGradient id="gPanel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4b86c7"/><stop offset="1" stop-color="#1b3556"/></linearGradient>
-          <linearGradient id="gGround" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--hill-f)"/><stop offset="1" stop-color="var(--hill-f)" stop-opacity="0"/></linearGradient>
-        </defs>
-        <g id="stars"></g>
-        <g class="shoot"><line x1="0" y1="0" x2="-52" y2="20"></line></g>
-        <g class="clouds">
-          <g transform="translate(0,62)"><g class="cloud" style="animation-duration: 86s; animation-delay: -30s"><ellipse cx="0" cy="0" rx="38" ry="10"></ellipse><ellipse cx="-18" cy="-6" rx="20" ry="10"></ellipse><ellipse cx="16" cy="-9" rx="24" ry="12"></ellipse></g></g>
-          <g transform="translate(0,112)"><g class="cloud" style="animation-duration: 120s; animation-delay: -75s"><ellipse cx="0" cy="0" rx="46" ry="11"></ellipse><ellipse cx="-22" cy="-7" rx="22" ry="11"></ellipse><ellipse cx="20" cy="-10" rx="28" ry="13"></ellipse></g></g>
-          <g transform="translate(0,34)"><g class="cloud" style="animation-duration: 100s; animation-delay: -10s"><ellipse cx="0" cy="0" rx="30" ry="8"></ellipse><ellipse cx="-14" cy="-5" rx="16" ry="8"></ellipse><ellipse cx="12" cy="-7" rx="19" ry="9"></ellipse></g></g>
-        </g>
-        <rect x="0" y="140" width="800" height="62" fill="url(#gHaze)" class="haze"></rect>
-        <path d="M60 200 Q400 -40 740 200" pathLength="1" class="sun-arc"></path>
-        <path id="arcDone" d="M60 200 Q400 -40 740 200" pathLength="1" class="sun-arc-done" style="stroke-dasharray: 0 1"></path>
-        <g id="sunDot" class="sun-dot">
-          <circle r="56" class="sun-glow"></circle>
-          <g class="sun-rays" id="sunRays"></g>
-          <circle r="15" class="sun-core"></circle>
-          <circle r="20" class="sun-ring"></circle>
-        </g>
-        <g id="moonDot" class="sun-dot" style="opacity: 0">
-          <circle r="42" fill="url(#gMoonGlow)"></circle>
-          <circle r="12" class="moon-dark"></circle>
-          <path id="moonLit" class="moon-lit" d=""></path>
-          <circle cx="-3" cy="-3" r="2.2" class="crater"></circle><circle cx="4" cy="3" r="1.6" class="crater"></circle><circle cx="-1" cy="6" r="1.2" class="crater"></circle>
-        </g>
-        <path class="hill hill-b" d="M0 200 L0 184 C80 166 160 190 260 180 S420 158 520 178 S700 190 800 170 L800 215 L0 215 Z"></path>
-        <g id="hzPanels"></g>
-        <path class="hill hill-f" d="M0 200 L0 196 C120 184 220 200 340 193 S560 182 680 194 S760 196 800 190 L800 215 L0 215 Z"></path>
-        <g id="hzLamps"></g>
-      </svg>
-      <div class="sun-stats">
-        <div class="sun-stat"><span>Terbit</span><b id="sunRise">--:--</b></div>
-        <div class="sun-stat"><span>Puncak</span><b id="sunNoon">--:--</b></div>
-        <div class="sun-stat"><span>Terbenam</span><b id="sunSet">--:--</b></div>
-        <div class="sun-stat"><span>Lama siang</span><b id="sunLen">--</b></div>
-      </div>
-      <p class="sun-note">Mode otomatis menyalakan semua lampu saat matahari terbenam dan mematikannya saat terbit. Hanya berjalan selama dasbor terbuka. Lokasi acuan: <b id="sunLoc">Jakarta</b>.</p>
-    </section>
-
-    <!-- ================= CUACA REAL-TIME ================= -->
-    <section id="sec-weather" class="hud-panel wx-card">
+    <!-- ================= CUACA & MATAHARI (SATU KARTU) ================= -->
+    <section id="sec-sky" class="hud-panel sun-card wx-card phase-day">
       <svg width="0" height="0" style="position:absolute" aria-hidden="true">
         <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></symbol>
         <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol>
@@ -1211,18 +1202,18 @@
         <symbol id="i-fog" viewBox="0 0 24 24"><path d="M4 9h16M6 13h12M4 17h16"/></symbol>
         <symbol id="i-snow" viewBox="0 0 24 24"><path d="M7 15h10a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7.1 6.1 4.5 4.5 0 0 0 7 15z"/><path d="M8 19v.01M12 21v.01M16 19v.01" stroke-width="2.6"/></symbol>
       </svg>
-      <div class="wx-fx" id="wxFx"></div>
       <div class="wx-head">
         <div>
-          <h2 class="font-hud font-bold text-[11px] sm:text-xs tracking-wider" style="color: var(--text-primary)">CUACA SAAT INI</h2>
+          <h2 class="font-hud font-bold text-[11px] sm:text-xs tracking-wider" style="color: var(--text-primary)">CUACA &amp; MATAHARI</h2>
           <p id="wxPlace" class="wx-place">Memuat lokasi...</p>
+          <p id="sunSub" class="sun-sub">Menghitung posisi matahari...</p>
         </div>
         <div class="wx-actions">
+          <button type="button" id="autoSunBtn" class="sun-toggle" onclick="toggleAutoSun()" aria-pressed="false"><span class="sun-switch"><i></i></span><span id="autoSunText">Otomatis senja: OFF</span></button>
           <button type="button" class="wx-btn" onclick="loadWeather(true)">Segarkan</button>
           <button type="button" class="wx-btn" onclick="toggleWxSettings()" aria-expanded="false" id="wxSetBtn">Pengaturan</button>
         </div>
       </div>
-
       <div id="wxSettings" class="wx-settings" hidden>
         <div class="wx-set-row">
           <input id="wxSearch" type="text" placeholder="Cari kota atau wilayah (mis. Bandung)" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();searchPlace();}" />
@@ -1237,25 +1228,80 @@
         </div>
       </div>
 
-      <div class="wx-main">
-        <div class="wx-now">
-          <svg class="wx-icon big" viewBox="0 0 24 24" aria-hidden="true"><use id="wxIcon" href="#i-cloud"></use></svg>
-          <div>
-            <div class="wx-temp"><span id="wxTemp">--</span><small id="wxUnit">&deg;C</small></div>
-            <div id="wxCond" class="wx-cond">Memuat...</div>
-            <div id="wxFeels" class="wx-sub"></div>
-          </div>
-        </div>
-        <div class="wx-grid">
-          <div class="wx-tile"><span>Kelembapan</span><b id="wxHum">--</b></div>
-          <div class="wx-tile"><span>Angin</span><b id="wxWind">--</b></div>
-          <div class="wx-tile"><span>Tutupan awan</span><b id="wxCloud">--</b></div>
-          <div class="wx-tile"><span>Curah hujan</span><b id="wxRain">--</b></div>
-          <div class="wx-tile"><span>Indeks UV</span><b id="wxUv">--</b></div>
-          <div class="wx-tile"><span>Radiasi surya</span><b id="wxRad">--</b></div>
+      <div class="sky-stage w-clear" id="skyStage">
+      <svg class="sun-svg" viewBox="0 0 800 215" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Langit: posisi matahari, bulan, dan kondisi cuaca">
+        <defs>
+          <radialGradient id="gSun" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff7cf"/><stop offset="0.5" stop-color="#ffc54d"/><stop offset="1" stop-color="#ff9a1f"/></radialGradient>
+          <radialGradient id="gGlow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffc54d" stop-opacity="0.6"/><stop offset="1" stop-color="#ffc54d" stop-opacity="0"/></radialGradient>
+          <radialGradient id="gMoonGlow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#c8d6ff" stop-opacity="0.5"/><stop offset="1" stop-color="#c8d6ff" stop-opacity="0"/></radialGradient>
+          <radialGradient id="gLamp" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffd36b" stop-opacity="0.85"/><stop offset="1" stop-color="#ffd36b" stop-opacity="0"/></radialGradient>
+          <linearGradient id="gHaze" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb06a" stop-opacity="0"/><stop offset="1" stop-color="#ffb06a" stop-opacity="0.45"/></linearGradient>
+          <linearGradient id="gFog" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#dfe6ee" stop-opacity="0"/><stop offset="0.5" stop-color="#dfe6ee" stop-opacity="0.55"/><stop offset="1" stop-color="#dfe6ee" stop-opacity="0"/></linearGradient>
+          <linearGradient id="gPanel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4b86c7"/><stop offset="1" stop-color="#1b3556"/></linearGradient>
+        </defs>
+        <g id="stars"></g>
+        <g class="shoot"><line x1="0" y1="0" x2="-52" y2="20"></line></g>
+        <g class="clouds">
+          <g class="cw" transform="translate(0,62)"><g class="cloud" style="animation-duration: 86s; animation-delay: -30s"><ellipse cx="0" cy="0" rx="38" ry="10"></ellipse><ellipse cx="-18" cy="-6" rx="20" ry="10"></ellipse><ellipse cx="16" cy="-9" rx="24" ry="12"></ellipse></g></g>
+          <g class="cw" transform="translate(0,112)"><g class="cloud" style="animation-duration: 120s; animation-delay: -75s"><ellipse cx="0" cy="0" rx="46" ry="11"></ellipse><ellipse cx="-22" cy="-7" rx="22" ry="11"></ellipse><ellipse cx="20" cy="-10" rx="28" ry="13"></ellipse></g></g>
+          <g class="cw" transform="translate(0,34)"><g class="cloud" style="animation-duration: 100s; animation-delay: -10s"><ellipse cx="0" cy="0" rx="30" ry="8"></ellipse><ellipse cx="-14" cy="-5" rx="16" ry="8"></ellipse><ellipse cx="12" cy="-7" rx="19" ry="9"></ellipse></g></g>
+          <g class="cw" transform="translate(0,90)"><g class="cloud" style="animation-duration: 140s; animation-delay: -50s"><ellipse cx="0" cy="0" rx="52" ry="12"></ellipse><ellipse cx="-24" cy="-8" rx="24" ry="12"></ellipse><ellipse cx="22" cy="-11" rx="30" ry="14"></ellipse></g></g>
+          <g class="cw" transform="translate(0,142)"><g class="cloud" style="animation-duration: 110s; animation-delay: -95s"><ellipse cx="0" cy="0" rx="58" ry="12"></ellipse><ellipse cx="-26" cy="-8" rx="26" ry="12"></ellipse><ellipse cx="24" cy="-11" rx="32" ry="14"></ellipse></g></g>
+          <g class="cw" transform="translate(0,16)"><g class="cloud" style="animation-duration: 95s; animation-delay: -60s"><ellipse cx="0" cy="0" rx="60" ry="13"></ellipse><ellipse cx="-28" cy="-8" rx="28" ry="13"></ellipse><ellipse cx="26" cy="-11" rx="34" ry="15"></ellipse></g></g>
+        </g>
+        <rect x="0" y="140" width="800" height="62" fill="url(#gHaze)" class="haze"></rect>
+        <path d="M60 200 Q400 -40 740 200" pathLength="1" class="sun-arc"></path>
+        <path id="arcDone" d="M60 200 Q400 -40 740 200" pathLength="1" class="sun-arc-done" style="stroke-dasharray: 0 1"></path>
+        <g id="sunDot" class="sun-dot">
+          <g class="sun-inner">
+            <circle r="56" class="sun-glow"></circle>
+            <g class="sun-rays" id="sunRays"></g>
+            <circle r="15" class="sun-core"></circle>
+            <circle r="20" class="sun-ring"></circle>
+          </g>
+        </g>
+        <g id="moonDot" class="sun-dot" style="opacity: 0">
+          <circle r="42" fill="url(#gMoonGlow)"></circle>
+          <circle r="12" class="moon-dark"></circle>
+          <path id="moonLit" class="moon-lit" d=""></path>
+          <circle cx="-3" cy="-3" r="2.2" class="crater"></circle><circle cx="4" cy="3" r="1.6" class="crater"></circle><circle cx="-1" cy="6" r="1.2" class="crater"></circle>
+        </g>
+        <g class="fog">
+          <rect class="fog-band" x="-200" y="120" width="1000" height="34" fill="url(#gFog)" style="animation-duration: 38s"></rect>
+          <rect class="fog-band" x="-100" y="150" width="1000" height="38" fill="url(#gFog)" style="animation-duration: 52s; animation-delay: -20s"></rect>
+          <rect class="fog-band" x="-300" y="96" width="1000" height="28" fill="url(#gFog)" style="animation-duration: 64s; animation-delay: -35s"></rect>
+        </g>
+        <path class="hill hill-b" d="M0 200 L0 184 C80 166 160 190 260 180 S420 158 520 178 S700 190 800 170 L800 215 L0 215 Z"></path>
+        <g id="hzPanels"></g>
+        <path class="hill hill-f" d="M0 200 L0 196 C120 184 220 200 340 193 S560 182 680 194 S760 196 800 190 L800 215 L0 215 Z"></path>
+        <g class="heat" id="heatWaves"></g>
+        <g id="hzLamps"></g>
+      </svg>
+      <canvas id="skyFx" aria-hidden="true"></canvas>
+      <div class="sky-overlay">
+        <svg class="wx-icon big" viewBox="0 0 24 24" aria-hidden="true"><use id="wxIcon" href="#i-cloud"></use></svg>
+        <div>
+          <div class="wx-temp"><span id="wxTemp">--</span><small id="wxUnit">&deg;C</small></div>
+          <div id="wxCond" class="wx-cond">Memuat...</div>
+          <div id="wxFeels" class="wx-sub"></div>
         </div>
       </div>
-
+      </div>
+      <div class="sun-stats">
+        <div class="sun-stat"><span>Terbit</span><b id="sunRise">--:--</b></div>
+        <div class="sun-stat"><span>Puncak</span><b id="sunNoon">--:--</b></div>
+        <div class="sun-stat"><span>Terbenam</span><b id="sunSet">--:--</b></div>
+        <div class="sun-stat"><span>Lama siang</span><b id="sunLen">--</b></div>
+      </div>
+      <p class="sun-note">Mode otomatis menyalakan semua lampu saat matahari terbenam dan mematikannya saat terbit. Hanya berjalan selama dasbor terbuka. Lokasi acuan: <b id="sunLoc">Jakarta</b>.</p>
+      <div class="wx-grid wx-grid-main">
+        <div class="wx-tile"><span>Kelembapan</span><b id="wxHum">--</b></div>
+        <div class="wx-tile"><span>Angin</span><b id="wxWind">--</b></div>
+        <div class="wx-tile"><span>Tutupan awan</span><b id="wxCloud">--</b></div>
+        <div class="wx-tile"><span>Curah hujan</span><b id="wxRain">--</b></div>
+        <div class="wx-tile"><span>Indeks UV</span><b id="wxUv">--</b></div>
+        <div class="wx-tile"><span>Radiasi surya</span><b id="wxRad">--</b></div>
+      </div>
       <div class="wx-solar">
         <div class="wx-solar-top"><span>Potensi tenaga surya sekarang</span><b id="wxSolarLbl">--</b></div>
         <div class="wx-bar"><i id="wxSolarBar"></i></div>
@@ -1268,6 +1314,7 @@
       <div class="wx-sec-title">Prakiraan harian</div>
       <div id="wxDaily" class="wx-daily"></div>
       <p id="wxNote" class="wx-note">Sumber data: Open-Meteo.</p>
+      <p class="sun-note">Mode otomatis menyalakan semua lampu saat matahari terbenam dan mematikannya saat terbit. Hanya berjalan selama dasbor terbuka. Lokasi acuan: <b id="sunLoc">Jakarta</b>.</p>
     </section>
 
     <!-- ================= SECTION 0: SYSTEM POWER ANALYTICS & LIVE ENERGY TOPOLOGY ================= -->
@@ -4110,6 +4157,14 @@ async function pickGroqModel() {
           mk('circle', { cx: x + 7, cy: 171.5, r: 3, class: 'pbulb' }, g);
         }
       }
+      const heat = document.getElementById('heatWaves');
+      if (heat && !heat.children.length) {
+        [[176, 5, 0.16], [184, 7, 0.12], [191, 9, 0.1]].forEach(([y, dur, op], k) => {
+          let d = `M-40 ${y} q10 -3.5 20 0`;
+          for (let n = 0; n < 44; n++) d += ' t20 0';
+          const p = mk('path', { d, class: 'heat-wave', style: `animation-duration:${dur}s;animation-delay:${-k * 1.3}s;stroke-opacity:${op}` }, heat);
+        });
+      }
       const panels = document.getElementById('hzPanels');
       if (panels && !panels.children.length) {
         for (let i = 0; i < 4; i++) {
@@ -4140,7 +4195,7 @@ async function pickGroqModel() {
       }
       t = Math.max(0, Math.min(1, t));
       const near = Math.min(Math.abs(now - st.sunrise), Math.abs(now - st.sunset)) < 40 * 60000;
-      const card = el('sec-sun');
+      const card = el('sec-sky');
       card.classList.remove('phase-day', 'phase-dusk', 'phase-night');
       card.classList.add(!day ? 'phase-night' : (near ? 'phase-dusk' : 'phase-day'));
       if (!day && near) { card.classList.remove('phase-night'); card.classList.add('phase-dusk'); }
@@ -4341,7 +4396,8 @@ async function pickGroqModel() {
       el('wxIcon').setAttribute('href', '#i-' + info.icon);
       tweenNumber(el('wxTemp'), Math.round(c.temperature_2m), 0);
       el('wxUnit').textContent = wxUnitLbl();
-      el('wxCond').textContent = info.text;
+      const hotNow = wxIsHot(info, c, rad);
+      el('wxCond').textContent = info.text + (hotNow ? ' \u00B7 Terik' : '');
       el('wxFeels').textContent = `Terasa seperti ${Math.round(c.apparent_temperature)}${wxUnitLbl()}`;
       el('wxHum').textContent = Math.round(c.relative_humidity_2m) + '%';
       el('wxWind').textContent = `${Math.round(c.wind_speed_10m)} ${wxWindLbl()} ${wxDir(c.wind_direction_10m)}`;
@@ -4398,9 +4454,8 @@ async function pickGroqModel() {
         db.appendChild(row);
       }
 
-      // Efek latar sesuai cuaca
-      const fx = el('wxFx');
-      fx.className = 'wx-fx ' + (info.kind === 'rain' || info.kind === 'storm' ? 'rain' : (info.kind === 'snow' ? 'snow' : (!c.is_day ? 'night' : (info.kind === 'sun' ? 'sunny' : 'cloudy'))));
+      // Langit ikut cuaca asli (awan, hujan, petir, kabut, terik)
+      setSkyWeather(info, c, hotNow);
 
       // Chip di header
       const chip = el('wxChip'); chip.hidden = false;
@@ -4487,6 +4542,151 @@ async function pickGroqModel() {
       } catch (e) {}
       loadWeather(false);
       setInterval(() => { if (!document.hidden && (!wxData || Date.now() - wxData.ts >= wxCfg.interval * 60000)) loadWeather(false); }, 60000);
+    }
+
+    // ================= LANGIT MENGIKUTI CUACA (hujan, salju, petir, awan, kabut, terik) =================
+    const skyFx = { mode: 'none', intensity: 0, lean: 0.12, drops: [], flakes: [], ripples: [], bolt: null, nextBolt: 0, raf: 0, last: 0, w: 0, h: 0, groundY: 0, dpr: 1, visible: true, ctx: null };
+
+    // Terik: cerah/berawan tipis di siang hari dengan suhu tinggi, radiasi kuat, atau UV sangat tinggi
+    function wxIsHot(info, c, rad) {
+      if (!c.is_day || (info.kind !== 'sun' && info.kind !== 'part')) return false;
+      const tC = wxCfg.unit === 'fahrenheit' ? (c.temperature_2m - 32) * 5 / 9 : c.temperature_2m;
+      return tC >= 33 || rad >= 800 || (c.uv_index || 0) >= 9;
+    }
+
+    function skyResize() {
+      const st = document.getElementById('skyStage'), cv = document.getElementById('skyFx');
+      if (!st || !cv) return;
+      const svg = st.querySelector('.sun-svg'), r = st.getBoundingClientRect(), f = skyFx;
+      f.dpr = Math.min(2, window.devicePixelRatio || 1);
+      f.w = r.width; f.h = r.height;
+      cv.width = Math.round(r.width * f.dpr); cv.height = Math.round(r.height * f.dpr);
+      cv.style.width = r.width + 'px'; cv.style.height = r.height + 'px';
+      f.ctx = cv.getContext('2d');
+      f.ctx.setTransform(f.dpr, 0, 0, f.dpr, 0, 0);
+      const sr = svg.getBoundingClientRect();
+      f.groundY = (sr.top - r.top) + sr.height * 0.9;
+    }
+
+    const newDrop = (initial) => ({ x: Math.random() * (skyFx.w + 90) - 45, y: initial ? Math.random() * skyFx.groundY : -20 - Math.random() * 70,
+      len: 9 + Math.random() * (8 + 10 * skyFx.intensity), v: 520 + Math.random() * 480 + 300 * skyFx.intensity, a: 0.18 + Math.random() * 0.32 });
+    const newFlake = (initial) => ({ x: Math.random() * skyFx.w, y: initial ? Math.random() * skyFx.groundY : -8, r: 1 + Math.random() * 2.4, v: 28 + Math.random() * 50, p: Math.random() * 6.28, s: 8 + Math.random() * 18 });
+
+    function makeBolt() {
+      const f = skyFx, pts = [{ x: f.w * (0.12 + Math.random() * 0.76), y: 0 }];
+      for (let i = 1; i <= 12; i++) pts.push({ x: pts[i - 1].x + (Math.random() - 0.5) * f.w * 0.07, y: f.groundY * i / 12 });
+      const branches = [];
+      for (let b = 0; b < 2; b++) {
+        const k = 2 + Math.floor(Math.random() * 7), dir = Math.random() < 0.5 ? -1 : 1, bp = [{ x: pts[k].x, y: pts[k].y }];
+        for (let i = 0; i < 4; i++) bp.push({ x: bp[i].x + dir * (10 + Math.random() * 28), y: bp[i].y + f.groundY * 0.07 + Math.random() * 10 });
+        branches.push(bp);
+      }
+      return { pts, branches, t0: performance.now() };
+    }
+
+    function drawStorm(ctx, now) {
+      const f = skyFx;
+      if (!f.nextBolt) f.nextBolt = now + 1500 + Math.random() * 3500;
+      if (!f.bolt && now >= f.nextBolt) f.bolt = makeBolt();
+      if (!f.bolt) return;
+      const e = now - f.bolt.t0;
+      if (e >= 650) { f.bolt = null; f.nextBolt = now + 3500 + Math.random() * 7500; return; }
+      const a = e < 60 ? 1 : (e < 110 ? 0.25 : (e < 190 ? 0.95 : 0.9 * (1 - (e - 190) / 460))); // kilatan ganda lalu meredup
+      ctx.fillStyle = `rgba(225,235,255,${0.3 * a})`; ctx.fillRect(0, 0, f.w, f.h);
+      const stroke = (pts, w) => { ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y); pts.slice(1).forEach(p => ctx.lineTo(p.x, p.y)); ctx.stroke(); };
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      ctx.shadowColor = `rgba(170,195,255,${a})`; ctx.shadowBlur = 20;
+      ctx.strokeStyle = `rgba(255,255,255,${a})`;
+      stroke(f.bolt.pts, 2.6);
+      f.bolt.branches.forEach(b => stroke(b, 1.4));
+      ctx.shadowBlur = 0;
+    }
+
+    function skyFrame(now) {
+      const f = skyFx; f.raf = 0;
+      if (f.mode === 'none' || !f.ctx || document.hidden || !f.visible) { f.last = 0; return; } // berhenti saat tak terlihat
+      const dt = Math.min(0.05, (now - (f.last || now)) / 1000); f.last = now;
+      const ctx = f.ctx; ctx.clearRect(0, 0, f.w, f.h);
+      if (f.mode === 'snow') {
+        const n = Math.round(60 + 140 * f.intensity);
+        while (f.flakes.length < n) f.flakes.push(newFlake(true));
+        f.flakes.length = Math.min(f.flakes.length, n);
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        for (const p of f.flakes) {
+          p.y += p.v * dt; p.x += Math.sin(p.p + now / 1000 * 0.9) * p.s * dt + f.lean * 40 * dt;
+          if (p.y > f.groundY) { Object.assign(p, newFlake(false)); continue; }
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fill();
+        }
+      } else {
+        const n = Math.round(50 + 230 * f.intensity);
+        while (f.drops.length < n) f.drops.push(newDrop(true));
+        f.drops.length = Math.min(f.drops.length, n);
+        const light = document.documentElement.getAttribute('data-theme') === 'light';
+        ctx.lineCap = 'round'; ctx.lineWidth = 1.1;
+        for (const d of f.drops) {
+          d.y += d.v * dt; d.x += d.v * dt * f.lean;
+          if (d.y > f.groundY) {
+            if (f.ripples.length < 50 && Math.random() < 0.5) f.ripples.push({ x: d.x, y: f.groundY + Math.random() * (f.h - f.groundY) * 0.7, age: 0 });
+            Object.assign(d, newDrop(false)); continue;
+          }
+          ctx.strokeStyle = `rgba(${light ? '60,95,170' : '175,200,255'},${d.a})`;
+          ctx.beginPath(); ctx.moveTo(d.x, d.y); ctx.lineTo(d.x - d.len * f.lean, d.y - d.len); ctx.stroke();
+        }
+        f.ripples = f.ripples.filter(r => (r.age += dt) < 0.45);
+        for (const r of f.ripples) {
+          const k = r.age / 0.45;
+          ctx.strokeStyle = `rgba(190,210,255,${0.35 * (1 - k)})`;
+          ctx.beginPath(); ctx.ellipse(r.x, r.y, 2 + 9 * k, 1 + 3 * k, 0, 0, 6.283); ctx.stroke();
+        }
+        if (f.mode === 'storm') drawStorm(ctx, now);
+      }
+      f.raf = requestAnimationFrame(skyFrame);
+    }
+
+    function skyKick() {
+      const f = skyFx;
+      if (f.mode === 'none') { if (f.ctx) f.ctx.clearRect(0, 0, f.w, f.h); return; }
+      if (!f.raf && f.visible && !document.hidden) { f.last = 0; f.raf = requestAnimationFrame(skyFrame); }
+    }
+
+    function setClouds(n) {
+      document.querySelectorAll('#skyStage .cw').forEach((g, i) => { g.style.opacity = i < n ? '1' : '0'; });
+    }
+
+    function setSkyWeather(info, c, hot) {
+      const st = document.getElementById('skyStage');
+      if (!st) return;
+      const kind = info.kind, code = c.weather_code, cover = c.cloud_cover || 0;
+      let cls = 'w-clear', n = cover < 15 ? 1 : 2, mode = 'none', inten = 0;
+      if (kind === 'storm') { cls = 'w-storm'; n = 6; mode = 'storm'; inten = 0.9; }
+      else if (kind === 'rain') { cls = 'w-rain'; n = 6; mode = 'rain'; inten = [51, 56, 61, 66, 80].includes(code) ? 0.35 : ([53, 63, 81, 57, 67].includes(code) ? 0.65 : 1); }
+      else if (kind === 'snow') { cls = 'w-snow'; n = 6; mode = 'snow'; inten = [71, 77, 85].includes(code) ? 0.4 : 0.85; }
+      else if (kind === 'fog') { cls = 'w-fog'; n = 2; }
+      else if (kind === 'cloud') { cls = 'w-cloud'; n = 6; }
+      else if (kind === 'part') { cls = 'w-part'; n = cover < 40 ? 3 : 4; }
+      st.className = 'sky-stage ' + cls + (hot ? ' w-hot' : '');
+      setClouds(n);
+      const f = skyFx;
+      const kmh = (c.wind_speed_10m || 0) * ({ kmh: 1, ms: 3.6, mph: 1.609 }[wxCfg.wind] || 1);
+      f.lean = -Math.sin((c.wind_direction_10m || 90) * Math.PI / 180) * Math.min(0.55, 0.05 + kmh / 90);
+      f.mode = REDUCED_MOTION ? 'none' : mode;
+      f.intensity = inten;
+      f.nextBolt = 0; f.bolt = null;
+      if (f.mode === 'none') { f.drops = []; f.flakes = []; f.ripples = []; }
+      skyResize();
+      skyKick();
+    }
+
+    function initSky() {
+      const st = document.getElementById('skyStage');
+      if (!st) return;
+      skyResize();
+      if ('ResizeObserver' in window) new ResizeObserver(() => { skyResize(); }).observe(st);
+      else window.addEventListener('resize', skyResize);
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver((es) => { skyFx.visible = es[0].isIntersecting; if (skyFx.visible) skyKick(); }, { threshold: 0.02 }).observe(st);
+      }
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) skyKick(); });
     }
 
     // ================= PENJADWALAN & TIMER MUNDUR =================
@@ -5335,6 +5535,7 @@ async function pickGroqModel() {
     initPresence();
     initWeather();
     initSun();
+    initSky();
     updateNotifyUI();
     document.getElementById('cmdkInput').addEventListener('input', () => { cmdkSel = 0; renderCmdk(); });
     document.getElementById('cmdk').addEventListener('mousedown', (e) => { if (e.target.id === 'cmdk') closeCmdk(); });
